@@ -83,19 +83,13 @@ void main_Core0(void)
 #endif
 
   /* Output disable on pin 25 */
-#ifdef CORE_FAMILY_ARM
   LED_GREEN_CFG();
-  LED_GREEN_OFF();
-#else
-  LED_RED_CFG();
-  LED_RED_OFF();
-#endif
+
 
   /* Start the Core 1 and turn on the led to be sure that we passed successfully the core 1 initiaization */
   if(TRUE == RP2350_StartCore1())
   {
-    LED_BLUE_CFG();
-    LED_BLUE_OFF();
+    LED_GREEN_ON();
   }
   else
   {
@@ -158,7 +152,6 @@ void main_Core1(void)
   /* set next timeout (machine timer is enabled by default) */
   *pMTIMECMP = *pMTIME + 150000000ul; //1s
 
-  LED_GREEN_CFG();
 #endif
 
   while(1)
@@ -182,7 +175,7 @@ void Isr_MachineTimerInterrupt(void)
 {
   *pMTIMECMP = *pMTIME + 150000000ul;
 
-  LED_RED_TOGGLE();
+  LED_GREEN_TOGGLE();
 }
 
 #endif
