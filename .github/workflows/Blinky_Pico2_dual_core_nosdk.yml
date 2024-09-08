@@ -32,8 +32,7 @@ jobs:
       - name: Verify PATH and Run Rebuild
         run: |
           echo "Current PATH: $PATH"
-          echo "Checking if arm-none-eabi-gcc is available"
-          which arm-none-eabi-gcc
+          echo "Current working directory:"; pwd
           cd ./Build
           chmod +x ./Rebuild.sh
           ./Rebuild.sh ARM
