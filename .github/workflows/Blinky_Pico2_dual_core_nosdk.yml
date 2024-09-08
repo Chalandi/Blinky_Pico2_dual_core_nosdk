@@ -23,6 +23,8 @@ jobs:
           echo
           echo "rebuild blinky"
           echo
+          echo "working directory"
+          pwd
           mv ./Tools/picotool/picotool_linux ./Tools/picotool/picotool
           echo
           bash ./Rebuild.sh ARM
