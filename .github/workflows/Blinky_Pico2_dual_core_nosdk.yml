@@ -23,10 +23,10 @@ jobs:
           echo
           echo "rebuild blinky"
           echo
-          echo 'cp Tools/linux/elf2uf2 Tools'
-          cp Tools/linux/elf2uf2 Tools
+          mv ./Tools/picotool/picotool_linux ./Tools/picotool/picotool
+          cd build
           echo
           bash ./Rebuild.sh ARM
           echo
-          ls -la ./Output/Baremetal_Pico2_dual_core_nosdk.elf
-          ls -la ./Output/Baremetal_Pico2_dual_core_nosdk.uf2
+          ls -la ../Output/Baremetal_Pico2_dual_core_nosdk.elf
+          ls -la ../Output/Baremetal_Pico2_dual_core_nosdk.uf2
