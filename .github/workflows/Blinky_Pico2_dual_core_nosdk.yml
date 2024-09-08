@@ -33,7 +33,7 @@ jobs:
         run: echo $PATH
 
       - name: Query Compiler Version
-        run: arm-none-eabi-g++ -v
+        run: arm-none-eabi-gcc -v
 
       - name: Rebuild Blinky
         run: |

@@ -21,10 +21,19 @@ OBJ_DIR    = $(OUTPUT_DIR)/Obj
 LD_SCRIPT  = $(SRC_DIR)/Memory_Map.ld
 PIO_OUT_DIR= $(SRC_DIR)/pio
 SRC_DIR    = ../Code
-PICOTOOL   = ../Tools/picotool/picotool
-PIOASM     = ../Tools/pioasm/pioasm
-PYTHON     = python
+
+ifeq ($(OS),Windows_NT)
+    PYTHON     = python
+    PICOTOOL   = ../Tools/picotool/picotool
+    PIOASM     = ../Tools/pioasm/pioasm
+else
+    PYTHON     = python3
+    PICOTOOL   = ../Tools/picotool/picotool_linux
+    PIOASM     = ../Tools/pioasm/pioasm
+endif
+
 ERR_MSG_FORMATER_SCRIPT = ../Tools/scripts/CompilerErrorFormater.py
+
 ############################################################################################
 # Toolchain
 ############################################################################################
@@ -76,8 +85,7 @@ VERBOSE_GCC = -frecord-gcc-switches -fverbose-asm
 # C Compiler flags
 ############################################################################################
 
-COPS  = -mlittle-endian                               \
-        $(OPT)                                        \
+COPS  = $(OPT)                                        \
         $(ARCH)                                       \
         $(DEFS)                                       \
         -ffast-math                                   \
@@ -104,8 +112,7 @@ COPS  = -mlittle-endian                               \
 # C++ Compiler flags
 ############################################################################################
 
-CPPOPS  = -mlittle-endian                               \
-          $(OPT)                                        \
+CPPOPS  = $(OPT)                                        \
           $(ARCH)                                       \
           $(DEFS)                                       \
           -ffast-math                                   \
@@ -138,12 +145,10 @@ CPPOPS  = -mlittle-endian                               \
 ############################################################################################
 ifeq ($(AS), $(TOOLCHAIN)-as)
   ASOPS =  $(ARCH)       \
-           -mlittle-endian  \
            -alh \
            -g
 else
-  ASOPS = -mlittle-endian                               \
-          $(OPT)                                        \
+  ASOPS = $(OPT)                                        \
           $(ARCH)                                       \
           $(DEFS)                                       \
           -ffast-math                                   \
