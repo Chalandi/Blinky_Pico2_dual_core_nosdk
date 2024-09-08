@@ -24,18 +24,29 @@ jobs:
           sudo tar -xf arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz -C /arm-toolchain
 
       - name: Verify Toolchain Installation
-        run: ls -la /arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin
+        run: |
+          sudo ls -la /arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin
+          sudo find /arm-toolchain -name arm-none-eabi-gcc
 
       - name: Add ARM Toolchain to PATH
         run: |
           echo "ARM_TOOLCHAIN=/arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin" >> $GITHUB_ENV
           echo "PATH=$ARM_TOOLCHAIN:$PATH" >> $GITHUB_ENV
 
-      - name: Verify PATH and Run Rebuild
+      - name: Verify PATH and Check arm-none-eabi-gcc
         run: |
           echo "Current PATH: $PATH"
-          echo "Checking if arm-none-eabi-gcc is available"
+          echo "ARM_TOOLCHAIN: $ARM_TOOLCHAIN"
           which arm-none-eabi-gcc || echo "arm-none-eabi-gcc not found"
+
+      - name: Verify PATH in a New Step
+        run: |
+          echo "Updated PATH: $PATH"
+          which arm-none-eabi-gcc || echo "arm-none-eabi-gcc not found"
+
+      - name: Run Rebuild with Absolute Path
+        run: |
+          /arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc --version
           cd ./Build
           chmod +x ./Rebuild.sh
           ./Rebuild.sh ARM
