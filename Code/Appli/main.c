@@ -22,6 +22,7 @@
 #include "Cpu.h"
 #include "Gpio.h"
 #include "SysTickTimer.h"
+#include "core_arch.h"
 
 //=============================================================================
 // Macros
