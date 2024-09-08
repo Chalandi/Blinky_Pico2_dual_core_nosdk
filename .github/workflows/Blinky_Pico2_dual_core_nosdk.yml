@@ -24,7 +24,6 @@ jobs:
           echo "rebuild blinky"
           echo
           mv ./Tools/picotool/picotool_linux ./Tools/picotool/picotool
-          cd build
           echo
           bash ./Rebuild.sh ARM
           echo
