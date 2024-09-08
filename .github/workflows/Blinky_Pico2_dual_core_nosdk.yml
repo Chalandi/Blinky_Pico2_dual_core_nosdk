@@ -24,7 +24,7 @@ jobs:
           tar -xf arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz -C ~/arm-toolchain
 
       - name: Add ARM Toolchain to PATH
-        run: echo "::add-path::~/arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin"
+        run: echo "PATH=~/arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin:$PATH" >> $GITHUB_ENV
 
       - name: Verify PATH change
         run: echo $PATH
@@ -40,7 +40,5 @@ jobs:
 
       - name: List Output Files
         run: |
-          echo current directory
-          pwd
           ls -la ../Output/Baremetal_Pico2_dual_core_nosdk.elf
           ls -la ../Output/Baremetal_Pico2_dual_core_nosdk.uf2
