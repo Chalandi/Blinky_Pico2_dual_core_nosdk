@@ -19,20 +19,23 @@ jobs:
 
       - name: Install ARM Toolchain v13.3
         run: |
+          sudo mkdir -p /arm-toolchain
           wget https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
-          mkdir -p ~/arm-toolchain
-          tar -xf arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz -C ~/arm-toolchain
+          sudo tar -xf arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz -C /arm-toolchain
 
       - name: Verify Toolchain Installation
-        run: ls -la ~/arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin
+        run: ls -la /arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin
 
       - name: Add ARM Toolchain to PATH
-        run: echo "PATH=~/arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin:$PATH" >> $GITHUB_ENV
+        run: |
+          echo "ARM_TOOLCHAIN=/arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin" >> $GITHUB_ENV
+          echo "PATH=$ARM_TOOLCHAIN:$PATH" >> $GITHUB_ENV
 
       - name: Verify PATH and Run Rebuild
         run: |
           echo "Current PATH: $PATH"
-          echo "Current working directory:"; pwd
+          echo "Checking if arm-none-eabi-gcc is available"
+          which arm-none-eabi-gcc || echo "arm-none-eabi-gcc not found"
           cd ./Build
           chmod +x ./Rebuild.sh
           ./Rebuild.sh ARM
