@@ -225,7 +225,6 @@ PIO_SRC_FILES :=
 ############################################################################################
 INC_FILES := $(SRC_DIR)                             \
              $(SRC_DIR)/Appli                       \
-             $(SRC_DIR)/pio                         \
              $(SRC_DIR)/Mcal                        \
              $(SRC_DIR)/Mcal/Clock                  \
              $(SRC_DIR)/Mcal/Cmsis                  \
@@ -264,7 +263,6 @@ PRE_BUILD_INFO:
 	@git log -n 1 --clear-decorations 2> /dev/null > /dev/null || true
 	@echo +++ info: "$(shell $(CC) -v 2>&1 | tail -n 1)"
 	@echo +++ info: "$(shell make -v 2>&1 | head -n 1)"
-
 
 .PHONY : POST_BUILD_INFO
 POST_BUILD_INFO:
@@ -312,6 +310,7 @@ $(OBJ_DIR)/%.o : %.cpp
 $(OUTPUT_DIR)/$(PRJ_NAME).elf : $(FILES_O) $(LD_SCRIPT)
 	@-echo +++ link: $(subst \,/,$@)
 	@$(LD) $(LOPS) $(FILES_O) -o $(OUTPUT_DIR)/$(PRJ_NAME).elf
+	@-echo
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@$(READELF) -WhS $(OUTPUT_DIR)/$(PRJ_NAME).elf > $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).sym
