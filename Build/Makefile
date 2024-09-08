@@ -264,7 +264,7 @@ all : PRE_BUILD_INFO  PIO_SRC_GEN  $(OUTPUT_DIR)/$(PRJ_NAME).elf  POST_BUILD_INF
 PRE_BUILD_INFO:
 	@-echo +++ Building RP2350 baremetal image for $(CORE_FAMILY) core
 	@git log -n 1 --decorate-refs=refs/heads/ --pretty=format:"+++ Git branch:  %D (%h)" 2>/dev/null || true
-	@git log -n 1 --clear-decorations 2>/dev/null || true
+	@git log -n 1 --clear-decorations 2> /dev/null > /dev/null || true
 
 .PHONY : POST_BUILD_INFO
 POST_BUILD_INFO:
