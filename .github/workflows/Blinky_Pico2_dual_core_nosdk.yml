@@ -32,16 +32,5 @@ jobs:
       - name: Verify PATH change
         run: echo $PATH
 
-      - name: Query Compiler Version
-        run: arm-none-eabi-gcc -v
-
       - name: Rebuild Blinky
-        run: |
-          mv ./Tools/picotool/picotool_linux ./Tools/picotool/picotool
-          cd ./Build
-          bash ./Rebuild.sh ARM
-
-      - name: List Output Files
-        run: |
-          ls -la ../Output/Baremetal_Pico2_dual_core_nosdk.elf
-          ls -la ../Output/Baremetal_Pico2_dual_core_nosdk.uf2
+        run: arm-none-eabi-gcc -v; cd ./Build; bash ./Rebuild.sh ARM
