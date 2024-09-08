@@ -152,31 +152,46 @@ void main_Core1(void)
   /* set next timeout (machine timer is enabled by default) */
   *pMTIMECMP = *pMTIME + 150000000ul; //1s
 
+#else
+
+  /* configure ARM systick timer */
+  SysTickTimer_Init();
+  SysTickTimer_Start(SYS_TICK_MS(100));
+
 #endif
 
   while(1)
   {
-#ifdef CORE_FAMILY_ARM
-    #define DELAY 10000000
-    LED_GREEN_TOGGLE();
-#else
-    #define DELAY 10000000
-#endif
-
-    BlockingDelay(DELAY);
+    __asm("nop");
   }
 }
 
 
 #ifdef CORE_FAMILY_RISC_V
-__attribute__((interrupt)) void Isr_MachineTimerInterrupt(void);
+  __attribute__((interrupt)) void Isr_MachineTimerInterrupt(void);
+  
+  void Isr_MachineTimerInterrupt(void)
+  {
+    *pMTIMECMP = *pMTIME + 150000000ul;
+  
+    LED_GREEN_TOGGLE();
+  }
 
-void Isr_MachineTimerInterrupt(void)
-{
-  *pMTIMECMP = *pMTIME + 150000000ul;
+#else
 
-  LED_GREEN_TOGGLE();
-}
+  void SysTickTimer(void);
 
+  void SysTickTimer(void)
+  {
+    static uint32_t cpt = 0;
+
+    SysTickTimer_Reload(SYS_TICK_MS(100));
+    
+    if(++cpt >= 10ul)
+    {
+      LED_GREEN_TOGGLE();
+      cpt = 0;
+    }
+  }
 #endif
 
