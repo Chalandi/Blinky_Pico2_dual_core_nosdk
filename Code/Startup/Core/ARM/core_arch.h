@@ -20,7 +20,8 @@
 
 
 
-#define CORE_ARCH_SEND_EVENT_INST()  __asm("SEV")
-
+#define CORE_ARCH_SEND_EVENT_INST()    __asm("SEV")
+#define CORE_ARCH_DISABLE_INTERRUPTS() __asm("CPSID i")
+#define CORE_ARCH_ENABLE_INTERRUPTS()  __asm("CPSIE i")
 
 #endif //__CORE_ARCH_H__

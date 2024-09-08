@@ -260,14 +260,12 @@ all : PRE_BUILD_INFO  PIO_SRC_GEN  $(OUTPUT_DIR)/$(PRJ_NAME).elf  POST_BUILD_INF
 
 .PHONY : PRE_BUILD_INFO
 PRE_BUILD_INFO:
+	@$(if $(strip $(PICOTOOL_FAMILY_ID)), ,$(error Error: the Entered CORE_FAMILY is not supported!))
 	@-echo +++ Building RP2350 baremetal image for $(CORE_FAMILY) core
-	@-echo
-	@git log -n 1 --decorate-refs=refs/heads/ --pretty=format:"+++ Git branch:  %D (%h)" 2>/dev/null || true
-	@git log -n 1 --clear-decorations 2>/dev/null || true
-	@-echo
-	@-echo +++ Query compiler version for $(CORE_FAMILY) core
-	@$(CC) -v
-	@-echo
+	@git log -n 1 --decorate-refs=refs/heads/ --pretty=format:"+++ Git branch: %D (%h)" 2>/dev/null || true
+	@git log -n 1 --clear-decorations 2> /dev/null > /dev/null || true
+	@echo +++ info: "$(shell $(CC) -v 2>&1 | tail -n 1)"
+	@echo +++ info: "$(shell make -v 2>&1 | head -n 1)"
 
 .PHONY : POST_BUILD_INFO
 POST_BUILD_INFO:
