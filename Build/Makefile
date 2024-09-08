@@ -181,29 +181,28 @@ ifeq ($(LD), $(TOOLCHAIN)-ld)
          -nostdlib                              \
          $(ARCH)                                \
          $(DEFS)                                \
-         -ffast-math                            \
          -e Startup_Init                        \
          --print-memory-usage                   \
          --print-map                            \
          -dT $(LD_SCRIPT)                       \
          -Map=$(OUTPUT_DIR)/$(PRJ_NAME).map     \
          --no-warn-rwx-segments                 \
-         --specs=nano.specs                     \
          -z,max-page-size=4096                  \
+         --specs=nano.specs                     \
          --specs=nosys.specs
 else
   LOPS = -nostartfiles                          \
-         -e Startup_Init                        \
+         -nostdlib                              \
          $(ARCH)                                \
          $(DEFS)                                \
-         -ffast-math                            \
+         -e Startup_Init                        \
          -Wl,--print-memory-usage               \
          -Wl,--print-map                        \
          -Wl,-dT $(LD_SCRIPT)                   \
          -Wl,-Map=$(OUTPUT_DIR)/$(PRJ_NAME).map \
          -Wl,--no-warn-rwx-segments             \
-         --specs=nano.specs                     \
          -Wl,-z,max-page-size=4096              \
+         --specs=nano.specs                     \
          --specs=nosys.specs
 endif
 
@@ -222,14 +221,13 @@ SRC_FILES := $(SRC_DIR)/Appli/main.c                                         \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/util.s
 
 
-PIO_SRC_FILES := 
+PIO_SRC_FILES :=
 
 ############################################################################################
 # Include Paths
 ############################################################################################
 INC_FILES := $(SRC_DIR)                             \
              $(SRC_DIR)/Appli                       \
-             $(SRC_DIR)/pio                         \
              $(SRC_DIR)/Mcal                        \
              $(SRC_DIR)/Mcal/Clock                  \
              $(SRC_DIR)/Mcal/Cmsis                  \
@@ -240,7 +238,7 @@ INC_FILES := $(SRC_DIR)                             \
              $(SRC_DIR)/Mcal/USB                    \
              $(SRC_DIR)/Startup                     \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY) \
-             $(SRC_DIR)/Std                  
+             $(SRC_DIR)/Std
 
 ############################################################################################
 # Rules
@@ -263,8 +261,13 @@ all : PRE_BUILD_INFO  PIO_SRC_GEN  $(OUTPUT_DIR)/$(PRJ_NAME).elf  POST_BUILD_INF
 .PHONY : PRE_BUILD_INFO
 PRE_BUILD_INFO:
 	@-echo +++ Building RP2350 baremetal image for $(CORE_FAMILY) core
+	@-echo
 	@git log -n 1 --decorate-refs=refs/heads/ --pretty=format:"+++ Git branch:  %D (%h)" 2>/dev/null || true
 	@git log -n 1 --clear-decorations 2>/dev/null || true
+	@-echo
+	@-echo +++ Query compiler version for $(CORE_FAMILY) core
+	@$(CC) -v
+	@-echo
 
 .PHONY : POST_BUILD_INFO
 POST_BUILD_INFO:
@@ -312,6 +315,7 @@ $(OBJ_DIR)/%.o : %.cpp
 $(OUTPUT_DIR)/$(PRJ_NAME).elf : $(FILES_O) $(LD_SCRIPT)
 	@-echo +++ link: $(subst \,/,$@)
 	@$(LD) $(LOPS) $(FILES_O) -o $(OUTPUT_DIR)/$(PRJ_NAME).elf
+	@-echo
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@$(READELF) -WhS $(OUTPUT_DIR)/$(PRJ_NAME).elf > $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).sym
