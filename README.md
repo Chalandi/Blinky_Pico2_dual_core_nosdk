@@ -5,15 +5,14 @@ Blinky_Pico2_dual_core_nosdk
 
 This repository implements an entirely manually-written,
 Blinky Project for the RaspberryPi(R) Pico2 RP2350 dual-core
-ARM(R) Cortex(R)-M33 / RISC-V Hazard3 (RPI PICO2 RP2350).
-It exhibits pure _bare_ _metal_ programming
-on on the RaspberryPi(R) Pico2 RP22350
+ARM(R) Cortex(R)-M33 / RISC-V Hazard3.
+It exhibits pure _bare_ _metal_ programming on RP22350
 dual-core ARM(R) Cortex(R)-M33 / RISC-V Hazard3 and uses no sdk.
 
 Features include:
-  - CPU, dual-core both ARM and RISC-V supported, clock and PLL initialization,
+  - CPU, dual-core boot both ARM and RISC-V supported, clock and PLL initialization,
   - timebase derived from SysTick,
-  - blinky LED show on the green user LED on `pin 19`,
+  - blinky LEDs,
   - implementation in C99 with absolute minimal use of assembly.
 
 A clear and easy-to-understand build system based on GNUmake
@@ -24,21 +23,17 @@ a _bare_ _metal_ RaspberryPi(R) Pico2 RP2350 using no sdk.
 
 ## Details on the Application
 
-The application boots from the secondary boot-loader (SBL)
-at the start location. This low-level startup boots through
-core 0. Core 0 then starts up core 1 (via a specific protocol).
+This low-level startup boots through core 0 which then starts up core 1 (via a specific protocol).
 Core 1 subsequently carries out the blinky application,
 while core 0 enters an endless, idle loop.
 
 Low-level initialization brings the CPU up to full speed
-at $133~MHz$. Hardware settings such as wait states
-have seemingly been set by the boot-loader.
-
-The blinky LED show utilizes the green user LED on `port25`.
+at $150~MHz$. Hardware settings such as wait states
+have seemingly been set by the bootloader.
 
 ## Building the Application
 
-Build on `*nix*` is easy using an installed `gcc-arm-none-eabi` or/and `riscv32-unknown-elf`
+Build on `*nix*` is easy using an installed ARM compiler `gcc-arm-none-eabi` or/and RISC-V compiler `riscv32-unknown-elf`
 
 Build an ARM binary using the following command:
 
