@@ -39,19 +39,19 @@ ERR_MSG_FORMATER_SCRIPT = ../Tools/scripts/CompilerErrorFormater.py
 ############################################################################################
 
 ifeq ($(CORE_FAMILY), RISC-V)
-    TOOLCHAIN = riscv32-unknown-elf
-    ARCH      = -march=rv32imac_zicsr_zifencei_zba_zbb_zbs_zbkb -mabi=ilp32
-    DEFS      = -DCORE_FAMILY_RISC_V -msmall-data-limit=0 -falign-functions=4
+    TOOLCHAIN          = riscv32-unknown-elf
+    ARCH               = -march=rv32imac_zicsr_zifencei_zba_zbb_zbs_zbkb -mabi=ilp32
+    DEFS               = -DCORE_FAMILY_RISC_V -msmall-data-limit=0 -falign-functions=4
     PICOTOOL_FAMILY_ID = rp2350-riscv
 else ifeq ($(CORE_FAMILY), ARM)
-    TOOLCHAIN = arm-none-eabi
-    ARCH      = -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp
-    DEFS      = -DCORE_FAMILY_ARM
+    TOOLCHAIN          = arm-none-eabi
+    ARCH               = -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp
+    DEFS               = -DCORE_FAMILY_ARM
     PICOTOOL_FAMILY_ID = rp2350-arm-s
 else
-    TOOLCHAIN =
-    ARCH      =
-    ARCH      =
+    TOOLCHAIN          =
+    ARCH               =
+    ARCH               =
     PICOTOOL_FAMILY_ID = 
 endif
 
@@ -88,7 +88,6 @@ VERBOSE_GCC = -frecord-gcc-switches -fverbose-asm
 COPS  = $(OPT)                                        \
         $(ARCH)                                       \
         $(DEFS)                                       \
-        -ffast-math                                   \
         -MD                                           \
         -Wa,-adhln=$(OBJ_DIR)/$(basename $(@F)).lst   \
         -g3                                           \
@@ -115,7 +114,6 @@ COPS  = $(OPT)                                        \
 CPPOPS  = $(OPT)                                        \
           $(ARCH)                                       \
           $(DEFS)                                       \
-          -ffast-math                                   \
           -Wa,-adhln=$(OBJ_DIR)/$(basename $(@F)).lst   \
           -g3                                           \
           -Wconversion                                  \
@@ -151,7 +149,6 @@ else
   ASOPS = $(OPT)                                        \
           $(ARCH)                                       \
           $(DEFS)                                       \
-          -ffast-math                                   \
           -MD                                           \
           -Wa,-adhln=$(OBJ_DIR)/$(basename $(@F)).lst   \
           -g3                                           \
@@ -181,29 +178,28 @@ ifeq ($(LD), $(TOOLCHAIN)-ld)
          -nostdlib                              \
          $(ARCH)                                \
          $(DEFS)                                \
-         -ffast-math                            \
          -e Startup_Init                        \
          --print-memory-usage                   \
          --print-map                            \
          -dT $(LD_SCRIPT)                       \
          -Map=$(OUTPUT_DIR)/$(PRJ_NAME).map     \
          --no-warn-rwx-segments                 \
-         --specs=nano.specs                     \
          -z,max-page-size=4096                  \
+         --specs=nano.specs                     \
          --specs=nosys.specs
 else
   LOPS = -nostartfiles                          \
-         -e Startup_Init                        \
+         -nostdlib                              \
          $(ARCH)                                \
          $(DEFS)                                \
-         -ffast-math                            \
+         -e Startup_Init                        \
          -Wl,--print-memory-usage               \
          -Wl,--print-map                        \
          -Wl,-dT $(LD_SCRIPT)                   \
          -Wl,-Map=$(OUTPUT_DIR)/$(PRJ_NAME).map \
          -Wl,--no-warn-rwx-segments             \
-         --specs=nano.specs                     \
          -Wl,-z,max-page-size=4096              \
+         --specs=nano.specs                     \
          --specs=nosys.specs
 endif
 
@@ -222,7 +218,7 @@ SRC_FILES := $(SRC_DIR)/Appli/main.c                                         \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/util.s
 
 
-PIO_SRC_FILES := 
+PIO_SRC_FILES :=
 
 ############################################################################################
 # Include Paths
@@ -240,7 +236,7 @@ INC_FILES := $(SRC_DIR)                             \
              $(SRC_DIR)/Mcal/USB                    \
              $(SRC_DIR)/Startup                     \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY) \
-             $(SRC_DIR)/Std                  
+             $(SRC_DIR)/Std
 
 ############################################################################################
 # Rules
