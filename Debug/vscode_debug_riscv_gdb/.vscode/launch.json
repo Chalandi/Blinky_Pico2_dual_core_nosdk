@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug RISC-V",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "program": "../../Output/Baremetal_Pico2_dual_core_nosdk.elf",
+      /*"svdPath": "../../Code/Mcal/RP2350.svd",*/
+      "miDebuggerPath": "riscv32-unknown-elf-gdb",
+      "miDebuggerServerAddress": "localhost:3333",
+      "MIMode": "gdb",
+      "stopAtEntry": true,
+      "preLaunchTask": "Run Openocd",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
