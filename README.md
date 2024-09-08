@@ -3,17 +3,14 @@ Blinky_Pico2_dual_core_nosdk
 
 [![Build Status](https://github.com/chalandi/Blinky_Pico2_dual_core_nosdk/actions/workflows/Blinky_Pico2_dual_core_nosdk.yml/badge.svg)](https://github.com/chalandi/Blinky_Pico2_dual_core_nosdk/actions)
 
-This repository implements an entirely manually-written,
-Blinky Project for the RaspberryPi(R) Pico2 RP2350 dual-core
-ARM(R) Cortex(R)-M33 / RISC-V Hazard3.
-It exhibits pure _bare_ _metal_ programming on RP22350
-dual-core ARM(R) Cortex(R)-M33 / RISC-V Hazard3 and uses no sdk.
+This repository implements an entirely manually-written bare metal project 
+for the RaspberryPi(R) Pico2 RP2350 dual-core ARM(R) Cortex(R)-M33 / RISC-V Hazard3.
 
 Features include:
   - CPU, dual-core boot both ARM and RISC-V supported, clock and PLL initialization,
   - timebase derived from SysTick,
-  - blinky LEDs,
-  - implementation in C99 with absolute minimal use of assembly.
+  - blinky LEDs example,
+  - implementation in C11 with absolute minimal use of assembly.
 
 A clear and easy-to-understand build system based on GNUmake
 completes this fun and educational project.
@@ -23,13 +20,12 @@ a _bare_ _metal_ RaspberryPi(R) Pico2 RP2350 using no sdk.
 
 ## Details on the Application
 
-This low-level startup boots through core 0 which then starts up core 1 (via a specific protocol).
-Core 1 subsequently carries out the blinky application,
-while core 0 enters an endless, idle loop.
+This low-level startup boots through core 0 and performs the low level initialization 
+of the C/C++ environment and the clock configuration then starts up core 1 (via a specific protocol).
+Core 1 subsequently carries out the blinky application, while core 0 enters an endless, idle loop.
 
-Low-level initialization brings the CPU up to full speed
-at $150~MHz$. Hardware settings such as wait states
-have seemingly been set by the bootloader.
+Low-level initialization brings the CPU up to full speed at $150~MHz$.
+Hardware settings such as wait states have seemingly been set by the bootloader.
 
 ## Building the Application
 
