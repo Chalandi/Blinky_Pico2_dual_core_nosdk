@@ -77,10 +77,10 @@ void main_Core0(void)
   while(boHaltCore0);
 #endif
 
-#ifdef CORE_FAMILY_ARM
+
   /* Disable interrupts on core 0 */
-  __asm volatile("CPSID i");
-#endif
+  CORE_ARCH_DISABLE_INTERRUPTS();
+
 
   /* Output disable on pin 25 */
   LED_GREEN_CFG();
