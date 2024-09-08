@@ -30,4 +30,4 @@ jobs:
         run: echo "PATH=~/arm-toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin:$PATH" >> $GITHUB_ENV
 
       - name: Rebuild Blinky
-        run: echo $PATH; cd ./Build; ./Rebuild.sh ARM
+        run: echo $PATH; cd ./Build; chmod +x ./Rebuild.sh; ./Rebuild.sh ARM
