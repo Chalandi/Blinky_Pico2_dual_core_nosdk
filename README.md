@@ -38,7 +38,8 @@ cd Blinky_Pico2_dual_core_nosdk
 Rebuild.sh ARM
 ```
 
-Build an RISC-V binary using the following command:
+
+Build a RISC-V binary using the following command:
 
 ```sh
 cd Blinky_Pico2_dual_core_nosdk
