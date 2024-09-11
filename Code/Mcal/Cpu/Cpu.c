@@ -24,6 +24,7 @@
 //=============================================================================
 // Globals
 //=============================================================================
+static uint32 u32MulticoreLock  = 0;
 static volatile uint32 u32MulticoreSync = 0;
 
 
@@ -36,7 +37,13 @@ static volatile uint32 u32MulticoreSync = 0;
 //-----------------------------------------------------------------------------------------
 void RP2350_MulticoreSync(uint32 CpuId)
 {
+  /* aquire the multicore lock */
+  arch_spin_lock(&u32MulticoreLock);
+
   u32MulticoreSync |= (1UL << CpuId);
+
+  /* release the multicore lock */
+  arch_spin_unlock(&u32MulticoreLock);
 
   while(u32MulticoreSync != MULTICORE_SYNC_MASK);
 }
@@ -72,6 +79,11 @@ void RP2350_InitCore(void)
 
   while((HW_PER_RESETS->RESET_DONE.bit.IO_BANK0 == 0U) || (HW_PER_RESETS->RESET_DONE.bit.PADS_BANK0 == 0U));
 
+#ifdef CORE_FAMILY_ARM
+  /*Setting EXTEXCLALL allows external exclusive operations to be used in a configuration with no MPU.
+  This is because the default memory map does not include any shareable Normal memory.*/
+  SCnSCB->ACTLR |= (1ul<<29);
+#endif
 }
 
 //-----------------------------------------------------------------------------------------
