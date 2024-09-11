@@ -1,0 +1,15 @@
+
+SRC_FILES += $(SRC_DIR)/OSEK/OsAlarm.c
+SRC_FILES += $(SRC_DIR)/OSEK/OsCore.c
+SRC_FILES += $(SRC_DIR)/OSEK/OsEvt.c
+SRC_FILES += $(SRC_DIR)/OSEK/OsSched.c
+SRC_FILES += $(SRC_DIR)/OSEK/OsTask.c
+SRC_FILES += $(SRC_DIR)/OSEK/OsTcb.c
+SRC_FILES += $(SRC_DIR)/OSEK/HwPlatform/$(CORE_FAMILY)/OsAsm.s
+SRC_FILES += $(SRC_DIR)/OSEK/HwPlatform/$(CORE_FAMILY)/OsHwPltfm.c
+SRC_FILES += $(SRC_DIR)/OSEK/HwPlatform/$(CORE_FAMILY)/OsHwSchedPrio.s
+SRC_FILES += $(SRC_DIR)/OSEK/HwPlatform/$(CORE_FAMILY)/OsSwClz.s
+
+
+INC_FILES += $(SRC_DIR)/OSEK
+INC_FILES += $(SRC_DIR)/OSEK/HwPlatform/$(CORE_FAMILY)

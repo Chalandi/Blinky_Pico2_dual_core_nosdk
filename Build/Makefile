@@ -21,6 +21,7 @@ OBJ_DIR    = $(OUTPUT_DIR)/Obj
 LD_SCRIPT  = $(SRC_DIR)/Memory_Map.ld
 PIO_OUT_DIR= $(SRC_DIR)/pio
 SRC_DIR    = ../Code
+RTOS       = osek2
 
 ifeq ($(OS),Windows_NT)
     PYTHON     = python
@@ -73,7 +74,7 @@ OPT_MODIFIED_O2 = -O2                               \
 
 NO_OPT = -O0
 
-OPT = $(NO_OPT)
+OPT = -O2
 
 ############################################################################################
 # GCC Compiler verbose flags
@@ -236,6 +237,15 @@ INC_FILES := $(SRC_DIR)                             \
              $(SRC_DIR)/Startup                     \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY) \
              $(SRC_DIR)/Std
+
+
+############################################################################################
+# RTOS Files
+############################################################################################
+ifeq ($(RTOS),osek)
+ include $(SRC_DIR)/OSEK/Os.makefile
+ SRC_FILES += $(SRC_DIR)/Appli/tasks.c
+endif
 
 ############################################################################################
 # Rules

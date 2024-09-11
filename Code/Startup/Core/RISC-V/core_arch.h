@@ -24,4 +24,8 @@
 #define CORE_ARCH_DISABLE_INTERRUPTS() riscv_clear_csr(RVCSR_MSTATUS_OFFSET, 0x08ul)
 #define CORE_ARCH_ENABLE_INTERRUPTS()  riscv_set_csr(RVCSR_MSTATUS_OFFSET, 0x08ul)
 
+
+void arch_spin_lock(uint32* lock);
+void arch_spin_unlock(uint32* lock);
+
 #endif //__CORE_ARCH_H__
