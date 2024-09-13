@@ -21,7 +21,7 @@ OBJ_DIR    = $(OUTPUT_DIR)/Obj
 LD_SCRIPT  = $(SRC_DIR)/Memory_Map.ld
 PIO_OUT_DIR= $(SRC_DIR)/pio
 SRC_DIR    = ../Code
-RTOS       = osek2
+RTOS       = osek
 
 ifeq ($(OS),Windows_NT)
     PYTHON     = python
