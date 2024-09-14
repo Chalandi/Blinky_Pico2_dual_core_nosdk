@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "cwd": "${workspaceRoot}",
-      "program": "../../Output/Baremetal_Pico2_dual_core_nosdk.elf",
+      "program": "../../Output/riscv_baremetal_pico2_dual_core_nosdk.elf",
       /*"svdPath": "../../Code/Mcal/RP2350.svd",*/
       "miDebuggerPath": "riscv32-unknown-elf-gdb",
       "miDebuggerServerAddress": "localhost:3333",
