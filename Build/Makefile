@@ -39,8 +39,8 @@ ERR_MSG_FORMATER_SCRIPT = ../Tools/scripts/CompilerErrorFormater.py
 ############################################################################################
 
 ifeq ($(CORE_FAMILY), RISC-V)
-    TOOLCHAIN          = riscv32-unknown-elf
-    ARCH               = -march=rv32imac_zicsr_zifencei_zba_zbb_zbs_zbkb -mabi=ilp32
+    TOOLCHAIN          = riscv-none-elf
+    ARCH               = -march=rv32ima_zicsr_zifencei_zba_zbb_zbs_zbkb_zca_zcb_zcmp -mabi=ilp32
     DEFS               = -DCORE_FAMILY_RISC_V -msmall-data-limit=0 -falign-functions=4
     PICOTOOL_FAMILY_ID = rp2350-riscv
 else ifeq ($(CORE_FAMILY), ARM)
