@@ -17,7 +17,7 @@
 .syntax unified
 
 //-----------------------------------------------------------------------------------------------------------------
-// \brief  OsDispatcher
+// \brief  OsDispatchHandler
 //
 // \descr  Context switcher
 //
@@ -28,11 +28,11 @@
 .thumb_func
 .section ".text"
 .align 4
-.globl  OsDispatcher
-.type   OsDispatcher, % function
-.extern OS_Dispatcher
+.globl  OsDispatchHandler
+.type   OsDispatchHandler, % function
+.extern OsDispatcher
 
-OsDispatcher:
+OsDispatchHandler:
 
   cpsid i
   push {r4 - r11, lr}
@@ -40,7 +40,7 @@ OsDispatcher:
   it eq
   vpusheq {S16-S31}
   mov r0,r13
-  bl.w OS_Dispatcher
+  bl.w OsDispatcher
   mov r13,r0
   pop {r4 - r11, lr}
   tst lr, #0x10

@@ -14,10 +14,10 @@
 ############################################################################################
 # Defines
 ############################################################################################
-
-PRJ_NAME   = Baremetal_Pico2_dual_core_nosdk
+CORE_FAMILY_LOWER_CASE = $(shell echo $(CORE_FAMILY) | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z]//g')
+PRJ_NAME               = $(CORE_FAMILY_LOWER_CASE)_baremetal_pico2_dual_core_nosdk
 OUTPUT_DIR = ../Output
-OBJ_DIR    = $(OUTPUT_DIR)/Obj
+OBJ_DIR                = $(OUTPUT_DIR)/$(CORE_FAMILY_LOWER_CASE)_obj
 LD_SCRIPT  = $(SRC_DIR)/Memory_Map.ld
 PIO_OUT_DIR= $(SRC_DIR)/pio
 SRC_DIR    = ../Code
@@ -74,7 +74,7 @@ OPT_MODIFIED_O2 = -O2                               \
 
 NO_OPT = -O0
 
-OPT = -O2
+OPT = $(NO_OPT)
 
 ############################################################################################
 # GCC Compiler verbose flags
@@ -261,21 +261,22 @@ ifeq ($(MAKECMDGOALS),build)
 -include $(subst .o,.d,$(FILES_O))
 endif
 
-build : PRE_BUILD_INFO  PIO_SRC_GEN  $(OUTPUT_DIR)/$(PRJ_NAME).elf  POST_BUILD_INFO
+build : PRE_BUILD  PIO_SRC_GEN  $(OUTPUT_DIR)/$(PRJ_NAME).elf  POST_BUILD
 
-all : PRE_BUILD_INFO  PIO_SRC_GEN  $(OUTPUT_DIR)/$(PRJ_NAME).elf  POST_BUILD_INFO
+all : PRE_BUILD  PIO_SRC_GEN  $(OUTPUT_DIR)/$(PRJ_NAME).elf  POST_BUILD
 
-.PHONY : PRE_BUILD_INFO
-PRE_BUILD_INFO:
+.PHONY : PRE_BUILD
+PRE_BUILD:
 	@$(if $(strip $(PICOTOOL_FAMILY_ID)), ,$(error Error: the Entered CORE_FAMILY is not supported!))
 	@-echo +++ Building RP2350 baremetal image for $(CORE_FAMILY) core
 	@git log -n 1 --decorate-refs=refs/heads/ --pretty=format:"+++ Git branch: %D (%h)" 2>/dev/null || true
 	@git log -n 1 --clear-decorations 2> /dev/null > /dev/null || true
 	@echo +++ info: "$(shell $(CC) -v 2>&1 | tail -n 1)"
 	@echo +++ info: "$(shell make -v 2>&1 | head -n 1)"
+	@$(if $(shell test -d $(OBJ_DIR) && echo yes),,mkdir -p $(subst \,/,$(OBJ_DIR)))
 
-.PHONY : POST_BUILD_INFO
-POST_BUILD_INFO:
+.PHONY : POST_BUILD
+POST_BUILD:
 	@-echo +++ End
 
 .PHONY : PIO_SRC_GEN
@@ -293,7 +294,7 @@ clean :
 	@-rm -rf $(OUTPUT_DIR) *.list 2>/dev/null || true
 	@-rm -rf $(OUTPUT_DIR) *.map  2>/dev/null || true
 	@-rm -rf $(OUTPUT_DIR) *.txt  2>/dev/null || true
-	@-mkdir -p $(subst \,/,$(OBJ_DIR))
+	@-mkdir -p $(subst \,/,$(OUTPUT_DIR))
 
 $(OBJ_DIR)/%.o : %.c
 	@-echo +++ compile: $(subst \,/,$<) to $(subst \,/,$@)

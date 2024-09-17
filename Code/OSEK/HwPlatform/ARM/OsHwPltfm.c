@@ -13,6 +13,8 @@
 
 #include"OsTypes.h"
 #include"OsHwPltfm.h"
+#include"OsInternal.h"
+#include"OsTcb.h"
 
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  OsIsInterruptContext
@@ -85,6 +87,7 @@ void Ostm_Start(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
+#if 0
   __attribute__((weak)) extern const uint32 osNbrOfInterrupts;
   __attribute__((weak)) extern const Isr_t IsrLookupTable[];
   __attribute__((weak)) ISR(Undefined);
@@ -114,6 +117,7 @@ void osInitInterrupts(void)
       }
     }
   }
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -187,3 +191,66 @@ void osMaskNonNestedIntPrio(uint32 PrioLevel)
 void OsIsr_FeUndefinedFunc(void) {}
 
 
+//-----------------------------------------------------------------------------
+/// \brief
+///
+/// \descr
+///
+/// \param
+///
+/// \return
+//-----------------------------------------------------------------------------
+void osHwTimerInit(void)
+{
+  //SysTick_Init();
+}
+
+//-----------------------------------------------------------------------------
+/// \brief
+///
+/// \descr
+///
+/// \param
+///
+/// \return
+//-----------------------------------------------------------------------------
+void osHwTimerStart(void)
+{
+  //SysTick_Start(SYSTICK_TIMEOUT_MSEC(1));
+}
+
+//-----------------------------------------------------------------------------
+/// \brief
+///
+/// \descr
+///
+/// \param
+///
+/// \return
+//-----------------------------------------------------------------------------
+void osHwTimerReload(void)
+{
+ /* clear the pending systick flag by SW (is not cleared by HW) */
+  //R32_STK_SR->bit.u1CNTIF = 0u;
+}
+
+uint32 osGetHwIntNestingLevel(void)
+{
+  return 0;
+}
+
+void osDisableHwIntNesting(void)
+{
+}
+
+void osSaveAndDisableIntState(void)
+{
+}
+
+void osRestoreSavedIntState(void)
+{
+}
+
+void OsRunCat2Isr(void)
+{
+}

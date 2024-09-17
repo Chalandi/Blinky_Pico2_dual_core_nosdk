@@ -4,7 +4,7 @@
         {
             "name": "RISC-V Multicore",
             "cwd": "${workspaceRoot}",
-            /*"executable": "../../Output/Baremetal_Pico2_dual_core_nosdk.elf",*/
+            /*"executable": "../../Output/riscv_baremetal_pico2_dual_core_nosdk.elf",*/
             "request": "attach",
             "type": "cortex-debug",
             "servertype": "openocd",
@@ -16,7 +16,7 @@
             "svdFile": "../../Code/Mcal/rp2350.svd",
             "runToEntryPoint": "main",
             "loadFiles": [],
-            "symbolFiles": ["../../Output/Baremetal_Pico2_dual_core_nosdk.elf"],
+            "symbolFiles": ["../../Output/riscv_baremetal_pico2_dual_core_nosdk.elf"],
             "postRestartCommands": [
                 "break main",
                 "continue"

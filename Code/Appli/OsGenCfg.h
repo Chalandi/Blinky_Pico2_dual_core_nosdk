@@ -65,7 +65,7 @@ OS_CONFIG_BEGIN
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /*  13  Reserved                                                   */
     OS_INTERRUPT_CATx_DEF(OsDispatchHandler, 15, NESTED)  /*  14  Software interrupt                                         */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /*  15  Reserved                                                   */
-    OS_INTERRUPT_CAT2_DEF(WindowWatchdogInt, 2, NOT_NESTED)  /*  16  Window Watchdog interrupt                                  */
+    OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /*  16  Window Watchdog interrupt                                  */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /*  17  PVD through EXTI line detection interrupt                  */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /*  18  Tamper interrupt                                           */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /*  19  RTC global interrupt                                       */
