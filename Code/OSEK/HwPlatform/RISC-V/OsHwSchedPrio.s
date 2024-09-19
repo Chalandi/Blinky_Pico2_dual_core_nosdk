@@ -43,6 +43,8 @@ OsHwSearchForHighPrio:
                        add a1, a1, a3
 .L_ContinueSearching:
                        lw a0, 0(a1)
+/*
+#ifdef(OS_USE_SW_CLZ)
                        addi sp, sp, -4*4
                        sw a1, 0(sp)
                        sw a2, 4(sp)
@@ -55,6 +57,10 @@ OsHwSearchForHighPrio:
                        lw a4, 12(sp)
                        addi sp, sp, 4*4
                        mv a2, a0
+#else
+*/
+                       clz a2,a0
+/*#endif*/
                        li a4, 32
                        bne a2, a4, .L_ReadyTaskFound
                        addi a1, a1, -4

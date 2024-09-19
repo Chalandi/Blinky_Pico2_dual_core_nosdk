@@ -14,8 +14,9 @@
 #ifndef __OS_ASM_H__
 #define __OS_ASM_H__
 
-#ifndef pFunc
-typedef void (*pFunc)(void);
+#ifndef PFUNC_TYPEDEF
+  #define PFUNC_TYPEDEF
+  typedef void (*pFunc)(void);
 #endif
 
 void OsDispatchHandler(void);

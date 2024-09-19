@@ -5,9 +5,7 @@
 *******************************************************************************************************************/
 #include"OsTcb.h"
 #include"OsAPIs.h"
-
-
-volatile uint32 AlarmCycleValue = 0;
+#include "Gpio.h"
 
 //===============================================================================================================================
 // OS TASK : T1
@@ -29,7 +27,7 @@ TASK(T1)
       {
         OS_ClearEvent(EVT_BLINK_BLUE_LED_FAST);
         T1AliveCounter++;
-        /* blink led here !*/
+        LED_GREEN_TOGGLE();
       }
     }
     else
@@ -44,7 +42,8 @@ TASK(T1)
 //===============================================================================================================================
 TASK(T2)
 {
-  static uint32 T2AliveCounter = 0;
+  static uint32 T2AliveCounter  = 0;
+  static uint32 AlarmCycleValue = 0;
   OsEventMaskType OsWaitEventMask = EVT_BLINK_BLUE_LED_SLOW;
   OsEventMaskType Events = 0;
   (void)OS_SetRelAlarm(ALARM_BLINK_BLUE_LED_SLOW,0,10000);

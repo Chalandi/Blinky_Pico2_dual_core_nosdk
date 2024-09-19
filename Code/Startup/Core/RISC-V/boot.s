@@ -83,25 +83,24 @@ _start_c1:
 .section .riscv_intvect
 .align 4
 .type _VectoredInterruptVectorTable, @function
-.globl Isr_MachineSoftwareInterrupt
-.globl Isr_MachineTimerInterrupt
-.globl Isr_MachineExternalInterrupt
-.globl AllExceptionsHandler
+.globl OsDispatchHandler
+.globl OsCat2IsrWrapper
+.globl OsCatchAllCpuExceptions
 .globl _VectoredInterruptVectorTable
 
 _VectoredInterruptVectorTable:
-                               j AllExceptionsHandler           /* Exceptions */
+                               j OsCatchAllCpuExceptions        /* Exceptions */
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
-                               j Isr_MachineSoftwareInterrupt   /* MachineSoftwareInterrupt (MSI) */
-                               j Isr_UndefinedHandler
-                               j Isr_UndefinedHandler
-                               j Isr_UndefinedHandler
-                               j Isr_MachineTimerInterrupt      /* MachineTimerInterrupt (MTI) --> The lowest priority interrupt level */
+                               j OsDispatchHandler              /* MachineSoftwareInterrupt (MSI) */
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
-                               j Isr_MachineExternalInterrupt  /* MachineExternalInterrupt (MEI) --> The highest priority interrupt level */
+                               j OsCat2IsrWrapper             /* MachineTimerInterrupt (MTI) --> The lowest priority interrupt level */
+                               j Isr_UndefinedHandler
+                               j Isr_UndefinedHandler
+                               j Isr_UndefinedHandler
+                               j OsCat2IsrWrapper               /* MachineExternalInterrupt (MEI) --> The highest priority interrupt level */
 
 
 .size _VectoredInterruptVectorTable, .-_VectoredInterruptVectorTable
@@ -120,4 +119,3 @@ Isr_UndefinedHandler: j Isr_UndefinedHandler
 .align 4
 AllExceptionsHandler: j AllExceptionsHandler
 .size AllExceptionsHandler, .-AllExceptionsHandler
-

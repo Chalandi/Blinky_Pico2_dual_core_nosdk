@@ -47,7 +47,7 @@ void OS_StartOS(OsAppModeType Mode)
   if(TRUE == OsIsInterruptContext())
   {
     return;
-  }   
+  }
   
   if(OS_NUMBER_OF_TASKS > 0)
   {
@@ -362,7 +362,7 @@ uint32 OsIntCallDispatch(uint32 StackPtr)
     
     if(OCB_Cfg.OsIntCallDispatcher == 1)
     {
-      /* The internal system state is changed by the ISR cat2 (an Event is triggred)
+      /* The internal system state is changed by the ISR cat2 (an Event is triggered)
          at this point the OS will switch to the new context (target task context) */
 
       /* Reset the flag */

@@ -21,8 +21,8 @@
 #include "riscv.h"
 
 #define CORE_ARCH_SEND_EVENT_INST()    __asm("slt x0, x0, x1")
-#define CORE_ARCH_DISABLE_INTERRUPTS() riscv_clear_csr(RVCSR_MSTATUS_OFFSET, 0x08ul)
-#define CORE_ARCH_ENABLE_INTERRUPTS()  riscv_set_csr(RVCSR_MSTATUS_OFFSET, 0x08ul)
+#define CORE_ARCH_DISABLE_INTERRUPTS() riscv_clear_csr(RVCSR_MSTATUS_OFFSET, RVCSR_MSTATUS_MIE_BITS)
+#define CORE_ARCH_ENABLE_INTERRUPTS()  riscv_set_csr(RVCSR_MSTATUS_OFFSET, RVCSR_MSTATUS_MIE_BITS)
 
 
 void arch_spin_lock(uint32* lock);

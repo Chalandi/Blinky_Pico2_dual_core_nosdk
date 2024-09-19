@@ -3,7 +3,7 @@
 #define OS_ASM_ALIGN(alignment)      .align alignment
 #define OS_ASM_GLOBL(name)           .globl  name
 #define OS_ASM_FUNC(name)            .type   name, @function
-#define OS_ASM_OBJECT(name)            .type   name, @object
+#define OS_ASM_OBJECT(name)          .type   name, @object
 #define OS_ASM_LABEL(name)           name:
 #define OS_ASM_SIZE(name)            .size name, .-#name
 

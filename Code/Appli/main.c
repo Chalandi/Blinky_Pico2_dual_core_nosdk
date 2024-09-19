@@ -57,9 +57,17 @@ int main(void)
   /* Synchronize with core 1 */
   RP2350_MulticoreSync((uint32_t)HW_PER_SIO->CPUID.reg);
 
+#ifdef CORE_FAMILY_RISC_V
+
+  #include "OsAPIs.h"
+
+  /* start the OS */
+  OS_StartOS(APP_MODE_DEFAULT);
+
+#else
   /* endless loop on the core 0 */
   for(;;);
-
+#endif
   /* never reached */
   return(0);
 }
@@ -134,6 +142,10 @@ void main_Core1(void)
   /* Clear all pending interrupts on core 1 */
   NVIC->ICPR[0] = (uint32)-1;
 
+  /* enable FPU */
+  *(volatile unsigned int*)0xE000ED8C |= ((1ul<<11) | (1ul<<10));
+  *(volatile unsigned int*)0xE000ED88 |= ((3ul<<22) | (3ul<<20));
+
 #endif
 
   /* Synchronize with core 0 */
@@ -142,20 +154,10 @@ void main_Core1(void)
 
 #ifdef CORE_FAMILY_RISC_V
 
-  /* configure the machine timer for 1Hz interrupt window */
-  #include "riscv.h"
+  //#include "OsAPIs.h"
 
-  /* enable machine timer interrupt */
-  riscv_set_csr(RVCSR_MIE_OFFSET, 0x80ul);
-
-  /* enable global interrupt */
-  riscv_set_csr(RVCSR_MSTATUS_OFFSET, 0x08ul);
-
-  /* configure machine timer to use 150 MHz */
-  HW_PER_SIO->MTIME_CTRL.bit.FULLSPEED = 1;
-
-  /* set next timeout (machine timer is enabled by default) */
-  *pMTIMECMP = *pMTIME + 150000000ul; //1s
+  /* start the OS */
+  //OS_StartOS(APP_MODE_DEFAULT);
 
 #else
 
@@ -173,14 +175,6 @@ void main_Core1(void)
 
 
 #ifdef CORE_FAMILY_RISC_V
-  __attribute__((interrupt)) void Isr_MachineTimerInterrupt(void);
-  
-  void Isr_MachineTimerInterrupt(void)
-  {
-    *pMTIMECMP = *pMTIME + 150000000ul;
-  
-    LED_GREEN_TOGGLE();
-  }
 
 #else
 
@@ -199,4 +193,3 @@ void main_Core1(void)
     }
   }
 #endif
-

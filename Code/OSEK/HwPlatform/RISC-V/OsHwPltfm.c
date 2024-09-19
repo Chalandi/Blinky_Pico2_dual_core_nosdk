@@ -47,7 +47,7 @@ boolean OsIsInterruptContext(void)
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  osRestoreSavedIntState
 ///
-/// \descr  This function return the interrupt nesting level status (8 nested levels currently supported).
+/// \descr  This function return the interrupt nesting level status
 ///
 /// \param  void
 ///
@@ -73,7 +73,7 @@ uint32 osGetHwIntNestingLevel(void)
 
   return((uint32)(u8CurrentNestingLevel));
 */
-return 0;
+return 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -87,7 +87,11 @@ return 0;
 //-----------------------------------------------------------------------------
 void osHwTimerInit(void)
 {
-  //SysTick_Init();
+  /* enable machine timer interrupt */
+  riscv_set_csr(RVCSR_MIE_OFFSET, RVCSR_MIE_MTIE_BITS);
+
+  /* configure machine timer to use 150 MHz */
+  HW_PER_SIO->MTIME_CTRL.bit.FULLSPEED = 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -101,7 +105,10 @@ void osHwTimerInit(void)
 //-----------------------------------------------------------------------------
 void osHwTimerStart(void)
 {
-  //SysTick_Start(SYSTICK_TIMEOUT_MSEC(1));
+  volatile uint64_t* pMTIMECMP = (volatile uint64_t*)&(HW_PER_SIO->MTIMECMP.reg);
+  volatile uint64_t* pMTIME    = (volatile uint64_t*)&(HW_PER_SIO->MTIME.reg);
+  /* set next timeout (machine timer is enabled by default) */
+  *pMTIMECMP = *pMTIME + 150000ul; //1ms
 }
 
 //-----------------------------------------------------------------------------
@@ -115,8 +122,10 @@ void osHwTimerStart(void)
 //-----------------------------------------------------------------------------
 void osHwTimerReload(void)
 {
- /* clear the pending systick flag by SW (is not cleared by HW) */
-  //R32_STK_SR->bit.u1CNTIF = 0u;
+  volatile uint64_t* pMTIMECMP = (volatile uint64_t*)&(HW_PER_SIO->MTIMECMP.reg);
+  volatile uint64_t* pMTIME    = (volatile uint64_t*)&(HW_PER_SIO->MTIME.reg);
+  /* set next timeout (machine timer is enabled by default) */
+  *pMTIMECMP = *pMTIME + 150000ul; //1ms
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -209,41 +218,9 @@ uint32 osGetPMR(void)
 //------------------------------------------------------------------------------------------------------------------
 void OsRunCat2Isr(void)
 {
-#if 0
-  /* get the interrupt id */
-  const uint32 IntId = csr_read_mcause() & 0x7FFFFFFFul;
-
-  if(IsrLookupTable[IntId].type == NOT_NESTED)
-  {
-    /* disable the nesting of the Cat2 interrupt with the current priority level.
-       Cat1 interrupts are not masked and they could nest the unnested Cat2 interrupt
-    */
-    osSetPMR(OS_INT_CAT1_LOWEST_PRIO_LEVEL);
-  }
-
-  /* call the interrupt service routine */
-  IsrLookupTable[IntId].IsrFunc();
-#endif
-}
-
-//------------------------------------------------------------------------------------------------------------------
-/// \brief  OsRunSysTickIsr
-///
-/// \descr  System tick interrupt service routine.
-///
-/// \param  void
-///
-/// \return void
-//------------------------------------------------------------------------------------------------------------------
-#if 0
-void OsRunSysTickIsr(void)
-{
-  PFIC->ITHRESDR.reg = 5u;
-  PFIC->IPSR1.reg |= (1ul << 16);
-   __asm volatile("FENCE.I");
   CALL_ISR(SysTickTimer);
 }
-#endif
+
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  OsCatchAllCpuExceptions
 ///

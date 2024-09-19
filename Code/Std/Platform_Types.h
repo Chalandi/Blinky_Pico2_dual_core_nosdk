@@ -27,16 +27,26 @@ typedef signed long sint32;
 typedef unsigned long long uint64;
 typedef signed long long sint64;
 
-typedef void (*pFunc)(void);
+#ifndef PFUNC_TYPEDEF
+  #define PFUNC_TYPEDEF
+  typedef void (*pFunc)(void);
+#endif
 
-typedef enum
-{
-  FALSE = 0,
-  TRUE
-}boolean;
+#ifndef BOOLEAN_TYPEDEF
+  #define BOOLEAN_TYPEDEF
+  typedef enum
+  {
+    FALSE = 0,
+    TRUE
+  }boolean;
+#endif
 
-#define NULL    (void*)0
+#ifndef NULL
+  #define NULL    (void*)0
+#endif
 
-#define NULL_PTR    (void*)0
+#ifndef NULL_PTR
+  #define NULL_PTR    (void*)0
+#endif
 
 #endif

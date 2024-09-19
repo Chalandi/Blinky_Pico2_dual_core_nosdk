@@ -1,7 +1,7 @@
 /******************************************************************************************
   Filename    : OsAsm.s
 
-  Core        : QingKeV4F (RISC-V RV32IMACF)
+  Core        : Hazard3 RISC-V
 
   Author      : Chalandi Amine
 
@@ -15,7 +15,7 @@
 
 .file "OsAsm.s"
 
-.equ OS_CPU_CONTEXT_USED_REGISTERS, 32
+.equ OS_CPU_CONTEXT_USED_REGISTERS, 31
 
 /*-----------------------------------------------------------------------------------------------------------------*/
 /* \brief  OsSaveCpuContext                                                                                        */
@@ -60,9 +60,9 @@
   sw x31, 29*4(sp)
   csrr x1, mepc
   sw x1,  30*4(sp)
-  la x1, 0xE000E040
+  /*la x1, 0xE000E040
   lw x3, 0(x1)
-  sw x3, 31*4(sp)
+  sw x3, 31*4(sp)*/
 .endm
 
 /*-----------------------------------------------------------------------------------------------------------------*/
@@ -75,9 +75,9 @@
 /* \return void                                                                                                    */
 /*-----------------------------------------------------------------------------------------------------------------*/
 .macro OsRestoreCpuContext
-  lw x3,  31*4(sp)
-  la x1, 0xE000E040
-  sw x3, 0(x1)
+  /*lw x3,  31*4(sp)*/
+  /*la x1, 0xE000E040*/
+  /*sw x3, 0(x1)*/
   lw x1,  30*4(sp)
   csrrw zero, mepc, x1
   lw x1,   0*4(sp)
@@ -128,14 +128,19 @@
 .type   OsDispatchHandler, % function
 .extern OsDispatcher
 
+.equ SIO_CPUID, 0xd0000000
+.equ SIO_RISCV_SOFTIRQ, 0xd00001a0
+
 OsDispatchHandler:
                    OsSaveCpuContext
                    mv a0, sp
-                   la a1, 0x80000000
-                   la a2, 0xE000F000
-                   lw a3, 0(a2)
-                   xor a3, a3, a1
-                   sw a3, 0(a2)
+                   la a1, SIO_RISCV_SOFTIRQ
+                   la a2, SIO_CPUID
+                   lw a4, 0(a2)
+                   addi a4, a4, 8
+                   addi a5, zero, 1
+                   sll a5, a5, a4
+                   sw a5, 0(a1)
                    jal OsDispatcher
                    mv sp, a0
                    OsRestoreCpuContext
@@ -250,9 +255,9 @@ OsGetCurrentSP:
 /* ----------------------------------------------------------------------------------------------------------------- */
 /*  \brief  OsSetIntVectTableAddress : void OsSetIntVectTableAddress(unsigned int* address)                          */
 /*                                                                                                                   */
-/*  \descr                                                              */
+/*  \descr                                                                                                           */
 /*                                                                                                                   */
-/*  \param                                     */
+/*  \param                                                                                                           */
 /*                                                                                                                   */
 /*  \return void                                                                                                     */
 /* ----------------------------------------------------------------------------------------------------------------- */
