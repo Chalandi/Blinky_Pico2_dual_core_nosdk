@@ -129,7 +129,7 @@ void osInitInterrupts(void)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-void osSetPMR(uint32 level)
+void osSetInterruptPriorityMask(uint32 level)
 {
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();
   OsSetSysBasepriReg((level << (8U - IntPrioBit)));
@@ -144,7 +144,7 @@ void osSetPMR(uint32 level)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-uint32 osGetPMR(void)
+uint32 osGetInterruptPriorityMask(void)
 {
   uint32 level = 0;
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();

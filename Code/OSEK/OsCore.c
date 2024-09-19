@@ -526,10 +526,10 @@ void OS_ResumeAllInterrupts(void)
 void OS_SuspendOSInterrupts(void)
 {
   /* Get the global mask prio */
-  OCB_Cfg.OsInterruptSavedLevel = osGetPMR();
+  OCB_Cfg.OsInterruptSavedLevel = osGetInterruptPriorityMask();
 
   /* Disable OS interrupts */
-  osSetPMR(OS_INT_CAT1_LOWEST_PRIO_LEVEL);
+  osSetInterruptPriorityMask(OS_INT_CAT1_LOWEST_PRIO_LEVEL);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -544,7 +544,7 @@ void OS_SuspendOSInterrupts(void)
 void OS_ResumeOSInterrupts(void)
 {
   /* Restore the global mask prio */
-  osSetPMR(OCB_Cfg.OsInterruptSavedLevel);
+  osSetInterruptPriorityMask(OCB_Cfg.OsInterruptSavedLevel);
 }
 
 //------------------------------------------------------------------------------------------------------------------

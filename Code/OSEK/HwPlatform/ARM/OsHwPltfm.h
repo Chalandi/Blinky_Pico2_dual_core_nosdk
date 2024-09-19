@@ -110,8 +110,8 @@ typedef union
 #define SYS_TICK_ENABLE_INT          1U
 #define SYS_TICK_ENABLE_TIMER        1U
 
-uint32 osGetPMR(void);
-void   osSetPMR(uint32 level);
+uint32 osGetInterruptPriorityMask(void);
+void   osSetInterruptPriorityMask(uint32 level);
 uint32 OsGetEIIC(void);
 void   Ostm_Start(void);
 void   Ostm_Init(void);

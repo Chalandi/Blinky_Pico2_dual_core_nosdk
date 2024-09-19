@@ -144,6 +144,7 @@ OsDispatchHandler:
                    jal OsDispatcher
                    mv sp, a0
                    OsRestoreCpuContext
+                   csrw mcause, zero
                    mret
 
 .size OsDispatchHandler, .-OsDispatchHandler
@@ -175,6 +176,7 @@ OsCat2IsrWrapper:
                    jal OsIntCallDispatch
                    mv sp, a0
                    OsRestoreCpuContext
+                   csrw mcause, zero
                    mret
 
 .size OsCat2IsrWrapper, .-OsCat2IsrWrapper
@@ -227,6 +229,7 @@ OsStartNewTask:
                  mv x29,x0
                  mv x30,x0
                  mv x31,x0
+                 csrw mcause, zero
                  mret
 
 .size OsStartNewTask, .-OsStartNewTask

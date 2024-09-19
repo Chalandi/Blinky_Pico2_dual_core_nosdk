@@ -40,8 +40,7 @@ volatile uint32 OsHwPltfmSavedIntState = 0;
 //------------------------------------------------------------------------------------------------------------------
 boolean OsIsInterruptContext(void)
 {
-  //return((boolean)(PFIC->GISR.bit.GACTSTA));
-  return 0;
+  return((uint32_t)(riscv_read_csr(RVCSR_MCAUSE_OFFSET) >> 31) == 0ul ? FALSE : TRUE);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -55,25 +54,7 @@ boolean OsIsInterruptContext(void)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osGetHwIntNestingLevel(void)
 {
-/*
-  uint8 u8CurrentNestingLevel = PFIC->GISR.bit.NESTSTA;
-
-  switch(u8CurrentNestingLevel)
-  {
-    case 0x03: u8CurrentNestingLevel = 2u; break;
-    case 0x07: u8CurrentNestingLevel = 3u; break;
-    case 0x0F: u8CurrentNestingLevel = 4u; break;
-    case 0x1F: u8CurrentNestingLevel = 5u; break;
-    case 0x3F: u8CurrentNestingLevel = 6u; break;
-    case 0x7F: u8CurrentNestingLevel = 7u; break;
-    case 0xFF: u8CurrentNestingLevel = 8u; break;
-    default:
-    break;
-  }
-
-  return((uint32)(u8CurrentNestingLevel));
-*/
-return 1;
+  return 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -139,42 +120,7 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-#if 0
-  uint32 u32IntRegOffset    = 0;
-  uint32 u32IntBitPosition  = 0;
-  
-  OsSetIntVectTableAddress((uint32*)&osIntVectTable);
 
-  for(uint32 IntId = 0; IntId <= 103; IntId++)
-  {
-    u32IntRegOffset    = (uint32)(IntId / 32u);
-    u32IntBitPosition  = (uint32)(IntId - (32u*u32IntRegOffset));
-    
-    if(IsrLookupTable[IntId].IsrFunc != pISR(Undefined))
-    {
-      /* configure the interrupt's priority */
-      *((volatile uint8*)((uint32)(&PFIC->IPRIOR0) + IntId)) = (uint8)((IsrLookupTable[IntId].Prio) << 4u);
-
-      /* enable the interrupt */
-      *((volatile uint32*)((uint32)(&PFIC->IENR1.reg) + sizeof(uint32)*u32IntRegOffset)) |= (uint32)(1ul << u32IntBitPosition);
-    }
-    else
-    {
-      /* disable the interrupt */
-      *((volatile uint32*)((&PFIC->IRER1.reg) + sizeof(uint32)*u32IntRegOffset)) |= (uint32)(1ul << u32IntBitPosition);
-    }
-  }
-
-  /* configure the interrupt system control
-    8 nested levels, 3 preemption bits, no Hardware stack */
-  osSetINTSYSCR(0x0E);
-#endif
-}
-
-ISR(WindowWatchdogInt);
-ISR(WindowWatchdogInt)
-{
- __asm("nop");
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -186,7 +132,7 @@ ISR(WindowWatchdogInt)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-void osSetPMR(uint32 level)
+void osSetInterruptPriorityMask(uint32 level) /*osSetInterruptPriorityMask*/
 {
   (void)level;
   //PFIC->ITHRESDR.reg = (uint32)level << 4;
@@ -201,7 +147,7 @@ void osSetPMR(uint32 level)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-uint32 osGetPMR(void)
+uint32 osGetInterruptPriorityMask(void) /*osGetInterruptPriorityMask*/
 {
   //return(PFIC->ITHRESDR.reg >> 4);
   return 0;
@@ -210,7 +156,7 @@ uint32 osGetPMR(void)
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  OsRunCat2Isr
 ///
-/// \descr  This function is the entry point of all category 2 interrupts (PLIC).
+/// \descr  This function is the entry point of all category 2 interrupts
 ///
 /// \param  void
 ///
@@ -247,7 +193,7 @@ void OsCatchAllCpuExceptions(void)
 //------------------------------------------------------------------------------------------------------------------
 void osSaveAndDisableIntState(void)
 {
-  //OsHwPltfmSavedIntState = csr_read_clr_bits_mstatus(MSTATUS_MIE_BIT_MASK);
+  OsHwPltfmSavedIntState = riscv_read_clear_csr(RVCSR_MSTATUS_OFFSET, RVCSR_MSTATUS_MIE_BITS);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -261,5 +207,5 @@ void osSaveAndDisableIntState(void)
 //------------------------------------------------------------------------------------------------------------------
 void osRestoreSavedIntState(void)
 {
-  //csr_write_mstatus(OsHwPltfmSavedIntState);
+  riscv_write_csr(RVCSR_MSTATUS_OFFSET, OsHwPltfmSavedIntState);
 }

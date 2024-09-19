@@ -32,8 +32,8 @@
 //=========================================================================================
 #define osDispatch()              HW_PER_SIO->RISCV_SOFTIRQ.reg = (1ul << (HW_PER_SIO->CPUID.reg)); __asm("fence"); riscv_set_csr(RVCSR_MIE_OFFSET, RVCSR_MIE_MSIE_BITS);
 
-#define ENABLE_INTERRUPTS()       riscv_set_csr(RVCSR_MSTATUS_OFFSET, 0x08ul)
-#define DISABLE_INTERRUPTS()      riscv_clear_csr(RVCSR_MSTATUS_OFFSET, 0x08ul)
+#define ENABLE_INTERRUPTS()       riscv_set_csr(RVCSR_MSTATUS_OFFSET, RVCSR_MSTATUS_MIE_BITS)
+#define DISABLE_INTERRUPTS()      riscv_clear_csr(RVCSR_MSTATUS_OFFSET, RVCSR_MSTATUS_MIE_BITS)
 
 #define osSetINTSYSCR(value)        //__asm volatile ("csrw    0x804, %0" : : "r" (value) :)
 #define osMaskClearINTSYSCR(value)  //__asm volatile ("csrrc   zero, 0x804, %0" : : "r" (value) :)
@@ -54,8 +54,8 @@ extern uint32 osIntVectTable;
 //=========================================================================================
 // Functions Prototype
 //=========================================================================================
-uint32 osGetPMR(void);
-void osSetPMR(uint32 level);
+uint32 osGetInterruptPriorityMask(void);
+void osSetInterruptPriorityMask(uint32 level);
 void osHwTimerInit(void);
 void osHwTimerStart(void);
 void osHwTimerReload(void);
