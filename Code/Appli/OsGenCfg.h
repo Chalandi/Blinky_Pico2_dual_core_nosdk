@@ -167,8 +167,7 @@ OS_CONFIG_BEGIN
   //=============================================================================
   //  Interrupt Configuration
   //=============================================================================
-  #define OS_FE_INTERRUPT_ENABLED           0
-  #define OS_INTERRUPT_ENABLED              1
+  #define OS_INTERRUPT_VECTOR_ENABLED 
 
   //=============================================================================
   //  Clock Configuration

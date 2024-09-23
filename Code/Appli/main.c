@@ -21,7 +21,7 @@
 #include "Platform_Types.h"
 #include "Cpu.h"
 #include "Gpio.h"
-#include "SysTickTimer.h"
+#include "OsAPIs.h"
 
 //=============================================================================
 // Macros
@@ -57,19 +57,8 @@ int main(void)
   /* Synchronize with core 1 */
   RP2350_MulticoreSync((uint32_t)HW_PER_SIO->CPUID.reg);
 
-#ifdef CORE_FAMILY_RISC_V
-
-  #include "OsAPIs.h"
-
   /* start the OS */
   OS_StartOS(APP_MODE_DEFAULT);
-
-#else
-  /* endless loop on the core 0 */
-  for(;;);
-#endif
-  /* never reached */
-  return(0);
 }
 
 //-----------------------------------------------------------------------------------------
@@ -92,7 +81,6 @@ void main_Core0(void)
 
   /* Output disable on pin 25 */
   LED_GREEN_CFG();
-
 
   /* Start the Core 1 and turn on the led to be sure that we passed successfully the core 1 initiaization */
   if(TRUE == RP2350_StartCore1())
@@ -133,7 +121,7 @@ void main_Core1(void)
 
 #ifdef CORE_FAMILY_ARM
 
-  /*Setting EXTEXCLALL allows external exclusive operations to be used in a configuration with no MPU.
+  /* Setting EXTEXCLALL allows external exclusive operations to be used in a configuration with no MPU.
   This is because the default memory map does not include any shareable Normal memory.*/
   SCnSCB->ACTLR |= (1ul<<29);
 
@@ -151,45 +139,8 @@ void main_Core1(void)
   /* Synchronize with core 0 */
   RP2350_MulticoreSync((uint32_t)HW_PER_SIO->CPUID.reg);
 
-
-#ifdef CORE_FAMILY_RISC_V
-
-  //#include "OsAPIs.h"
-
-  /* start the OS */
-  //OS_StartOS(APP_MODE_DEFAULT);
-
-#else
-
-  /* configure ARM systick timer */
-  SysTickTimer_Init();
-  SysTickTimer_Start(SYS_TICK_MS(100));
-
-#endif
-
   while(1)
   {
     __asm("nop");
   }
 }
-
-
-#ifdef CORE_FAMILY_RISC_V
-
-#else
-
-  void SysTickTimer(void);
-
-  void SysTickTimer(void)
-  {
-    static uint32_t cpt = 0;
-
-    SysTickTimer_Reload(SYS_TICK_MS(100));
-    
-    if(++cpt >= 10ul)
-    {
-      LED_GREEN_TOGGLE();
-      cpt = 0;
-    }
-  }
-#endif

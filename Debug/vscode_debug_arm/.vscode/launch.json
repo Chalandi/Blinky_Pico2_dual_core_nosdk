@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ARM Multicore",
+            "cwd": "${workspaceRoot}",
+            /*"executable": "../../Output/riscv_baremetal_pico2_dual_core_nosdk.elf",*/
+            "request": "attach",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "gdbPath" : "arm-none-eabi-gdb",
+            "device": "RP2350",
+            "configFiles": [
+                "../../Tools/openocd/rp2350_arm.cfg"
+            ],
+            "svdFile": "../../Code/Mcal/rp2350.svd",
+            "runToEntryPoint": "main",
+            "loadFiles": [],
+            "symbolFiles": ["../../Output/arm_baremetal_pico2_dual_core_nosdk.elf"],
+            "postRestartCommands": [
+                "break main",
+                "continue"
+            ]
+        }      
+    ]
+}

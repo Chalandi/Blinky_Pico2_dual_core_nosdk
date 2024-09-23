@@ -169,6 +169,7 @@ OsDispatchHandler:
 
 OsCat2IsrWrapper:
                    OsSaveCpuContext
+                   /* increment nesting level */
                    mv a0, sp
                    jal OsStoreStackPointer
                    jal OsRunCat2Isr
@@ -177,6 +178,7 @@ OsCat2IsrWrapper:
                    mv sp, a0
                    OsRestoreCpuContext
                    csrw mcause, zero
+                   /* decrement nesting level */
                    mret
 
 .size OsCat2IsrWrapper, .-OsCat2IsrWrapper

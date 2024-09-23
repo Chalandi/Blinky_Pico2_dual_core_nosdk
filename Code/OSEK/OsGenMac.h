@@ -277,13 +277,13 @@
 #define OS_FE_INTERRUPT_END  
 
 //Globals in OsTcb.c
-#if(OS_INTERRUPT_ENABLED == 1)
+#ifdef OS_INTERRUPT_VECTOR_ENABLED
   const unsigned int osNbrOfInterrupts = sizeof(IsrLookupTable)/sizeof(OsInterruptConfigType);
 #else
   const unsigned int osNbrOfInterrupts = 0;
 #endif
 
-#if(OS_FE_INTERRUPT_ENABLED == 1)
+#ifdef OS_EXCEPTION_VECTOR_ENABLED
   const unsigned int osNbrOfExceptions = sizeof(FeIntLookupTable) / sizeof(FeIsr_t);
 #else
   const unsigned int osNbrOfExceptions = 0;

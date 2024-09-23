@@ -86,10 +86,8 @@ void osHwTimerInit(void)
 //-----------------------------------------------------------------------------
 void osHwTimerStart(void)
 {
-  volatile uint64_t* pMTIMECMP = (volatile uint64_t*)&(HW_PER_SIO->MTIMECMP.reg);
-  volatile uint64_t* pMTIME    = (volatile uint64_t*)&(HW_PER_SIO->MTIME.reg);
   /* set next timeout (machine timer is enabled by default) */
-  *pMTIMECMP = *pMTIME + 150000ul; //1ms
+   osHwTimerReload();
 }
 
 //-----------------------------------------------------------------------------
@@ -103,9 +101,9 @@ void osHwTimerStart(void)
 //-----------------------------------------------------------------------------
 void osHwTimerReload(void)
 {
-  volatile uint64_t* pMTIMECMP = (volatile uint64_t*)&(HW_PER_SIO->MTIMECMP.reg);
-  volatile uint64_t* pMTIME    = (volatile uint64_t*)&(HW_PER_SIO->MTIME.reg);
-  /* set next timeout (machine timer is enabled by default) */
+  volatile uint64_t* const pMTIMECMP = (volatile uint64_t*)&(HW_PER_SIO->MTIMECMP.reg);
+  volatile uint64_t* const pMTIME    = (volatile uint64_t*)&(HW_PER_SIO->MTIME.reg);
+
   *pMTIMECMP = *pMTIME + 150000ul; //1ms
 }
 
@@ -120,7 +118,7 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-
+  /* driver for Xh3irq: Hazard3 interrupt controller */
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -132,7 +130,7 @@ void osInitInterrupts(void)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-void osSetInterruptPriorityMask(uint32 level) /*osSetInterruptPriorityMask*/
+void osSetInterruptPriorityMask(uint32 level)
 {
   (void)level;
   //PFIC->ITHRESDR.reg = (uint32)level << 4;
@@ -147,7 +145,7 @@ void osSetInterruptPriorityMask(uint32 level) /*osSetInterruptPriorityMask*/
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-uint32 osGetInterruptPriorityMask(void) /*osGetInterruptPriorityMask*/
+uint32 osGetInterruptPriorityMask(void)
 {
   //return(PFIC->ITHRESDR.reg >> 4);
   return 0;
@@ -164,7 +162,23 @@ uint32 osGetInterruptPriorityMask(void) /*osGetInterruptPriorityMask*/
 //------------------------------------------------------------------------------------------------------------------
 void OsRunCat2Isr(void)
 {
-  CALL_ISR(SysTickTimer);
+  uint32_t mcause = riscv_read_csr(RVCSR_MCAUSE_OFFSET);
+
+  if(((mcause >> 31) == 1ul) && ((mcause & 0x0f) == 7ul))
+  {
+    /* machine timer interrupt */
+    CALL_ISR(SysTickTimer);
+  }
+  else if(((mcause >> 31) == 1ul) && ((mcause & 0x0f) == 11ul))
+  {
+    /* external interrupt from Xh3irq (Hazard3 interrupt controller) */
+    
+  }
+  else
+  {
+    /* unhandled interrupt type */
+    OsKernelError(E_OS_KERNEL_PANIC);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------

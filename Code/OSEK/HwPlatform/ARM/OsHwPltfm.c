@@ -30,18 +30,18 @@ boolean OsIsInterruptContext(void)
   return((GET_ICSR_VECTACTIVE() == 0) ? FALSE : TRUE);
 }
 
-//------------------------------------------------------------------------------------------------------------------
-/// \brief  OsGetEIIC
+//-----------------------------------------------------------------------------
+/// \brief
 ///
-/// \descr  This function return the ISR number.
+/// \descr
 ///
-/// \param  void
+/// \param
 ///
-/// \return uint32: ISR number
-//------------------------------------------------------------------------------------------------------------------
-uint32 OsGetEIIC(void)
+/// \return
+//-----------------------------------------------------------------------------
+void osHwTimerInit(void)
 {
-  return(GET_ICSR_VECTACTIVE());
+  SysTickTimer_Init();
 }
 
 //-----------------------------------------------------------------------------
@@ -53,13 +53,9 @@ uint32 OsGetEIIC(void)
 ///
 /// \return
 //-----------------------------------------------------------------------------
-void Ostm_Init(void)
+void osHwTimerStart(void)
 {
-  pSTK_CTRL->u32Register = 0;
-  pSTK_LOAD->bits.u24RELOAD = OS_SYS_TICK_MS(1);
-  pSTK_VAL->u32Register = 0;
-  pSTK_CTRL->bits.u1CLOCKSRC = SYS_TICK_CLKSRC_AHB_DIV_8;
-  pSTK_CTRL->bits.u1TICKINT = SYS_TICK_ENABLE_INT;
+  SysTickTimer_Start(SYS_TICK_MS(1));
 }
 
 //-----------------------------------------------------------------------------
@@ -71,9 +67,9 @@ void Ostm_Init(void)
 ///
 /// \return
 //-----------------------------------------------------------------------------
-void Ostm_Start(void)
+void osHwTimerReload(void)
 {
-  pSTK_CTRL->bits.u1ENABLE = SYS_TICK_ENABLE_TIMER;
+  SysTickTimer_Reload(SYS_TICK_MS(1));
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -182,61 +178,12 @@ void osMaskNonNestedIntPrio(uint32 PrioLevel)
   (void)PrioLevel;
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();
   /* mask the category2 non nested interrupts */
-  OsSetSysBasepriReg((OS_CAT1_PRIO_MASK << (8U - IntPrioBit)));
-}
-
-//------------------------------------------------------------------------------------------------------------------
-///     STUBS
-//------------------------------------------------------------------------------------------------------------------
-void OsIsr_FeUndefinedFunc(void) {}
-
-
-//-----------------------------------------------------------------------------
-/// \brief
-///
-/// \descr
-///
-/// \param
-///
-/// \return
-//-----------------------------------------------------------------------------
-void osHwTimerInit(void)
-{
-  //SysTick_Init();
-}
-
-//-----------------------------------------------------------------------------
-/// \brief
-///
-/// \descr
-///
-/// \param
-///
-/// \return
-//-----------------------------------------------------------------------------
-void osHwTimerStart(void)
-{
-  //SysTick_Start(SYSTICK_TIMEOUT_MSEC(1));
-}
-
-//-----------------------------------------------------------------------------
-/// \brief
-///
-/// \descr
-///
-/// \param
-///
-/// \return
-//-----------------------------------------------------------------------------
-void osHwTimerReload(void)
-{
- /* clear the pending systick flag by SW (is not cleared by HW) */
-  //R32_STK_SR->bit.u1CNTIF = 0u;
+  OsSetSysBasepriReg((OS_INT_CAT1_LOWEST_PRIO_LEVEL << (8U - IntPrioBit)));
 }
 
 uint32 osGetHwIntNestingLevel(void)
 {
-  return 0;
+  return 1;
 }
 
 void osDisableHwIntNesting(void)
@@ -253,4 +200,6 @@ void osRestoreSavedIntState(void)
 
 void OsRunCat2Isr(void)
 {
+  /* run ISR */
+  CALL_ISR(SysTickTimer);
 }
