@@ -146,7 +146,7 @@
 #define OS_NUMBER_OF_ALARMS  OS_INVALID_ALARM
 
 #define OS_RESOURCE_BEGIN                                                        typedef enum{
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)                     Name,
+#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)                        Name,
 #define OS_RESOURCE_END                                                          OS_INVALID_RESOURCE}eResourceId;
 
 #define OS_NUMBER_OF_RESOURCE  OS_INVALID_RESOURCE
@@ -192,7 +192,7 @@
 
 
 #define OS_RESOURCE_BEGIN                                                        
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)                     
+#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)                     
 #define OS_RESOURCE_END                                                          
 
 
@@ -228,7 +228,7 @@
 #define OS_ALARM_END
 
 #define OS_RESOURCE_BEGIN
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...) static uint32 AuthorizedTask_##Name[OS_NUMBER_OF_TASKS] = AuthorizedTasks; static OsResourceConfigType OsResource_##Name = {CeilingPrio, OS_INVALID_TASK, &AuthorizedTask_##Name[0]};
+#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)                        static OsResourceConfigType OsResource_##Name = {CeilingPrio, OS_INVALID_TASK, AuthorizedTasks};
 #define OS_RESOURCE_END
 
 #define OS_INTERRUPT_BEGIN                                                       const OsInterruptConfigType IsrLookupTable[] = {
@@ -263,7 +263,7 @@
 #define OS_ALARM_END                                                                };
 
 #define OS_RESOURCE_BEGIN                                                           static const OsResourceConfigType* OsResourcesConfig[OS_NUMBER_OF_RESOURCE]={
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)                        &OsResource_##Name,
+#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)                           &OsResource_##Name,
 #define OS_RESOURCE_END                                                             };
 
 #define OS_INTERRUPT_BEGIN
@@ -311,7 +311,7 @@
 #define OS_ALARM_END
 
 #define OS_RESOURCE_BEGIN                                                         (OsResourceConfigType**)&OsResourcesConfig[0],
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)                     
+#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)                     
 #define OS_RESOURCE_END
 
 #define OS_INTERRUPT_BEGIN
@@ -346,7 +346,7 @@
 #define OS_ALARM_END
 
 #define OS_RESOURCE_BEGIN
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)
+#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)
 #define OS_RESOURCE_END
 
 #define OS_INTERRUPT_BEGIN
@@ -381,7 +381,7 @@
 #define OS_ALARM_END
 
 #define OS_RESOURCE_BEGIN
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)
+#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)
 #define OS_RESOURCE_END
 
 #define OS_INTERRUPT_BEGIN                                                       osVectoredIVT:
@@ -417,7 +417,7 @@
 #define OS_ALARM_END
 
 #define OS_RESOURCE_BEGIN
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)
+#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)
 #define OS_RESOURCE_END
 
 #define OS_INTERRUPT_BEGIN                                                       osLookupIVT:
@@ -453,7 +453,7 @@
 #define OS_ALARM_END
 
 #define OS_RESOURCE_BEGIN
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)
+#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)
 #define OS_RESOURCE_END
 
 #define OS_INTERRUPT_BEGIN

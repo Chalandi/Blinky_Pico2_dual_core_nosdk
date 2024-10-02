@@ -1,4 +1,4 @@
-﻿# ******************************************************************************************
+# ******************************************************************************************
 #   Filename    : Makefile
 #
 #   Author      : Chalandi Amine
@@ -15,13 +15,13 @@
 # Defines
 ############################################################################################
 CORE_FAMILY_LOWER_CASE = $(shell echo $(CORE_FAMILY) | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z]//g')
-PRJ_NAME               = $(CORE_FAMILY_LOWER_CASE)_baremetal_pico2_dual_core_nosdk
-OUTPUT_DIR = ../Output
-OBJ_DIR                = $(OUTPUT_DIR)/$(CORE_FAMILY_LOWER_CASE)_obj
-LD_SCRIPT  = $(SRC_DIR)/Memory_Map.ld
-PIO_OUT_DIR= $(SRC_DIR)/pio
-SRC_DIR    = ../Code
-RTOS       = osek
+PRJ_NAME    = $(CORE_FAMILY_LOWER_CASE)_baremetal_pico2_dual_core_nosdk
+OUTPUT_DIR  = ../Output
+OBJ_DIR     = $(OUTPUT_DIR)/$(CORE_FAMILY_LOWER_CASE)_obj
+LD_SCRIPT   = $(SRC_DIR)/Memory_Map.ld
+PIO_OUT_DIR = $(SRC_DIR)/pio
+SRC_DIR     = ../Code
+RTOS        = osek
 
 ifeq ($(OS),Windows_NT)
     PYTHON     = python
@@ -144,7 +144,7 @@ CPPOPS  = $(OPT)                                        \
 ############################################################################################
 ifeq ($(AS), $(TOOLCHAIN)-as)
   ASOPS =  $(ARCH)       \
-           -alh \
+           -alh          \
            -g
 else
   ASOPS = $(OPT)                                        \
@@ -214,8 +214,8 @@ SRC_FILES := $(SRC_DIR)/Appli/main.c                                         \
              $(SRC_DIR)/Mcal/SysTickTimer/SysTickTimer.c                     \
              $(SRC_DIR)/Startup/Startup.c                                    \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/image_definition_block.c \
-             $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/boot.s \
-             $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/IntVect.c \
+             $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/boot.s                   \
+             $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/IntVect.c                \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/util.s
 
 
@@ -257,13 +257,25 @@ FILES_O := $(addprefix $(OBJ_DIR)/, $(notdir $(addsuffix .o, $(basename $(SRC_FI
 
 PIO_OUTPUT_FILES = $(addprefix $(PIO_OUT_DIR)/, $(notdir $(addsuffix .h, $(basename $(PIO_SRC_FILES)))))
 
-ifeq ($(MAKECMDGOALS),build)
+ifeq ($(MAKECMDGOALS), BUILD_STAGE_2)
 -include $(subst .o,.d,$(FILES_O))
 endif
 
-build : PRE_BUILD  PIO_SRC_GEN  $(OUTPUT_DIR)/$(PRJ_NAME).elf  POST_BUILD
+REBUILD_STAGE_1 : CLEAN PRE_BUILD PIO_SRC_GEN
+REBUILD_STAGE_2 : link
+REBUILD_STAGE_3 : GENERATE POST_BUILD
 
-all : PRE_BUILD  PIO_SRC_GEN  $(OUTPUT_DIR)/$(PRJ_NAME).elf  POST_BUILD
+BUILD_STAGE_1   : PRE_BUILD PIO_SRC_GEN
+BUILD_STAGE_2   : link
+BUILD_STAGE_3   : GENERATE POST_BUILD
+
+############################################################################################
+# Recipes
+############################################################################################
+.PHONY : link
+link : $(OUTPUT_DIR)/$(PRJ_NAME).elf
+	@-echo "" > /dev/null
+
 
 .PHONY : PRE_BUILD
 PRE_BUILD:
@@ -286,8 +298,8 @@ $(PIO_OUT_DIR)/%.h : %.pio
 	@-echo +++ compile pio assembly: $(subst \,/, $<) to $(subst \,/, $@)
 	@$(PIOASM) -v 1  $<  $@
 
-.PHONY : clean
-clean :
+.PHONY : CLEAN
+CLEAN :
 	@-rm -rf $(OUTPUT_DIR) *.o    2>/dev/null || true
 	@-rm -rf $(OUTPUT_DIR) *.hex  2>/dev/null || true
 	@-rm -rf $(OUTPUT_DIR) *.elf  2>/dev/null || true
@@ -321,7 +333,11 @@ $(OBJ_DIR)/%.o : %.cpp
 $(OUTPUT_DIR)/$(PRJ_NAME).elf : $(FILES_O) $(LD_SCRIPT)
 	@-echo +++ link: $(subst \,/,$@)
 	@$(LD) $(LOPS) $(FILES_O) -o $(OUTPUT_DIR)/$(PRJ_NAME).elf
-	@-echo
+
+
+.PHONY : GENERATE
+GENERATE:
+	@$(if $(wildcard $(OUTPUT_DIR)/$(PRJ_NAME).elf), ,$(error Error: Link not succeeded !))
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@$(READELF) -WhS $(OUTPUT_DIR)/$(PRJ_NAME).elf > $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).sym
@@ -334,4 +350,3 @@ $(OUTPUT_DIR)/$(PRJ_NAME).elf : $(FILES_O) $(LD_SCRIPT)
 	@$(OBJCOPY) $(OUTPUT_DIR)/$(PRJ_NAME).elf -O binary $(OUTPUT_DIR)/$(PRJ_NAME).bin
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).uf2
 	@$(PICOTOOL) uf2 convert --quiet $(OUTPUT_DIR)/$(PRJ_NAME).elf $(OUTPUT_DIR)/$(PRJ_NAME).uf2 --family $(PICOTOOL_FAMILY_ID) --abs-block
-

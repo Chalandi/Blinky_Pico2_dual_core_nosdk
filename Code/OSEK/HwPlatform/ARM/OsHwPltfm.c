@@ -83,9 +83,8 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-#if 0
   __attribute__((weak)) extern const uint32 osNbrOfInterrupts;
-  __attribute__((weak)) extern const Isr_t IsrLookupTable[];
+  __attribute__((weak)) extern const OsInterruptConfigType IsrLookupTable[];
   __attribute__((weak)) ISR(Undefined);
 
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();
@@ -113,7 +112,6 @@ void osInitInterrupts(void)
       }
     }
   }
-#endif
 }
 
 //------------------------------------------------------------------------------------------------------------------

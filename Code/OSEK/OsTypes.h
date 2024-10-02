@@ -174,7 +174,7 @@ typedef struct
 {
   const uint32 ResCeilingPrio;
   uint32 CurrentOccupiedTask;
-  const uint32* const AuthorizedTask;
+  const uint32 AuthorizedTask;
 }OsResourceConfigType;
 
 typedef OsAlarmConfigType** OsAlarmBaseRefType;

@@ -35,7 +35,7 @@ OsStatusType OS_GetResource(OsResourceType ResID)
 {
   if(ResID < OS_NUMBER_OF_RESOURCE)
   {
-    if(OCB_Cfg.pRes[ResID]->AuthorizedTask[OCB_Cfg.CurrentTaskIdx] == 1 &&
+    if(((OCB_Cfg.pRes[ResID]->AuthorizedTask & (1ul << OCB_Cfg.CurrentTaskIdx)) != 0) &&
        OCB_Cfg.pRes[ResID]->CurrentOccupiedTask == OS_INVALID_TASK)
     {
       /* The resource is available */
