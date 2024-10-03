@@ -92,7 +92,7 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
       }
 
       /* Call the scheduler */
-      (void)osSched();
+      (void)osSchedule();
 
       return(E_OK);
     }
@@ -156,7 +156,7 @@ OsStatusType OS_TerminateTask(void)
     }
 
     /* Call the scheduler */
-    (void)osSched();
+    (void)osSchedule();
     
     return(E_OK);
   }  
@@ -196,7 +196,7 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
       /* If the succeeding task is identical with the current task, this does not result in multiple requests. 
       The task is not transferred to the suspended state, but will immediately become ready again.*/
 
-      (void)osSched();
+      (void)osSchedule();
     
       return(E_OK);
     }
@@ -241,7 +241,7 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
        OsSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
       }
 
-      (void)osSched();
+      (void)osSchedule();
     
       return(E_OK);
     }

@@ -86,7 +86,7 @@ OsStatusType OS_ReleaseResource(OsResourceType ResID)
       OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio = OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio;
 
       /* Call the scheduler */
-      (void)osSched();
+      (void)osSchedule();
 
       return(E_OK);
     }
@@ -142,7 +142,7 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
         OsSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
 
         /* Call the scheduler */
-        (void)osSched();
+        (void)osSchedule();
       }
     }
     return(E_OK);
@@ -243,7 +243,7 @@ OsStatusType OS_WaitEvent(OsEventMaskType Mask)
       OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = WAITING;
       
       /* Call the scheduler */
-      (void)osSched();  
+      (void)osSchedule();  
     }    
     
     return(E_OK);

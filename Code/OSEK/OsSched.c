@@ -153,7 +153,7 @@ OsStatusType OS_Schedule(void)
 }
 
 //-----------------------------------------------------------------------------
-/// \brief  OsStatusType osSched(void)
+/// \brief  OsStatusType osSchedule(void)
 ///
 /// \descr  os internal management of the scheduler 
 ///         it could be called from task and interrupt level
@@ -162,7 +162,7 @@ OsStatusType OS_Schedule(void)
 ///
 /// \return OsStatusType 
 //-----------------------------------------------------------------------------
-OsStatusType osSched(void)
+OsStatusType osSchedule(void)
 {
   if(OCB_Cfg.CurrentTaskIdx < OS_INTERNAL_TASK_ID                                                  &&
      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0                                        &&
