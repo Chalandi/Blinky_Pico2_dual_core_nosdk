@@ -56,4 +56,6 @@ void OsRunCat2Isr(void);
 void osErrTaskExitWithoutTerminate(void);
 void OsSetIntVectTableAddress(uint32* address);
 
+OsStatusType osSched(void);
+
 #endif

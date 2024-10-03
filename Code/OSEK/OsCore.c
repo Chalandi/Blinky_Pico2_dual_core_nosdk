@@ -112,7 +112,7 @@ void OS_StartOS(OsAppModeType Mode)
     }
         
     /* Call Scheduler */
-    (void)OS_Schedule();
+    (void)osSched();
     
     /* Set the OS running flag */
     OCB_Cfg.OsIsRunning = OS_TRUE;

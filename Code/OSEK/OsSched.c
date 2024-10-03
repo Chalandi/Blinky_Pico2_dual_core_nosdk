@@ -93,9 +93,76 @@ uint32 OsGetHighPrioReadyTaskIdx(const uint32 prio)
 ///
 /// \param  void
 ///
-/// \return void
+/// \return OsStatusType
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_Schedule(void)
+{
+  if(TRUE == OsIsInterruptContext())
+  {
+    osInternalError(E_OS_CALLEVEL);
+  }
+  else if(OCB_Cfg.CurrentTaskIdx < OS_INTERNAL_TASK_ID                                                  &&
+          OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0                                        &&
+          OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
+  {
+    osInternalError(E_OS_RESOURCE);
+  }
+  else
+  {
+    /* Enter the critical section */
+    OS_SuspendAllInterrupts();
+
+    /* Get the high prio task id */
+    OCB_Cfg.HighPrioReadyTaskIdx = OsGetHighPrioReadyTaskIdx((uint32)OsHwSearchForHighPrio());
+
+    /* Exit the critical section */
+    OS_ResumeAllInterrupts();
+
+    /* check if we need to switch the context (Preemption case) */
+    if(OCB_Cfg.pTcb[OCB_Cfg.HighPrioReadyTaskIdx]->Prio > OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio)
+    {
+      if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
+      {
+        /* Call osPostTaskHook */
+        #if(OS_POSTTASKHOOK)
+        osPostTaskHook();
+        #endif
+
+        /* change the state of the current task */
+        OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = READY;
+
+        /* set the current task's ready bit */
+        OsSetTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
+
+        if(OCB_Cfg.OsLockDispatcher == OS_FALSE)
+        {
+          /* Call the dispatcher to change the current context*/
+          osDispatch();
+          return(E_OK);
+        }
+        else if(OCB_Cfg.OsLockDispatcher == OS_TRUE)
+        {
+          /* dispatcher is locked ignore context switch */
+          return(E_OK);
+        }
+      }
+    }
+  }
+
+  return(E_OK);
+}
+
+//-----------------------------------------------------------------------------
+/// \brief  OsStatusType osSched(void)
+///
+/// \descr  os internal management of the scheduler 
+///         it could be called from task and interrupt level
+///
+/// \param  void
+///
+/// \return OsStatusType 
+//-----------------------------------------------------------------------------
+OsStatusType osSched(void)
 {
   if(OCB_Cfg.CurrentTaskIdx < OS_INTERNAL_TASK_ID                                                  &&
      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0                                        &&

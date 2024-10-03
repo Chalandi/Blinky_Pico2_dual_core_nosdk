@@ -25,7 +25,7 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID);
 OsStatusType OS_TerminateTask(void);
 OsStatusType OS_ChainTask(OsTaskType TaskID);
 OsStatusType OS_Schedule(void);
-	
+
 OsStatusType OS_GetTaskID(OsTaskRefType TaskID);
 OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State);
 
