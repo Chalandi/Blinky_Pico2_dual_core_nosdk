@@ -199,6 +199,25 @@ if ((args.gen_folder != None) or (args.process)):
     # Add "RES_SCHEDULER" on top of PrioritiesList
     PrioritiesList.append([OilResources.ResourcesList[OilResources.ResourcesTotalNumber - 1][0], OilResources.ResourcesList[OilResources.ResourcesTotalNumber - 1][1]])
 
+    ##################################################################################################
+    # Calculate interrupt cat1 prio mask
+    ##################################################################################################
+    IntCat1LowPrio  = 0xffffffff
+    IntCat2HighPrio = 0
+    for IntIdx in range(OilInterrupts.InterruptsTotalNumber):
+        IntCatType = OilInterrupts.InterruptsList[IntIdx][1]
+        Intprio    = OilInterrupts.InterruptsList[IntIdx][3]
+        if(IntCatType == '1' and int(Intprio) < IntCat1LowPrio):
+            IntCat1LowPrio = int(Intprio)
+        elif(IntCatType == '2' and int(Intprio) > IntCat2HighPrio):
+            IntCat2HighPrio = int(Intprio)
+    if(IntCat1LowPrio < IntCat2HighPrio):
+        print("Error: The lowest cat1 prio is lower than highest cat2 prio !!!")
+        print(f" IntCat1LowPrio = {IntCat1LowPrio}, IntCat2HighPrio = {IntCat2HighPrio}")
+        quit()
+    else:
+        OilInterrupts.InterruptCat1LowestPrio = IntCat1LowPrio
+
 # Code Generation
 if (args.gen_folder != None):
     OilCodeGen.OsConfigCodeGeneration(args,

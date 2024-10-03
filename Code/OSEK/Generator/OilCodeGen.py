@@ -162,7 +162,7 @@ def OsConfigCodeGeneration(args, OilOs,
             int_nest   = "NOT_NESTED" if OilInterrupts.InterruptsList[VectorDataIdx][4] == "FALSE" else "NESTED"            
             OsGenCfgHeaderFile.write(f"        OS_INTERRUPT_CAT{int_cat}_DEF({int_name}, {int_prio}, {int_nest})  /* Interrupt vector {vector} */\n")
         else:
-            OsGenCfgHeaderFile.write(f"        OS_INTERRUPT_CAT{int_cat}_DEF(Undefined, {int_prio}, {int_nest})  /* Interrupt vector {vector} */\n")        
+            OsGenCfgHeaderFile.write(f"        OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector {vector} */\n")        
  
     OsGenCfgHeaderFile.write("    OS_INTERRUPT_END\n")
     OsGenCfgHeaderFile.write("\n")
@@ -188,6 +188,10 @@ def OsConfigCodeGeneration(args, OilOs,
     OsGenCfgHeaderFile.write(f"    #define OsMaxVectorEntries()       {OilOs.OsMaxVectorEntries }\n")
     OsGenCfgHeaderFile.write(f"    #define OsTickTime()               {OilOs.OsTickTime }\n")
     OsGenCfgHeaderFile.write("\n")
-
+    OsGenCfgHeaderFile.write("  //=============================================================================\n")
+    OsGenCfgHeaderFile.write("  //  Interrupt Mask Configuration\n")
+    OsGenCfgHeaderFile.write("  //=============================================================================\n")
+    OsGenCfgHeaderFile.write(f"  #define OS_INT_CAT1_LOWEST_PRIO_LEVEL     {OilInterrupts.InterruptCat1LowestPrio}\n")
+    OsGenCfgHeaderFile.write("\n")
     OsGenCfgHeaderFile.write("OS_CONFIG_END\n")
     OsGenCfgHeaderFile.close()

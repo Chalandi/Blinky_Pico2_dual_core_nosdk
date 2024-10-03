@@ -114,6 +114,22 @@ CPU RP2350 {
    ISR ISR_001 {
       CATEGORY = 2;
       VectorAddress = 1;
+      Nesting = FALSE;
+      Priority = 6;
+   };
+
+   ISR ISR_010 {
+      CATEGORY = 1;
+      VectorAddress = 10;
+      Nesting = FALSE;
+      Priority = 12;
+   };
+
+   ISR ISR_011 {
+      CATEGORY = 1;
+      VectorAddress = 11;
+      Nesting = FALSE;
+      Priority = 16;
    };
 
 };

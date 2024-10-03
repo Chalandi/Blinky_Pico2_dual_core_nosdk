@@ -5,8 +5,9 @@ from jinja2 import Template
 from tabulate import tabulate
 
 # Globals
-InterruptsTotalNumber = 0
-InterruptsList        = []
+InterruptsTotalNumber   = 0
+InterruptCat1LowestPrio = 0
+InterruptsList          = []
 
 def OilInterruptsParser(args, Oilfile):
     

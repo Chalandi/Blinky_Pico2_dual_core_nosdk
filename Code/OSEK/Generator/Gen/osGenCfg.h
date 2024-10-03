@@ -12,7 +12,7 @@
 //
 // Generator       : OilGenTool
 //
-// Generation Time : 01.10.2024 05:18:06
+// Generation Time : 03.10.2024 22:30:35
 //
 // Description     : Auto-generated OS Configuration file please do not modify it manually !!!
 //
@@ -26,20 +26,20 @@
 //=============================================================================
 /*
   OS:
-  ╒════════╤═════════════════════════════════╕
-  │ Name   │ Properties                      │
-  ╞════════╪═════════════════════════════════╡
-  │ MyOSEK │ OsMulticore        =  TRUE      │
-  │        │ OsStartupHook      =  TRUE      │
-  │        │ OsErrorHook        =  TRUE      │
-  │        │ OsShutdownHook     =  TRUE      │
-  │        │ OsPreTaskHook      =  TRUE      │
-  │        │ OsPostTaskHook     =  TRUE      │
-  │        │ OsStackCheck       =  TRUE      │
-  │        │ OsCpuFrequency     =  16.000000 │
-  │        │ OsMaxVectorEntries =  113       │
-  │        │ OsTickTime         =  1000      │
-  ╘════════╧═════════════════════════════════╛
+  ╒══════════╤═════════════════════════════════╕
+  │ Name     │ Properties                      │
+  ╞══════════╪═════════════════════════════════╡
+  │ SysconOS │ OsMulticore        =  None      │
+  │          │ OsStartupHook      =  TRUE      │
+  │          │ OsErrorHook        =  TRUE      │
+  │          │ OsShutdownHook     =  TRUE      │
+  │          │ OsPreTaskHook      =  TRUE      │
+  │          │ OsPostTaskHook     =  TRUE      │
+  │          │ OsStackCheck       =  TRUE      │
+  │          │ OsCpuFrequency     =  16.000000 │
+  │          │ OsMaxVectorEntries =  113       │
+  │          │ OsTickTime         =  1000      │
+  ╘══════════╧═════════════════════════════════╛
 
   Tasks:
   ╒═══════════════╤════════╤════════════╤════════════╤══════════════╤═════════════╤══════════════╤════════════════════╕
@@ -140,11 +140,15 @@
   ╒═════════╤════════════╤══════════╤════════╤═══════════╕
   │ Name    │   Category │   Vector │   Prio │ Nesting   │
   ╞═════════╪════════════╪══════════╪════════╪═══════════╡
-  │ ISR_000 │          2 │        0 │      0 │ FALSE     │
+  │ ISR_000 │          2 │        0 │      7 │ FALSE     │
   ├─────────┼────────────┼──────────┼────────┼───────────┤
-  │ ISR_001 │          2 │        1 │      0 │ FALSE     │
+  │ ISR_001 │          2 │        1 │      6 │ FALSE     │
+  ├─────────┼────────────┼──────────┼────────┼───────────┤
+  │ ISR_010 │          1 │       10 │     12 │ FALSE     │
+  ├─────────┼────────────┼──────────┼────────┼───────────┤
+  │ ISR_011 │          1 │       11 │     16 │ FALSE     │
   ╘═════════╧════════════╧══════════╧════════╧═══════════╛
-  Total number of used interrupts: 2
+  Total number of used interrupts: 4
   Total number of CPU interrupts : 113
 */
 
@@ -193,8 +197,8 @@ OS_CONFIG_BEGIN
   //  Interrupts Configuration
   //=============================================================================
     OS_INTERRUPT_BEGIN
-        OS_INTERRUPT_CAT2_DEF(ISR_000, 0, NOT_NESTED)  /* Interrupt vector 0 */
-        OS_INTERRUPT_CAT2_DEF(ISR_001, 0, NOT_NESTED)  /* Interrupt vector 1 */
+        OS_INTERRUPT_CAT2_DEF(ISR_000, 7, NOT_NESTED)  /* Interrupt vector 0 */
+        OS_INTERRUPT_CAT2_DEF(ISR_001, 6, NOT_NESTED)  /* Interrupt vector 1 */
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 2 */
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 3 */
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 4 */
@@ -203,8 +207,8 @@ OS_CONFIG_BEGIN
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 7 */
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 8 */
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 9 */
-        OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 10 */
-        OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 11 */
+        OS_INTERRUPT_CAT1_DEF(ISR_010, 12, NOT_NESTED)  /* Interrupt vector 10 */
+        OS_INTERRUPT_CAT1_DEF(ISR_011, 16, NOT_NESTED)  /* Interrupt vector 11 */
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 12 */
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 13 */
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 14 */
@@ -324,5 +328,10 @@ OS_CONFIG_BEGIN
     #define OsCpuFrequency()           16000000
     #define OsMaxVectorEntries()       113
     #define OsTickTime()               1000
+
+  //=============================================================================
+  //  Interrupt Mask Configuration
+  //=============================================================================
+  #define OS_INT_CAT1_LOWEST_PRIO_LEVEL     12
 
 OS_CONFIG_END
