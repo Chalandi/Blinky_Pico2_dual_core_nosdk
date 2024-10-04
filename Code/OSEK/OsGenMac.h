@@ -385,11 +385,10 @@
 #define OS_RESOURCE_END
 
 #define OS_INTERRUPT_BEGIN                                                       osVectoredIVT:
-
 #define OS_INTERRUPT_CAT1_DEF(IsrFunc,Prio,Type)                                 j IsrFunc
 #define OS_INTERRUPT_CAT2_DEF(IsrFunc,Prio,Type)                                 j OsCat2IsrWrapper
 #define OS_INTERRUPT_CATx_DEF(IsrFunc,Prio,Type)                                 j IsrFunc
-#define OS_INTERRUPT_END                                                         .size osInternalVectorTable, .-osInternalVectorTable
+#define OS_INTERRUPT_END                                                         .size osVectoredIVT, .-osVectoredIVT
 
 #define OS_FE_INTERRUPT_BEGIN
 #define OS_FE_INTERRUPT_CAT2_DEF(FeIsrFunc)
@@ -421,11 +420,10 @@
 #define OS_RESOURCE_END
 
 #define OS_INTERRUPT_BEGIN                                                       osLookupIVT:
-
 #define OS_INTERRUPT_CAT1_DEF(IsrFunc,Prio,Type)                                 .word IsrFunc
 #define OS_INTERRUPT_CAT2_DEF(IsrFunc,Prio,Type)                                 .word OsCat2IsrWrapper
 #define OS_INTERRUPT_CATx_DEF(IsrFunc,Prio,Type)                                 .word IsrFunc
-#define OS_INTERRUPT_END                                                         
+#define OS_INTERRUPT_END                                                         .size osLookupIVT, .-osLookupIVT
 
 #define OS_FE_INTERRUPT_BEGIN
 #define OS_FE_INTERRUPT_CAT2_DEF(FeIsrFunc)

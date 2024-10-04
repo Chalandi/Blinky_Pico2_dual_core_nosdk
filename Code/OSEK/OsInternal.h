@@ -45,9 +45,6 @@ void OsKernelError(OsStatusType err);
 uint32 osGetMaximumStackUsage(uint32 TaskId);
 
 void osInitInterrupts(void);
-void osMaskNestedIntPrio(uint32 PrioLevel);
-void osMaskNonNestedIntPrio(uint32 PrioLevel);
-
 uint32 OsDispatcher(uint32 StackPtr);
 void OsStoreStackPointer(uint32 StackPtrValue);
 uint32 OsGetSavedStackPointer(void);
@@ -57,5 +54,6 @@ void osErrTaskExitWithoutTerminate(void);
 void OsSetIntVectTableAddress(uint32* address);
 
 OsStatusType osSchedule(void);
+uint32 osGetActiveInterruptVectorId(void);
 
 #endif

@@ -1,5 +1,6 @@
 
 SRC_FILES += $(SRC_DIR)/OSEK/OsAlarm.c
+SRC_FILES += $(SRC_DIR)/OSEK/OsCat2Int.c
 SRC_FILES += $(SRC_DIR)/OSEK/OsCore.c
 SRC_FILES += $(SRC_DIR)/OSEK/OsEvt.c
 SRC_FILES += $(SRC_DIR)/OSEK/OsSched.c

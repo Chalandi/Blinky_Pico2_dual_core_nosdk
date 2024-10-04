@@ -146,39 +146,6 @@ uint32 osGetInterruptPriorityMask(void)
   return((level >> (8U - IntPrioBit)));
 }
 
-//------------------------------------------------------------------------------------------------------------------
-/// \brief  
-///
-/// \descr  
-///
-/// \param  void
-///
-/// \return void
-//------------------------------------------------------------------------------------------------------------------
-void osMaskNestedIntPrio(uint32 PrioLevel)
-{
- /* mask the category2 under the current nested priority */
-  uint32 IntPrioBit = OsHwGetInterruptPrioBits();
-  OsSetSysBasepriReg((PrioLevel << (8U - IntPrioBit)));
-}
-
-//------------------------------------------------------------------------------------------------------------------
-/// \brief  
-///
-/// \descr  
-///
-/// \param  void
-///
-/// \return void
-//------------------------------------------------------------------------------------------------------------------
-void osMaskNonNestedIntPrio(uint32 PrioLevel)
-{
-  (void)PrioLevel;
-  uint32 IntPrioBit = OsHwGetInterruptPrioBits();
-  /* mask the category2 non nested interrupts */
-  OsSetSysBasepriReg((OS_INT_CAT1_LOWEST_PRIO_LEVEL << (8U - IntPrioBit)));
-}
-
 uint32 osGetHwIntNestingLevel(void)
 {
   return 1;
@@ -196,8 +163,23 @@ void osRestoreSavedIntState(void)
 {
 }
 
+#if 0
 void OsRunCat2Isr(void)
 {
   /* run ISR */
   CALL_ISR(SysTickTimer);
+}
+#endif
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  osGetActiveInterruptVectorId
+///
+/// \descr  This function returns the id of the active interrupt vector.
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
+uint32 osGetActiveInterruptVectorId(void)
+{
+  return(GET_ICSR_VECTACTIVE());
 }

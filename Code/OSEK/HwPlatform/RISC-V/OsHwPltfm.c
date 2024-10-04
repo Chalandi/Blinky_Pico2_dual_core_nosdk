@@ -223,3 +223,17 @@ void osRestoreSavedIntState(void)
 {
   riscv_write_csr(RVCSR_MSTATUS_OFFSET, OsHwPltfmSavedIntState);
 }
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  osGetActiveInterruptVectorId
+///
+/// \descr  This function returns the id of the active interrupt vector.
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
+uint32 osGetActiveInterruptVectorId(void)
+{
+  return((riscv_read_set_csr(RVCSR_MEINEXT_OFFSET, 1ul))>>2);
+}
