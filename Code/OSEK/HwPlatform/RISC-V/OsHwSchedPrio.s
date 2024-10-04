@@ -31,7 +31,7 @@
 .extern OsHwSchedPrioReg
 .extern __os_sw_clz
 
-.equ osNoReadyTaskIsFound, 0xA0A0F5F5UL
+.equ osNoReadyTaskWasFound, 0xA0A0F5F5UL
 
 OsHwSearchForHighPrio:
                        addi sp, sp, -4
@@ -66,7 +66,7 @@ OsHwSearchForHighPrio:
                        addi a1, a1, -4
                        addi a3, a3, -4
                        bgeu a3, zero, .L_ContinueSearching
-                       la a0, osNoReadyTaskIsFound
+                       la a0, osNoReadyTaskWasFound
                        lw ra, 0(sp)
                        addi sp, sp, 4
                        ret

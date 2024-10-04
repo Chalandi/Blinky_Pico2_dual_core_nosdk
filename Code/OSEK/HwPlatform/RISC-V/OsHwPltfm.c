@@ -22,12 +22,15 @@
 //=========================================================================================
 // Functions Prototype
 //=========================================================================================
-ISR(SysTickTimer);
+
 
 //=========================================================================================
 // Globals
 //=========================================================================================
 volatile uint32 OsHwPltfmSavedIntState = 0;
+
+static uint16 osInterrupt_reg_meiea_window[32] = {0};
+static uint16 osInterrupt_reg_meipra_window[32] = {0};
 
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  OsIsInterruptContext
@@ -52,11 +55,22 @@ boolean OsIsInterruptContext(void)
 ///
 /// \return
 //-----------------------------------------------------------------------------
+boolean osIsInterruptDisabled(void)
+{
+  return((((riscv_read_csr(RVCSR_MSTATUS_OFFSET) >> 3) & 0x01) == 0) ? TRUE : FALSE);
+}
+
+//-----------------------------------------------------------------------------
+/// \brief
+///
+/// \descr
+///
+/// \param
+///
+/// \return
+//-----------------------------------------------------------------------------
 void osHwTimerInit(void)
 {
-  /* enable machine timer interrupt */
-  riscv_set_csr(RVCSR_MIE_OFFSET, RVCSR_MIE_MTIE_BITS);
-
   /* configure machine timer to use 150 MHz */
   HW_PER_SIO->MTIME_CTRL.bit.FULLSPEED = 1;
 }
@@ -96,7 +110,7 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  osInitInterrupts
 ///
-/// \descr  Init the cat2 interrupts
+/// \descr  Init the cat1 and cat2 interrupts
 ///
 /// \param  void
 ///
@@ -104,7 +118,41 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-  /* driver for Xh3irq: Hazard3 interrupt controller */
+  extern const uint32 osNbrOfInterrupts;
+  extern const OsInterruptConfigType IsrLookupTable[];
+  ISR(Undefined);
+
+  for (uint32 InterruptIndex = 0; InterruptIndex < osNbrOfInterrupts; InterruptIndex++)
+  {
+    if (IsrLookupTable[InterruptIndex].IsrFunc != pISR(Undefined))
+    {
+      /* enable the interrupt */
+      const uint32 meiea_window_bit = InterruptIndex % 16;
+      const uint32 meiea_window_idx = InterruptIndex / 16;
+
+      osInterrupt_reg_meiea_window[meiea_window_idx] |= (1 << meiea_window_bit);
+
+      /* set prio */
+      const uint32 meipra_window_bit = InterruptIndex % 4;
+      const uint32 meipra_window_idx = InterruptIndex / 4;
+
+      osInterrupt_reg_meipra_window[meipra_window_idx] |= (IsrLookupTable[InterruptIndex].Prio << (4 * meipra_window_bit));
+    }
+  }
+
+  /* configure the Hazard3 interrupt controller (Xh3irq) */
+  for(uint8 idx = 0; idx <32; idx++)
+  {
+    const uint32 meiea_val  = (osInterrupt_reg_meiea_window[idx] << 16)  | idx;
+    const uint32 meipra_val = (osInterrupt_reg_meipra_window[idx] << 16) | idx;
+
+    riscv_write_csr(RVCSR_MEIEA_OFFSET, meiea_val);
+    riscv_write_csr(RVCSR_MEIPRA_OFFSET, meipra_val);
+  }
+
+  /* enable external interrupts */
+  riscv_set_csr(RVCSR_MIE_OFFSET, RVCSR_MIE_MEIE_BITS);
+
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -118,8 +166,8 @@ void osInitInterrupts(void)
 //------------------------------------------------------------------------------------------------------------------
 void osSetInterruptPriorityMask(uint32 level)
 {
-  (void)level;
-  //PFIC->ITHRESDR.reg = (uint32)level << 4;
+  uint32 new_meinext = (osGetInterruptPriorityMask() & ~(0x1ful << 16)) | (level << 16);
+  riscv_write_csr(RVCSR_MEINEXT_OFFSET, new_meinext);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -133,38 +181,7 @@ void osSetInterruptPriorityMask(uint32 level)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osGetInterruptPriorityMask(void)
 {
-  //return(PFIC->ITHRESDR.reg >> 4);
-  return 0;
-}
-
-//------------------------------------------------------------------------------------------------------------------
-/// \brief  OsRunCat2Isr
-///
-/// \descr  This function is the entry point of all category 2 interrupts
-///
-/// \param  void
-///
-/// \return void
-//------------------------------------------------------------------------------------------------------------------
-void OsRunCat2Isr(void)
-{
-  uint32_t mcause = riscv_read_csr(RVCSR_MCAUSE_OFFSET);
-
-  if(((mcause >> 31) == 1ul) && ((mcause & 0x0f) == 7ul))
-  {
-    /* machine timer interrupt */
-    CALL_ISR(SysTickTimer);
-  }
-  else if(((mcause >> 31) == 1ul) && ((mcause & 0x0f) == 11ul))
-  {
-    /* external interrupt from Xh3irq (Hazard3 interrupt controller) */
-    
-  }
-  else
-  {
-    /* unhandled interrupt type */
-    OsKernelError(E_OS_KERNEL_PANIC);
-  }
+  return ((riscv_read_csr(RVCSR_MEINEXT_OFFSET) >> 16) & 0x1ful);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -221,5 +238,5 @@ void osRestoreSavedIntState(void)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osGetActiveInterruptVectorId(void)
 {
-  return((riscv_read_set_csr(RVCSR_MEINEXT_OFFSET, 1ul))>>2);
+  return((riscv_read_set_csr(RVCSR_MEINEXT_OFFSET, 1ul)) >> 2);
 }

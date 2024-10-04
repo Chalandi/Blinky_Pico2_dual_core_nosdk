@@ -23,6 +23,7 @@
 boolean OsIsInterruptContext(void);
 boolean OsIsInterruptEILevelContext(void);
 boolean OsIsCat2IntContext(void);
+boolean osIsInterruptDisabled(void);
 
 void osErrorHook(OsStatusType Error);
 void osPreTaskHook(void);

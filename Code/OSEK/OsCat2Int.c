@@ -33,7 +33,7 @@
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
- __attribute__((weak)) void OsRunCat2Isr(void)
+ void OsRunCat2Isr(void)
 {
   /* get the active interrupt vector id */
   const uint32 IntId = osGetActiveInterruptVectorId();
@@ -63,7 +63,7 @@
 void OsIncNestingDepthLevel(void)
 {
   /* called by the OS with interrupt disabled, no need to lock the internal resource */
-  if(0 == OsGetSysPrimaskReg())
+  if(0 == osIsInterruptDisabled())
     OsKernelError(E_OS_ENABLEDINT);
 
   OCB_Cfg.OsInterruptNestingDepth++;
@@ -84,7 +84,7 @@ void OsIncNestingDepthLevel(void)
 void OsDecNestingDepthLevel(void)
 {
   /* called by the OS with interrupt disabled, no need to lock the internal resource */
-  if(0 == OsGetSysPrimaskReg())
+  if(0 == osIsInterruptDisabled())
     OsKernelError(E_OS_ENABLEDINT);
 
   OCB_Cfg.OsInterruptNestingDepth--;

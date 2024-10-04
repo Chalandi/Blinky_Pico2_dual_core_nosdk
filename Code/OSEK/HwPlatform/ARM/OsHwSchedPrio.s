@@ -24,7 +24,7 @@
 .extern OsSchedPrioTypeSize
 .extern OsHwSchedPrioReg
 
-.equ osNoReadyTaskIsFound, 0xA0A0F5F5UL
+.equ osNoReadyTaskWasFound, 0xA0A0F5F5UL
 
 OsHwSearchForHighPrio: 
                        push {r4-r7,lr}
@@ -43,7 +43,7 @@ __ContinueSearching:
                        add r7,r7, #-4
                        cmp r7, #0
                        bpl __ContinueSearching
-                       ldr r0, =osNoReadyTaskIsFound
+                       ldr r0, =osNoReadyTaskWasFound
                        pop {r4-r7,pc}
 __ReadyTaskFound:       
                        lsr r7, r7, #2

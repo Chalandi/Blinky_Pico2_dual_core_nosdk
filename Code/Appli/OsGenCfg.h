@@ -49,6 +49,7 @@ OS_CONFIG_BEGIN
   //=============================================================================
 
   OS_INTERRUPT_BEGIN
+#ifdef CORE_FAMILY_ARM
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Reserved                */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Reserved                */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* NMI                     */
@@ -65,6 +66,7 @@ OS_CONFIG_BEGIN
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Reserved                */
     OS_INTERRUPT_CAT1_DEF(OsDispatchHandler, 4, NESTED)  /* OsDispatchHandler       */
     OS_INTERRUPT_CAT2_DEF(SysTickTimer, 4, NOT_NESTED)  /* OsCat2IsrWrapper        */
+#endif
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* TIMER0_IRQ_0_IRQn       */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* TIMER0_IRQ_1_IRQn       */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* TIMER0_IRQ_2_IRQn       */
@@ -94,7 +96,11 @@ OS_CONFIG_BEGIN
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* SIO_IRQ_BELL_IRQn       */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* SIO_IRQ_FIFO_NS_IRQn    */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* SIO_IRQ_BELL_NS_IRQn    */
+#ifdef CORE_FAMILY_ARM
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* SIO_IRQ_MTIMECMP_IRQn   */
+#else
+    OS_INTERRUPT_CAT2_DEF(SysTickTimer, 10, NOT_NESTED)  /* SIO_IRQ_MTIMECMP_IRQn   */
+#endif
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* CLOCKS_IRQ_IRQn         */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* SPI0_IRQ_IRQn           */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* SPI1_IRQ_IRQn           */

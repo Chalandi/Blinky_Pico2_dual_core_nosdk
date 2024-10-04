@@ -32,7 +32,7 @@ static uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit);
 //------------------------------------------------------------------------------------------------------------------
 // Globals
 //------------------------------------------------------------------------------------------------------------------
-uint32 osSavedIntState = 0;
+volatile uint32 OsHwPltfmSavedIntState = 0;
 
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  OsIsInterruptContext
@@ -46,6 +46,20 @@ uint32 osSavedIntState = 0;
 boolean OsIsInterruptContext(void)
 {
   return((GET_ICSR_VECTACTIVE() == 0) ? FALSE : TRUE);
+}
+
+//-----------------------------------------------------------------------------
+/// \brief
+///
+/// \descr
+///
+/// \param
+///
+/// \return
+//-----------------------------------------------------------------------------
+boolean osIsInterruptDisabled(void)
+{
+  return(OsGetSysPrimaskReg());
 }
 
 //-----------------------------------------------------------------------------
@@ -101,9 +115,9 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-  __attribute__((weak)) extern const uint32 osNbrOfInterrupts;
-  __attribute__((weak)) extern const OsInterruptConfigType IsrLookupTable[];
-  __attribute__((weak)) ISR(Undefined);
+  extern const uint32 osNbrOfInterrupts;
+  extern const OsInterruptConfigType IsrLookupTable[];
+  ISR(Undefined);
 
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();
 
@@ -205,7 +219,7 @@ static uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit)
 //------------------------------------------------------------------------------------------------------------------
 void osSaveAndDisableIntState(void)
 {
-  osSavedIntState = OsGetSysPrimaskReg();
+  OsHwPltfmSavedIntState = OsGetSysPrimaskReg();
   DISABLE_INTERRUPTS();
 }
 
@@ -220,7 +234,7 @@ void osSaveAndDisableIntState(void)
 //------------------------------------------------------------------------------------------------------------------
 void osRestoreSavedIntState(void)
 {
-  if(osSavedIntState)
+  if(OsHwPltfmSavedIntState)
   {
     DISABLE_INTERRUPTS();
   }
