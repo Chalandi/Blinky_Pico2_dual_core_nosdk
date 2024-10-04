@@ -262,7 +262,27 @@ OsGetSysBasepriReg:
  dsb
  bx lr
 
+//-----------------------------------------------------------------------------------------------------------------
+// \brief  OsGetSysPrimaskReg : uint32 OsGetSysPrimaskReg(void)
+//
+// \descr  get the system primask register
+//
+// \param  void
+//
+// \return uint32 primask value
+//-----------------------------------------------------------------------------------------------------------------
+.thumb_func
+.section ".text"
+.align 4
+.globl  OsGetSysPrimaskReg
+.type   OsGetSysPrimaskReg, % function
 
+OsGetSysPrimaskReg:
+
+ mrs r0, primask
+ isb
+ dsb
+ bx lr
  
 
 //-----------------------------------------------------------------------------------------------------------------

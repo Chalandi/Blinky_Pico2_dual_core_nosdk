@@ -88,7 +88,8 @@ typedef enum
   E_OS_SYS_API_ERROR         = 23,
   E_OS_SYS_ALARM_MANAGEMENT  = 24,
   E_OS_SYS_WARNING           = 25,
-  E_OS_KERNEL_PANIC          = 26
+  E_OS_KERNEL_PANIC          = 26,
+  E_OS_ENABLEDINT            = 27
 }OsStatusType;
 
 typedef enum

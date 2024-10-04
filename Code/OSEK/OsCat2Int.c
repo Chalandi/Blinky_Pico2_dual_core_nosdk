@@ -62,6 +62,10 @@
 //------------------------------------------------------------------------------------------------------------------
 void OsIncNestingDepthLevel(void)
 {
+  /* called by the OS with interrupt disabled, no need to lock the internal resource */
+  if(0 == OsGetSysPrimaskReg())
+    OsKernelError(E_OS_ENABLEDINT);
+
   OCB_Cfg.OsInterruptNestingDepth++;
 
   if(OCB_Cfg.OsInterruptNestingDepth >= OS_INTERRUPT_NESTING_DEPTH_LEVEL)
@@ -79,7 +83,14 @@ void OsIncNestingDepthLevel(void)
 //------------------------------------------------------------------------------------------------------------------
 void OsDecNestingDepthLevel(void)
 {
+  /* called by the OS with interrupt disabled, no need to lock the internal resource */
+  if(0 == OsGetSysPrimaskReg())
+    OsKernelError(E_OS_ENABLEDINT);
+
   OCB_Cfg.OsInterruptNestingDepth--;
+
+  if(OCB_Cfg.OsInterruptNestingDepth >= OS_INTERRUPT_NESTING_DEPTH_LEVEL)
+    OsKernelError(E_OS_KERNEL_PANIC);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -93,7 +104,15 @@ void OsDecNestingDepthLevel(void)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osGetIntNestingLevel(void)
 {
-  return OCB_Cfg.OsInterruptNestingDepth;
+  uint32 osInterruptNestingDepth = 0;
+
+  /* might or might not be called durring interrupt nesting */
+
+  osSaveAndDisableIntState();
+  osInterruptNestingDepth = OCB_Cfg.OsInterruptNestingDepth;
+  osRestoreSavedIntState();
+
+  return osInterruptNestingDepth;
 }
 
 //------------------------------------------------------------------------------------------------------------------

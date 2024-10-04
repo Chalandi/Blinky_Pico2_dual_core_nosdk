@@ -7,17 +7,32 @@
 // 
 // Date        : 27.12.2017
 // 
-// Description : Hardware Platform definition for ARM Cortex-M4
+// Description : Hardware Platform definition for ARM Cortex-M33
 // 
 // *****************************************************************************
 
+//------------------------------------------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------------------------------------------
 #include"OsTypes.h"
 #include"OsHwPltfm.h"
 #include"OsInternal.h"
 #include"OsTcb.h"
 
-#define USE_OS_PRIO
-uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit);
+//------------------------------------------------------------------------------------------------------------------
+// Defines
+//------------------------------------------------------------------------------------------------------------------
+#define OS_REMAP_ARM_INTERRUPT_PRIO
+
+//------------------------------------------------------------------------------------------------------------------
+// Static functions prototypes
+//------------------------------------------------------------------------------------------------------------------
+static uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit);
+
+//------------------------------------------------------------------------------------------------------------------
+// Globals
+//------------------------------------------------------------------------------------------------------------------
+uint32 osSavedIntState = 0;
 
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  OsIsInterruptContext
@@ -164,12 +179,12 @@ uint32 osGetInterruptPriorityMask(void)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit)
+static uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit)
 {
-#ifdef USE_OS_PRIO
+#ifdef OS_REMAP_ARM_INTERRUPT_PRIO
   /* note: remap the level prio: ARM is using lower value for highest prio 
      contrary to the OS which uses lower value for lower prio */
-  if(level > ((1ul << IntPrioBit) -1))
+  if(level > ((1ul << IntPrioBit) - 1))
   {
     level = (1ul << IntPrioBit) - 1;
   }
@@ -190,19 +205,31 @@ uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit)
 //------------------------------------------------------------------------------------------------------------------
 void osSaveAndDisableIntState(void)
 {
+  osSavedIntState = OsGetSysPrimaskReg();
+  DISABLE_INTERRUPTS();
 }
 
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
 void osRestoreSavedIntState(void)
 {
+  if(osSavedIntState)
+  {
+    DISABLE_INTERRUPTS();
+  }
+  else
+  {
+    ENABLE_INTERRUPTS();
+  }
 }
 
-#if 0
-void OsRunCat2Isr(void)
-{
-  /* run ISR */
-  CALL_ISR(SysTickTimer);
-}
-#endif
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  osGetActiveInterruptVectorId
 ///

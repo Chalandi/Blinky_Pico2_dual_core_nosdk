@@ -55,8 +55,7 @@ void OsCatchAllCpuExceptions(void);
 void OsIsr_SysTickTimerFunc(void);
 boolean OsIsInterruptContext(void);
 void osInitInterrupts(void);
-//void osMaskNestedIntPrio(void);
-//void osMaskNonNestedIntPrio(void);
+uint32 OsGetSysPrimaskReg(void);
 void OsIsr_FeUndefinedFunc(void);
 void OsRunCat2Isr(void);
 #endif
