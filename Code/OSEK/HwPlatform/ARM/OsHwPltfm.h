@@ -24,17 +24,20 @@
 #define SCB_ICSR             0xE000ED04UL
 #define SET_PENDSV()         (*(volatile uint32*)(SCB_ICSR)) |= 1UL<<28
 #define CLEAR_PENDSV()       (*(volatile uint32*)(SCB_ICSR)) &= ~(1UL<<28)
-#define osDispatch()         SET_PENDSV(); __asm("DSB"); __asm("NOP")
-
-#define ENABLE_INTERRUPTS()       __asm("CPSIE I")
-#define DISABLE_INTERRUPTS()      __asm("CPSID I")
-
 #define GET_ICSR_VECTACTIVE()   ((*(volatile uint32*)(SCB_ICSR)) & (uint32)0x1FUL)
 
 #define NVIC_ISERx ((volatile uint32 *)(0xE000E100UL))
 #define NVIC_IPRx  ((volatile uint8 *) (0xE000E400UL))
 #define SCB_SHPRx  ((volatile uint8 *) (0xE000ED18UL))
 #define NVIC_ISPRx ((volatile uint8 *) (0xE000E200UL))
+
+
+#define osDispatch()         SET_PENDSV(); __asm("DSB"); __asm("NOP")
+
+#define ENABLE_INTERRUPTS()       __asm("CPSIE I")
+#define DISABLE_INTERRUPTS()      __asm("CPSID I")
+
+#define OS_INTERRUPT_NESTING_DEPTH_LEVEL  8
 
 //=========================================================================================
 // SYSTICK
@@ -50,8 +53,6 @@ void osRestoreSavedIntState(void);
 void osSaveAndDisableIntState(void);
 void OsCatchAllCpuExceptions(void);
 void OsIsr_SysTickTimerFunc(void);
-uint32 osGetHwIntNestingLevel(void);
-void osDisableHwIntNesting(void);
 boolean OsIsInterruptContext(void);
 void osInitInterrupts(void);
 //void osMaskNestedIntPrio(void);

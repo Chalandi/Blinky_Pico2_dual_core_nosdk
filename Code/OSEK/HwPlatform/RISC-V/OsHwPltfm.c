@@ -52,7 +52,7 @@ boolean OsIsInterruptContext(void)
 ///
 /// \return uint32 current nesting level
 //------------------------------------------------------------------------------------------------------------------
-uint32 osGetHwIntNestingLevel(void)
+uint32 osGetIntNestingLevel(void)
 {
   return 1;
 }

@@ -325,7 +325,7 @@
 #define OS_FE_INTERRUPT_END  
 
 #define OS_MULTICORE_END
-#define OS_CONFIG_END                                                             0,0,OS_INVALID_TASK,0,0,0,0,0,0,0,0,{0}};
+#define OS_CONFIG_END                                                             0,0,OS_INVALID_TASK,0,0,0,0,0,0,0,0,{0},{0}};
 
 #elif defined(OS_GEN_LINKER_SCRIPT)
 

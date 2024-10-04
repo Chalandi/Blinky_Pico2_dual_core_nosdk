@@ -55,5 +55,10 @@ void OsSetIntVectTableAddress(uint32* address);
 
 OsStatusType osSchedule(void);
 uint32 osGetActiveInterruptVectorId(void);
+void OsIncNestingDepthLevel(void);
+void OsDecNestingDepthLevel(void);
+uint32 osGetIntNestingLevel(void);
+void osDisableIntNesting(void);
+void osEnableIntNesting(void);
 
 #endif

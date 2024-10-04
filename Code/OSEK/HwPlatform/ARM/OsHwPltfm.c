@@ -16,6 +16,9 @@
 #include"OsInternal.h"
 #include"OsTcb.h"
 
+#define USE_OS_PRIO
+uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit);
+
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  OsIsInterruptContext
 ///
@@ -96,12 +99,12 @@ void osInitInterrupts(void)
       if((InterruptIndex == 4U) || (InterruptIndex == 5U)  || (InterruptIndex == 6U) || (InterruptIndex == 11U) || (InterruptIndex == 14U) || (InterruptIndex == 15U))
       {
         /* set the system handler priority level */
-        SCB_SHPRx[InterruptIndex - 4U] = ((uint8)IsrLookupTable[InterruptIndex].Prio << (8U - IntPrioBit));
+        SCB_SHPRx[InterruptIndex - 4U] = ((uint8)osRemapOsPriorityValue(IsrLookupTable[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
       }
       else if(InterruptIndex > 15U)
       {
         /* set the NVIC interrupt priority level */
-        NVIC_IPRx[InterruptIndex - 16U] = ((uint8)IsrLookupTable[InterruptIndex].Prio << (8U - IntPrioBit));
+        NVIC_IPRx[InterruptIndex - 16U] = ((uint8)osRemapOsPriorityValue(IsrLookupTable[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
 
         /* enable the NVIC interrupt */
         NVIC_ISERx[(InterruptIndex - 16U) / 32U] = (1UL << ((InterruptIndex - 16U) % 32U));
@@ -126,6 +129,9 @@ void osInitInterrupts(void)
 void osSetInterruptPriorityMask(uint32 level)
 {
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();
+
+  level = osRemapOsPriorityValue(level, IntPrioBit);
+
   OsSetSysBasepriReg((level << (8U - IntPrioBit)));
 }
 
@@ -142,19 +148,46 @@ uint32 osGetInterruptPriorityMask(void)
 {
   uint32 level = 0;
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();
+
   OsGetSysBasepriReg((uint32*)&level);
-  return((level >> (8U - IntPrioBit)));
+  level >>= (8U - IntPrioBit);
+
+  return(osRemapOsPriorityValue(level, IntPrioBit));
 }
 
-uint32 osGetHwIntNestingLevel(void)
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
+uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit)
 {
-  return 1;
+#ifdef USE_OS_PRIO
+  /* note: remap the level prio: ARM is using lower value for highest prio 
+     contrary to the OS which uses lower value for lower prio */
+  if(level > ((1ul << IntPrioBit) -1))
+  {
+    level = (1ul << IntPrioBit) - 1;
+  }
+
+  level = ((1ul << IntPrioBit) - 1) - level;
+#endif
+  return(level);
 }
 
-void osDisableHwIntNesting(void)
-{
-}
-
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
 void osSaveAndDisableIntState(void)
 {
 }

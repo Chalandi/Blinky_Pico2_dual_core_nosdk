@@ -27,7 +27,7 @@
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  OsRunCat2Isr
 ///
-/// \descr  This function is the entry point of all category 2 interrupts (PLIC).
+/// \descr  This function is the entry point of all category 2 interrupts
 ///
 /// \param  void
 ///
@@ -40,13 +40,86 @@
 
   if(IsrLookupTable[IntId].type == NOT_NESTED)
   {
-    /* disable the nesting of the current interrupt priority level (Cat1 interrupts will kept unmasked) */
+    /* disable the nesting of the current interrupt priority level but keep it enabled for category 1 interrupts */
     osSetInterruptPriorityMask(OS_INT_CAT1_LOWEST_PRIO_LEVEL);
   }
 
-  /* enable global interrupt flag */
-  ENABLE_INTERRUPTS();
+  /* enable interrupt nesting before calling the ISR */
+  osEnableIntNesting();
 
-  /* call the interrupt service routine */
+  /* call the appropriate interrupt service routine */
   IsrLookupTable[IntId].IsrFunc();
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
+void OsIncNestingDepthLevel(void)
+{
+  OCB_Cfg.OsInterruptNestingDepth++;
+
+  if(OCB_Cfg.OsInterruptNestingDepth >= OS_INTERRUPT_NESTING_DEPTH_LEVEL)
+    OsKernelError(E_OS_KERNEL_PANIC);
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
+void OsDecNestingDepthLevel(void)
+{
+  OCB_Cfg.OsInterruptNestingDepth--;
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
+ __attribute__((weak)) uint32 osGetIntNestingLevel(void)
+{
+  return OCB_Cfg.OsInterruptNestingDepth;
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
+void osDisableIntNesting(void)
+{
+  DISABLE_INTERRUPTS();
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  void
+///
+/// \return void
+//------------------------------------------------------------------------------------------------------------------
+void osEnableIntNesting(void)
+{
+  ENABLE_INTERRUPTS();
 }

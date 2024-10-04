@@ -68,6 +68,8 @@ OsDispatchHandler:
 .extern OsRunCat2Isr
 .extern OsGetSavedStackPointer
 .extern OsIntCallDispatch
+.extern OsIncNestingDepthLevel
+.extern OsDecNestingDepthLevel
 
 OsCat2IsrWrapper:
 
@@ -76,12 +78,14 @@ OsCat2IsrWrapper:
   tst lr, #0x10
   it eq
   vpusheq {S16-S31}
+  bl.w OsIncNestingDepthLevel
   mov r0,r13
   bl.w OsStoreStackPointer
   bl.w OsRunCat2Isr
   bl.w OsGetSavedStackPointer
   bl.w OsIntCallDispatch
   mov r13,r0
+  bl.w OsDecNestingDepthLevel
   pop {r4 - r11, lr}
   tst lr, #0x10
   it eq

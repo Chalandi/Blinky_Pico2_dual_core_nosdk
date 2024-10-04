@@ -64,7 +64,7 @@ OS_CONFIG_BEGIN
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Reserved                */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Reserved                */
     OS_INTERRUPT_CAT1_DEF(OsDispatchHandler, 4, NESTED)  /* OsDispatchHandler       */
-    OS_INTERRUPT_CAT2_DEF(SysTickTimer, 4, NESTED)  /* OsCat2IsrWrapper        */
+    OS_INTERRUPT_CAT2_DEF(SysTickTimer, 4, NOT_NESTED)  /* OsCat2IsrWrapper        */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* TIMER0_IRQ_0_IRQn       */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* TIMER0_IRQ_1_IRQn       */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* TIMER0_IRQ_2_IRQn       */
@@ -139,7 +139,7 @@ OS_CONFIG_BEGIN
   //=============================================================================
   //  Interrupt Mask Configuration
   //=============================================================================
-  #define OS_INT_CAT1_LOWEST_PRIO_LEVEL       8UL
+  #define OS_INT_CAT1_LOWEST_PRIO_LEVEL       7UL
 
 
 OS_CONFIG_END

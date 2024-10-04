@@ -282,10 +282,13 @@ ISR(SysTickTimer)
 void OsStoreStackPointer(uint32 StackPtrValue)
 {
   /* get the interrupt nesting level */
-  const uint32 OsInterruptNestingDepth = osGetHwIntNestingLevel();
+  const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
 
   /* save the interrupt nesting level stack pointer */
   OCB_Cfg.OsIntNestSavedStackPointer[OsInterruptNestingDepth - 1u] = StackPtrValue;
+
+  /* save the interrupt nesting level priority */
+  OCB_Cfg.OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u] = osGetInterruptPriorityMask();
 
   /* store the preempted task context only in nested level 1,
      the other nesting interrupts will use the current stack */
@@ -319,7 +322,7 @@ void OsStoreStackPointer(uint32 StackPtrValue)
 uint32 OsGetSavedStackPointer(void)
 {
   /* get the interrupt nesting level */
-  const uint32 OsInterruptNestingDepth = osGetHwIntNestingLevel();
+  const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
 
   if(OsInterruptNestingDepth == 1u)
   {
@@ -350,12 +353,15 @@ uint32 OsGetSavedStackPointer(void)
 uint32 OsIntCallDispatch(uint32 StackPtr)
 {
   /* get the interrupt nesting level */
-  const uint32 OsInterruptNestingDepth = osGetHwIntNestingLevel();
+  const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
+
+  /* restore the interrupt nesting priority level */
+  osSetInterruptPriorityMask(OCB_Cfg.OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u]);
 
   if(OsInterruptNestingDepth == 1u)
   {
     /* Disable the Hw nesting */
-    osDisableHwIntNesting();
+    osDisableIntNesting();
 
     /* Reset the flag */
     OCB_Cfg.OsCat2InterruptLevel = 0;

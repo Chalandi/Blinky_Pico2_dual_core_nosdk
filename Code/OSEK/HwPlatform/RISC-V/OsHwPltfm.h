@@ -35,16 +35,7 @@
 #define ENABLE_INTERRUPTS()       riscv_set_csr(RVCSR_MSTATUS_OFFSET, RVCSR_MSTATUS_MIE_BITS)
 #define DISABLE_INTERRUPTS()      riscv_clear_csr(RVCSR_MSTATUS_OFFSET, RVCSR_MSTATUS_MIE_BITS)
 
-#define osSetINTSYSCR(value)        //__asm volatile ("csrw    0x804, %0" : : "r" (value) :)
-#define osMaskClearINTSYSCR(value)  //__asm volatile ("csrrc   zero, 0x804, %0" : : "r" (value) :)
-#define osMaskSetINTSYSCR(value)    //__asm volatile ("csrrs   zero, 0x804, %0" : : "r" (value) :)
-
-#define osDisableHwIntNesting()  //osMaskSetINTSYSCR(0x20)
-
-//=========================================================================================
-// SYSTICK
-//=========================================================================================
-
+#define OS_INTERRUPT_NESTING_DEPTH_LEVEL  8
 
 //=========================================================================================
 // Externs
@@ -63,6 +54,6 @@ void osRestoreSavedIntState(void);
 void osSaveAndDisableIntState(void);
 void OsCatchAllCpuExceptions(void);
 void OsIsr_SysTickTimerFunc(void);
-uint32 osGetHwIntNestingLevel(void);
+uint32 osGetIntNestingLevel(void);
 
 #endif
