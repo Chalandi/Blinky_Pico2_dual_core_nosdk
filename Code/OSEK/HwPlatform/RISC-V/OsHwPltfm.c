@@ -43,20 +43,6 @@ boolean OsIsInterruptContext(void)
   return((uint32_t)(riscv_read_csr(RVCSR_MCAUSE_OFFSET) >> 31) == 0ul ? FALSE : TRUE);
 }
 
-//------------------------------------------------------------------------------------------------------------------
-/// \brief  osRestoreSavedIntState
-///
-/// \descr  This function return the interrupt nesting level status
-///
-/// \param  void
-///
-/// \return uint32 current nesting level
-//------------------------------------------------------------------------------------------------------------------
-uint32 osGetIntNestingLevel(void)
-{
-  return 1;
-}
-
 //-----------------------------------------------------------------------------
 /// \brief
 ///

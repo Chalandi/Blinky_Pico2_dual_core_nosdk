@@ -166,19 +166,21 @@ OsDispatchHandler:
 .extern OsRunCat2Isr
 .extern OsGetSavedStackPointer
 .extern OsIntCallDispatch
+.extern OsIncNestingDepthLevel
+.extern OsDecNestingDepthLevel
 
 OsCat2IsrWrapper:
                    OsSaveCpuContext
-                   /* increment nesting level */
+                   jal OsIncNestingDepthLevel
                    mv a0, sp
                    jal OsStoreStackPointer
                    jal OsRunCat2Isr
                    jal OsGetSavedStackPointer
                    jal OsIntCallDispatch
                    mv sp, a0
+                   jal OsDecNestingDepthLevel
                    OsRestoreCpuContext
                    csrw mcause, zero
-                   /* decrement nesting level */
                    mret
 
 .size OsCat2IsrWrapper, .-OsCat2IsrWrapper

@@ -91,7 +91,7 @@ void OsDecNestingDepthLevel(void)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
- __attribute__((weak)) uint32 osGetIntNestingLevel(void)
+uint32 osGetIntNestingLevel(void)
 {
   return OCB_Cfg.OsInterruptNestingDepth;
 }

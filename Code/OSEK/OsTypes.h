@@ -179,6 +179,10 @@ typedef struct
 
 typedef OsAlarmConfigType** OsAlarmBaseRefType;
 
+#ifndef OS_INTERRUPT_NESTING_DEPTH_LEVEL
+  #error "Interrupt nesting depth level is not defined in <OsHwPltf.h>"
+#endif
+
 typedef struct
 {
   OsTcbType**             pTcb;
