@@ -24,5 +24,6 @@ void OsGetSysCtrlReg(uint32* CtrlRegValue);
 void OsSetSysBasepriReg(uint32 BasepriRegValue);
 void OsGetSysBasepriReg(uint32* BasepriRegValue);
 uint32 OsHwGetInterruptPrioBits(void);
-
+uint32 OsGetSysPrimaskReg(void);
+uint32 OsHwSearchForHighPrio(void);
 #endif

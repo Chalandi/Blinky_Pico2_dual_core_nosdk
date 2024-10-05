@@ -30,7 +30,7 @@
 .align 4
 .globl  OsDispatchHandler
 .type   OsDispatchHandler, % function
-.extern OsDispatcher
+.extern osDispatcher
 
 OsDispatchHandler:
 
@@ -40,7 +40,7 @@ OsDispatchHandler:
   it eq
   vpusheq {S16-S31}
   mov r0,r13
-  bl.w OsDispatcher
+  bl.w osDispatcher
   mov r13,r0
   pop {r4 - r11, lr}
   tst lr, #0x10
@@ -64,12 +64,12 @@ OsDispatchHandler:
 .align 4
 .globl  OsCat2IsrWrapper
 .type   OsCat2IsrWrapper, % function
-.extern OsStoreStackPointer
-.extern OsRunCat2Isr
-.extern OsGetSavedStackPointer
-.extern OsIntCallDispatch
-.extern OsIncNestingDepthLevel
-.extern OsDecNestingDepthLevel
+.extern osStoreStackPointer
+.extern osRunCat2Isr
+.extern osGetSavedStackPointer
+.extern osIntCallDispatch
+.extern osIncNestingDepthLevel
+.extern osDecNestingDepthLevel
 
 OsCat2IsrWrapper:
 
@@ -78,14 +78,14 @@ OsCat2IsrWrapper:
   tst lr, #0x10
   it eq
   vpusheq {S16-S31}
-  bl.w OsIncNestingDepthLevel
+  bl.w osIncNestingDepthLevel
   mov r0,r13
-  bl.w OsStoreStackPointer
-  bl.w OsRunCat2Isr
-  bl.w OsGetSavedStackPointer
-  bl.w OsIntCallDispatch
+  bl.w osStoreStackPointer
+  bl.w osRunCat2Isr
+  bl.w osGetSavedStackPointer
+  bl.w osIntCallDispatch
   mov r13,r0
-  bl.w OsDecNestingDepthLevel
+  bl.w osDecNestingDepthLevel
   pop {r4 - r11, lr}
   tst lr, #0x10
   it eq

@@ -23,5 +23,6 @@ void OsDispatchHandler(void);
 void OsCat2IsrIrqWrapper(void);
 void OsStartNewTask(uint32 StackFramePtr, pFunc TaskFuncPtr);
 void OsGetCurrentSP(uint32* CurrentSpPtr);
+uint32 OsHwSearchForHighPrio(void);
 
 #endif

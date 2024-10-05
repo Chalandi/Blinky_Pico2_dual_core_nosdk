@@ -33,7 +33,7 @@ static uint16 osInterrupt_reg_meiea_window[32] = {0};
 static uint16 osInterrupt_reg_meipra_window[32] = {0};
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsIsInterruptContext
+/// \brief  osIsInterruptContext
 ///
 /// \descr  This function check the cpu mode (thread or interrupt).
 ///
@@ -41,7 +41,7 @@ static uint16 osInterrupt_reg_meipra_window[32] = {0};
 ///
 /// \return boolean: TRUE -> Cpu is in interrupt context, FALSE -> Cpu is not in interrupt context
 //------------------------------------------------------------------------------------------------------------------
-boolean OsIsInterruptContext(void)
+boolean osIsInterruptContext(void)
 {
   return((uint32_t)(riscv_read_csr(RVCSR_MCAUSE_OFFSET) >> 31) == 0ul ? FALSE : TRUE);
 }
@@ -185,7 +185,7 @@ uint32 osGetInterruptPriorityMask(void)
 }
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsCatchAllCpuExceptions
+/// \brief  osCatchAllCpuExceptions
 ///
 /// \descr  This function handle all CPU exceptions.
 ///
@@ -193,7 +193,7 @@ uint32 osGetInterruptPriorityMask(void)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-void OsCatchAllCpuExceptions(void)
+void osCatchAllCpuExceptions(void)
 {
   DISABLE_INTERRUPTS();
   for(;;);

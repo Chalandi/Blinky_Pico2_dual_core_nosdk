@@ -224,7 +224,7 @@ typedef struct
 #define pTASK(x)               (pTaskFunc)&OsTask_##x##Func
 #define pISR(x)                (pIsrFunc)&OsIsr_##x##Func
 #define pALARMCALLBACK(x)      (pIsrFunc)&OsAlarmCallback_##x##Func
-#define osInternalError(x)     OsKernelError(x); return(x)
+#define osInternalError(x)     osKernelError(x); return(x)
 
 #define PRAGMA(x) _Pragma(#x)
 

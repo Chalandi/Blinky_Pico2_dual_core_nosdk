@@ -25,7 +25,7 @@
 #include"OsHwPltfm.h"
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsRunCat2Isr
+/// \brief  osRunCat2Isr
 ///
 /// \descr  This function is the entry point of all category 2 interrupts
 ///
@@ -33,7 +33,7 @@
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
- void OsRunCat2Isr(void)
+ void osRunCat2Isr(void)
 {
   /* get the active interrupt vector id */
   const uint32 IntId = osGetActiveInterruptVectorId();
@@ -60,16 +60,16 @@
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-void OsIncNestingDepthLevel(void)
+void osIncNestingDepthLevel(void)
 {
   /* called by the OS with interrupt disabled, no need to lock the internal resource */
   if(0 == osIsInterruptDisabled())
-    OsKernelError(E_OS_ENABLEDINT);
+    osKernelError(E_OS_ENABLEDINT);
 
   OCB_Cfg.OsInterruptNestingDepth++;
 
   if(OCB_Cfg.OsInterruptNestingDepth >= OS_INTERRUPT_NESTING_DEPTH_LEVEL)
-    OsKernelError(E_OS_KERNEL_PANIC);
+    osKernelError(E_OS_KERNEL_PANIC);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -81,16 +81,16 @@ void OsIncNestingDepthLevel(void)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-void OsDecNestingDepthLevel(void)
+void osDecNestingDepthLevel(void)
 {
   /* called by the OS with interrupt disabled, no need to lock the internal resource */
   if(0 == osIsInterruptDisabled())
-    OsKernelError(E_OS_ENABLEDINT);
+    osKernelError(E_OS_ENABLEDINT);
 
   OCB_Cfg.OsInterruptNestingDepth--;
 
   if(OCB_Cfg.OsInterruptNestingDepth >= OS_INTERRUPT_NESTING_DEPTH_LEVEL)
-    OsKernelError(E_OS_KERNEL_PANIC);
+    osKernelError(E_OS_KERNEL_PANIC);
 }
 
 //------------------------------------------------------------------------------------------------------------------

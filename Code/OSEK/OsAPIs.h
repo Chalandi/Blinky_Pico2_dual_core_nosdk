@@ -21,43 +21,33 @@
 #include"OsTypes.h"
 #include"OsInternal.h"
 
+OsAppModeType OS_GetActiveApplicationMode(void);
 OsStatusType OS_ActivateTask(OsTaskType TaskID);
-OsStatusType OS_TerminateTask(void);
+OsStatusType OS_CancelAlarm(OsAlarmType AlarmID);
 OsStatusType OS_ChainTask(OsTaskType TaskID);
-OsStatusType OS_Schedule(void);
-
+OsStatusType OS_ClearEvent(OsEventMaskType Mask);
+OsStatusType OS_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick);
+OsStatusType OS_GetAlarmBase(OsAlarmType AlarmID, OsAlarmBaseRefType Info);
+OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event);
+OsStatusType OS_GetResource(OsResourceType ResID);
 OsStatusType OS_GetTaskID(OsTaskRefType TaskID);
 OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State);
-
+OsStatusType OS_ReleaseResource(OsResourceType ResID);
+OsStatusType OS_Schedule(void);
+OsStatusType OS_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cycle);
+OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask);
+OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickType cycle);
+OsStatusType OS_TerminateTask(void);
+OsStatusType OS_WaitEvent(OsEventMaskType Mask);
 
 void OS_DisableAllInterrupts(void);
 void OS_EnableAllInterrupts(void);
-void OS_SuspendAllInterrupts(void);
 void OS_ResumeAllInterrupts(void);
-void OS_SuspendOSInterrupts(void);
 void OS_ResumeOSInterrupts(void);
-
-
-
-OsStatusType OS_GetResource(OsResourceType ResID);
-OsStatusType OS_ReleaseResource(OsResourceType ResID);
-OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask);
-OsStatusType OS_ClearEvent(OsEventMaskType Mask);
-OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event);
-OsStatusType OS_WaitEvent(OsEventMaskType Mask);
-
-
-OsStatusType OS_GetAlarmBase(OsAlarmType AlarmID, OsAlarmBaseRefType Info);
-OsStatusType OS_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick);
-OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickType cycle);
-OsStatusType OS_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cycle);
-OsStatusType OS_CancelAlarm(OsAlarmType AlarmID);
-
-
-
-OsAppModeType OS_GetActiveApplicationMode(void);
-void OS_StartOS(OsAppModeType Mode);
 void OS_ShutdownOS(OsStatusType Error);
+void OS_StartOS(OsAppModeType Mode);
+void OS_SuspendAllInterrupts(void);
+void OS_SuspendOSInterrupts(void);
 
 #endif
 

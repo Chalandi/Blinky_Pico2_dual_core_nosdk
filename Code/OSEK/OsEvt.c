@@ -139,7 +139,7 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
         OCB_Cfg.pTcb[TaskID]->TaskStatus = READY;
 
         /* set the task's ready bit */
-        OsSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
+        osSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
 
         /* Call the scheduler */
         (void)osSchedule();
@@ -164,7 +164,7 @@ OsStatusType OS_ClearEvent(OsEventMaskType Mask)
   {
     osInternalError(E_OS_ACCESS);
   }
-  else if(TRUE == OsIsInterruptContext())
+  else if(TRUE == osIsInterruptContext())
   {
     osInternalError(E_OS_CALLEVEL);
   }  
@@ -227,7 +227,7 @@ OsStatusType OS_WaitEvent(OsEventMaskType Mask)
   { 
     osInternalError(E_OS_ACCESS);
   }
-  else if(TRUE == OsIsInterruptContext())
+  else if(TRUE == osIsInterruptContext())
   {
     osInternalError(E_OS_CALLEVEL);
   }   

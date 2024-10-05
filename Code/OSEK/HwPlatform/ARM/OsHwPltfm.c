@@ -35,7 +35,7 @@ static uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit);
 volatile uint32 OsHwPltfmSavedIntState = 0;
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsIsInterruptContext
+/// \brief  osIsInterruptContext
 ///
 /// \descr  This function check the cpu mode (thread or interrupt).
 ///
@@ -43,7 +43,7 @@ volatile uint32 OsHwPltfmSavedIntState = 0;
 ///
 /// \return boolean: TRUE -> Cpu in interrupt context, FALSE -> Cpu not in interrupt context
 //------------------------------------------------------------------------------------------------------------------
-boolean OsIsInterruptContext(void)
+boolean osIsInterruptContext(void)
 {
   return((GET_ICSR_VECTACTIVE() == 0) ? FALSE : TRUE);
 }

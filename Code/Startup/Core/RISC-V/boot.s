@@ -85,11 +85,11 @@ _start_c1:
 .type _VectoredInterruptVectorTable, @function
 .globl OsDispatchHandler
 .globl OsCat2IsrWrapper
-.globl OsCatchAllCpuExceptions
+.globl osCatchAllCpuExceptions
 .globl _VectoredInterruptVectorTable
 
 _VectoredInterruptVectorTable:
-                               j OsCatchAllCpuExceptions        /* Exceptions */
+                               j osCatchAllCpuExceptions        /* Exceptions */
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
                                j OsDispatchHandler              /* MachineSoftwareInterrupt (MSI) */

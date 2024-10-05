@@ -45,15 +45,19 @@ extern uint32 osIntVectTable;
 //=========================================================================================
 // Functions Prototype
 //=========================================================================================
+boolean osIsInterruptContext(void);
+boolean osIsInterruptDisabled(void);
+
+uint32 osGetActiveInterruptVectorId(void);
 uint32 osGetInterruptPriorityMask(void);
-void osSetInterruptPriorityMask(uint32 level);
+
+void osCatchAllCpuExceptions(void);
 void osHwTimerInit(void);
-void osHwTimerStart(void);
 void osHwTimerReload(void);
+void osHwTimerStart(void);
+void osInitInterrupts(void);
 void osRestoreSavedIntState(void);
 void osSaveAndDisableIntState(void);
-void OsCatchAllCpuExceptions(void);
-void OsIsr_SysTickTimerFunc(void);
-uint32 osGetIntNestingLevel(void);
+void osSetInterruptPriorityMask(uint32 level);
 
 #endif

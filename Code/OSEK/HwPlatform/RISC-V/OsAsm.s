@@ -126,7 +126,7 @@
 .align 4
 .globl  OsDispatchHandler
 .type   OsDispatchHandler, % function
-.extern OsDispatcher
+.extern osDispatcher
 
 .equ SIO_CPUID, 0xd0000000
 .equ SIO_RISCV_SOFTIRQ, 0xd00001a0
@@ -141,7 +141,7 @@ OsDispatchHandler:
                    addi a5, zero, 1
                    sll a5, a5, a4
                    sw a5, 0(a1)
-                   jal OsDispatcher
+                   jal osDispatcher
                    mv sp, a0
                    OsRestoreCpuContext
                    csrw mcause, zero
@@ -162,23 +162,23 @@ OsDispatchHandler:
 .align 4
 .globl  OsCat2IsrWrapper
 .type   OsCat2IsrWrapper, % function
-.extern OsStoreStackPointer
-.extern OsRunCat2Isr
-.extern OsGetSavedStackPointer
-.extern OsIntCallDispatch
-.extern OsIncNestingDepthLevel
-.extern OsDecNestingDepthLevel
+.extern osStoreStackPointer
+.extern osRunCat2Isr
+.extern osGetSavedStackPointer
+.extern osIntCallDispatch
+.extern osIncNestingDepthLevel
+.extern osDecNestingDepthLevel
 
 OsCat2IsrWrapper:
                    OsSaveCpuContext
-                   jal OsIncNestingDepthLevel
+                   jal osIncNestingDepthLevel
                    mv a0, sp
-                   jal OsStoreStackPointer
-                   jal OsRunCat2Isr
-                   jal OsGetSavedStackPointer
-                   jal OsIntCallDispatch
+                   jal osStoreStackPointer
+                   jal osRunCat2Isr
+                   jal osGetSavedStackPointer
+                   jal osIntCallDispatch
                    mv sp, a0
-                   jal OsDecNestingDepthLevel
+                   jal osDecNestingDepthLevel
                    OsRestoreCpuContext
                    csrw mcause, zero
                    mret

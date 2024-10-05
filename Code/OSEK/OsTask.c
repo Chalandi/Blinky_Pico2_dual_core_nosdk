@@ -84,7 +84,7 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
       OCB_Cfg.pTcb[TaskID]->TaskStatus = PRE_READY;
 
       /* set the current task's ready bit */
-      OsSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
+      osSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
       
       if(OCB_Cfg.pTcb[TaskID]->TaskType == BASIC)
       {
@@ -129,7 +129,7 @@ OsStatusType OS_TerminateTask(void)
   {
     osInternalError(E_OS_RESOURCE);
   }
-  else if(TRUE == OsIsInterruptContext())
+  else if(TRUE == osIsInterruptContext())
   {
     osInternalError(E_OS_CALLEVEL);
   }   
@@ -181,7 +181,7 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
   {
     osInternalError(E_OS_RESOURCE);
   }
-  else if(TRUE == OsIsInterruptContext())
+  else if(TRUE == osIsInterruptContext())
   {
     osInternalError(E_OS_CALLEVEL);
   } 
@@ -238,7 +238,7 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
         OCB_Cfg.pTcb[TaskID]->TaskStatus = PRE_READY;
 
        /* set the current task's ready bit */
-       OsSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
+       osSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
       }
 
       (void)osSchedule();

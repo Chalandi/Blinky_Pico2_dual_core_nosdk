@@ -44,18 +44,19 @@
 //=========================================================================================
 #include "SysTickTimer.h"
 
+boolean osIsInterruptContext(void);
+boolean osIsInterruptDisabled(void);
+
+uint32 osGetActiveInterruptVectorId(void);
 uint32 osGetInterruptPriorityMask(void);
-void   osSetInterruptPriorityMask(uint32 level);
+
+void osCatchAllCpuExceptions(void);
 void osHwTimerInit(void);
-void osHwTimerStart(void);
 void osHwTimerReload(void);
+void osHwTimerStart(void);
+void osInitInterrupts(void);
 void osRestoreSavedIntState(void);
 void osSaveAndDisableIntState(void);
-void OsCatchAllCpuExceptions(void);
-void OsIsr_SysTickTimerFunc(void);
-boolean OsIsInterruptContext(void);
-void osInitInterrupts(void);
-uint32 OsGetSysPrimaskReg(void);
-void OsIsr_FeUndefinedFunc(void);
-void OsRunCat2Isr(void);
+void osSetInterruptPriorityMask(uint32 level);
+
 #endif

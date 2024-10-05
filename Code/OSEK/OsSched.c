@@ -35,7 +35,7 @@ const uint32 OsSchedPrioTypeSize = sizeof(OsSchedPrioType);
 ///
 /// \return void 
 //-----------------------------------------------------------------------------
-void OsSetTaskPrioReady(const uint32 prio)
+void osSetTaskPrioReady(const uint32 prio)
 {
   if(sizeof(OsSchedPrioType)/sizeof(unsigned long) >= ((prio / 32U) + 1U))
   {
@@ -53,7 +53,7 @@ void OsSetTaskPrioReady(const uint32 prio)
 ///
 /// \return void 
 //-----------------------------------------------------------------------------
-void OsClearTaskPrioReady(const uint32 prio)
+void osClearTaskPrioReady(const uint32 prio)
 {
   if(sizeof(OsSchedPrioType)/sizeof(unsigned long) >= ((prio / 32U) + 1U))
   {
@@ -70,7 +70,7 @@ void OsClearTaskPrioReady(const uint32 prio)
 ///
 /// \return uint8 
 //-----------------------------------------------------------------------------
-uint32 OsGetHighPrioReadyTaskIdx(const uint32 prio)
+uint32 osGetHighPrioReadyTaskIdx(const uint32 prio)
 {
   for(uint32 tcbIdx = 0; tcbIdx < OS_NUMBER_OF_TASKS; tcbIdx++)
   {
@@ -97,7 +97,7 @@ uint32 OsGetHighPrioReadyTaskIdx(const uint32 prio)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_Schedule(void)
 {
-  if(TRUE == OsIsInterruptContext())
+  if(TRUE == osIsInterruptContext())
   {
     osInternalError(E_OS_CALLEVEL);
   }
@@ -113,7 +113,7 @@ OsStatusType OS_Schedule(void)
     OS_SuspendAllInterrupts();
 
     /* Get the high prio task id */
-    OCB_Cfg.HighPrioReadyTaskIdx = OsGetHighPrioReadyTaskIdx((uint32)OsHwSearchForHighPrio());
+    OCB_Cfg.HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)OsHwSearchForHighPrio());
 
     /* Exit the critical section */
     OS_ResumeAllInterrupts();
@@ -132,7 +132,7 @@ OsStatusType OS_Schedule(void)
         OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = READY;
 
         /* set the current task's ready bit */
-        OsSetTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
+        osSetTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
 
         if(OCB_Cfg.OsLockDispatcher == OS_FALSE)
         {
@@ -167,11 +167,11 @@ OsStatusType osSchedule(void)
   if(OCB_Cfg.CurrentTaskIdx < OS_INTERNAL_TASK_ID                                                  &&
      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0                                        &&
      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio &&
-     FALSE == OsIsCat2IntContext())
+     FALSE == osIsCat2IntContext())
   {
     osInternalError(E_OS_RESOURCE);
   }
-  else if(TRUE == OsIsInterruptContext() && FALSE == OsIsCat2IntContext()) /* Cat1 Interrupt */
+  else if(TRUE == osIsInterruptContext() && FALSE == osIsCat2IntContext()) /* Cat1 Interrupt */
   {
     osInternalError(E_OS_CALLEVEL);
   }
@@ -181,7 +181,7 @@ OsStatusType osSchedule(void)
     OS_SuspendAllInterrupts();
 
     /* Get the high prio task id */
-    OCB_Cfg.HighPrioReadyTaskIdx = OsGetHighPrioReadyTaskIdx((uint32)OsHwSearchForHighPrio());
+    OCB_Cfg.HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)OsHwSearchForHighPrio());
 
     /* Exit the critical section */
     OS_ResumeAllInterrupts();
@@ -204,7 +204,7 @@ OsStatusType osSchedule(void)
             OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = READY;
 
             /* set the current task's ready bit */
-            OsSetTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
+            osSetTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
 
             if(OCB_Cfg.OsCat2InterruptLevel == OS_FALSE && OCB_Cfg.OsLockDispatcher == OS_FALSE)
             {

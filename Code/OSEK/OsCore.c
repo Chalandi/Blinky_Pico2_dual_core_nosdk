@@ -44,7 +44,7 @@ void OS_StartOS(OsAppModeType Mode)
 {
   (void) Mode;
 
-  if(TRUE == OsIsInterruptContext())
+  if(TRUE == osIsInterruptContext())
   {
     return;
   }
@@ -78,7 +78,7 @@ void OS_StartOS(OsAppModeType Mode)
         OCB_Cfg.pTcb[tcbIdx]->TaskStatus = PRE_READY;
 
         /* set the current task's ready bit */
-        OsSetTaskPrioReady(OCB_Cfg.pTcb[tcbIdx]->Prio);
+        osSetTaskPrioReady(OCB_Cfg.pTcb[tcbIdx]->Prio);
         
         /* Update the number of multiple activation */
         if(OCB_Cfg.pTcb[tcbIdx]->TaskType == BASIC)
@@ -168,7 +168,7 @@ static void osReloadTimer(void)
 }
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsDispatcher
+/// \brief  osDispatcher
 ///
 /// \descr  Context switch engine
 ///
@@ -176,7 +176,7 @@ static void osReloadTimer(void)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-uint32 OsDispatcher(uint32 StackPtr)
+uint32 osDispatcher(uint32 StackPtr)
 {
 
   /* Save the current stack pointer of the running task before switching the context */
@@ -213,7 +213,7 @@ uint32 OsDispatcher(uint32 StackPtr)
       OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = RUNNING;
 
       /* Clear the current task's ready bit */
-      OsClearTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
+      osClearTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
       
       /* Call osPreTaskHook */
       #if(OS_PRETASKHOOK)
@@ -236,7 +236,7 @@ uint32 OsDispatcher(uint32 StackPtr)
       OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = RUNNING;
 
       /* Clear the current task's ready bit */
-      OsClearTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
+      osClearTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
       
       /* Call osPreTaskHook */
       #if(OS_PRETASKHOOK)
@@ -271,7 +271,7 @@ ISR(SysTickTimer)
 }
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsStoreStackPointer
+/// \brief  osStoreStackPointer
 ///
 /// \descr  Store the current stack pointer in case of category 2 interrupt
 ///
@@ -279,7 +279,7 @@ ISR(SysTickTimer)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-void OsStoreStackPointer(uint32 StackPtrValue)
+void osStoreStackPointer(uint32 StackPtrValue)
 {
   /* get the interrupt nesting level */
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
@@ -311,7 +311,7 @@ void OsStoreStackPointer(uint32 StackPtrValue)
 }
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsGetSavedStackPointer
+/// \brief  osGetSavedStackPointer
 ///
 /// \descr  return the saved stack pointer in case of category 2 interrupt
 ///
@@ -319,7 +319,7 @@ void OsStoreStackPointer(uint32 StackPtrValue)
 ///
 /// \return uint32 : saved stack pointer
 //------------------------------------------------------------------------------------------------------------------
-uint32 OsGetSavedStackPointer(void)
+uint32 osGetSavedStackPointer(void)
 {
   /* get the interrupt nesting level */
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
@@ -342,7 +342,7 @@ uint32 OsGetSavedStackPointer(void)
 }
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsIntCallDispatch
+/// \brief  osIntCallDispatch
 ///
 /// \descr  Call the dispatcher to switch the context if needed after an category 2 interrupt 
 ///
@@ -350,7 +350,7 @@ uint32 OsGetSavedStackPointer(void)
 ///
 /// \return uint32 : The new stack pointer after switching the context otherwise the last saved stack pointer
 //------------------------------------------------------------------------------------------------------------------
-uint32 OsIntCallDispatch(uint32 StackPtr)
+uint32 osIntCallDispatch(uint32 StackPtr)
 {
   /* get the interrupt nesting level */
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
@@ -375,7 +375,7 @@ uint32 OsIntCallDispatch(uint32 StackPtr)
       OCB_Cfg.OsIntCallDispatcher = 0;
 
       /* Call the Dispatcher to execute the context switch process */
-      return(OsDispatcher(StackPtr));
+      return(osDispatcher(StackPtr));
     }
     else
     {
@@ -451,7 +451,7 @@ static void osIdleLoop(void)
 }
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsIsCat2IntContext
+/// \brief  osIsCat2IntContext
 ///
 /// \descr  This function checks if the cpu is in category 2 interrupt context or not.
 ///
@@ -459,7 +459,7 @@ static void osIdleLoop(void)
 ///
 /// \return boolean: TRUE -> Category 2 interrupt context, FALSE -> none category 2 interrupt context
 //------------------------------------------------------------------------------------------------------------------
-boolean OsIsCat2IntContext(void)
+boolean osIsCat2IntContext(void)
 {
     return((boolean)OCB_Cfg.OsCat2InterruptLevel);
 }
@@ -564,7 +564,7 @@ void OS_ResumeOSInterrupts(void)
 //------------------------------------------------------------------------------------------------------------------
 void OsIsr_UndefinedFunc(void)
 {
-  OsKernelError(E_OS_DISABLEDINT);
+  osKernelError(E_OS_DISABLEDINT);
   for(;;);
 }
 
@@ -577,14 +577,14 @@ void OsIsr_UndefinedFunc(void)
 ///
 /// \return uint64 
 //-----------------------------------------------------------------------------
-uint64 OsGetSystemTicksCounter(void)
+uint64 osGetSystemTicksCounter(void)
 {
   return(OCB_Cfg.OsSysTickCounter);
 }
 
 
 //-----------------------------------------------------------------------------
-/// \brief  OsGetSystemTicksElapsedTime
+/// \brief  osGetSystemTicksElapsedTime
 ///
 /// \descr  Get the system elapsed time relative to the prvTicks
 ///
@@ -592,7 +592,7 @@ uint64 OsGetSystemTicksCounter(void)
 ///
 /// \return uint64 
 //-----------------------------------------------------------------------------
-uint64 OsGetSystemTicksElapsedTime(uint64 prvTicks)
+uint64 osGetSystemTicksElapsedTime(uint64 prvTicks)
 {
   return((uint64)(OCB_Cfg.OsSysTickCounter - prvTicks));
 }
@@ -613,7 +613,7 @@ void osErrTaskExitWithoutTerminate(void)
 }
 
 //-----------------------------------------------------------------------------
-/// \brief  OsKernelError
+/// \brief  osKernelError
 ///
 /// \descr  Catch all internal OS errors
 ///
@@ -621,7 +621,7 @@ void osErrTaskExitWithoutTerminate(void)
 ///
 /// \return void 
 //-----------------------------------------------------------------------------
-void OsKernelError(OsStatusType err)
+void osKernelError(OsStatusType err)
 {
   DISABLE_INTERRUPTS();
   #if(OS_ERRORHOOK)
