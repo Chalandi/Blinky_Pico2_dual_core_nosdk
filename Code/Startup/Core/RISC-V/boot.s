@@ -83,8 +83,8 @@ _start_c1:
 .section .riscv_intvect
 .align 4
 .type _VectoredInterruptVectorTable, @function
-.globl OsDispatchHandler
-.globl OsCat2IsrWrapper
+.globl osDispatchHandler
+.globl osCat2IsrWrapper
 .globl osCatchAllCpuExceptions
 .globl _VectoredInterruptVectorTable
 
@@ -92,15 +92,15 @@ _VectoredInterruptVectorTable:
                                j osCatchAllCpuExceptions        /* Exceptions */
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
-                               j OsDispatchHandler              /* MachineSoftwareInterrupt (MSI) */
+                               j osDispatchHandler              /* MachineSoftwareInterrupt (MSI) */
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
-                               j OsCat2IsrWrapper             /* MachineTimerInterrupt (MTI) --> The lowest priority interrupt level */
+                               j osCat2IsrWrapper             /* MachineTimerInterrupt (MTI) --> The lowest priority interrupt level */
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
-                               j OsCat2IsrWrapper               /* MachineExternalInterrupt (MEI) --> The highest priority interrupt level */
+                               j osCat2IsrWrapper               /* MachineExternalInterrupt (MEI) --> The highest priority interrupt level */
 
 
 .size _VectoredInterruptVectorTable, .-_VectoredInterruptVectorTable

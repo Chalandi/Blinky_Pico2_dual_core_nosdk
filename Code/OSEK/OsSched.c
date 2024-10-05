@@ -113,7 +113,7 @@ OsStatusType OS_Schedule(void)
     OS_SuspendAllInterrupts();
 
     /* Get the high prio task id */
-    OCB_Cfg.HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)OsHwSearchForHighPrio());
+    OCB_Cfg.HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
 
     /* Exit the critical section */
     OS_ResumeAllInterrupts();
@@ -181,7 +181,7 @@ OsStatusType osSchedule(void)
     OS_SuspendAllInterrupts();
 
     /* Get the high prio task id */
-    OCB_Cfg.HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)OsHwSearchForHighPrio());
+    OCB_Cfg.HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
 
     /* Exit the critical section */
     OS_ResumeAllInterrupts();

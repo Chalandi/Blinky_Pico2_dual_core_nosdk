@@ -19,14 +19,14 @@
 .thumb_func
 .section ".text"
 .align 4
-.globl  OsHwSearchForHighPrio
-.type OsHwSearchForHighPrio, %function
+.globl  osHwSearchForHighPrio
+.type osHwSearchForHighPrio, %function
 .extern OsSchedPrioTypeSize
 .extern OsHwSchedPrioReg
 
 .equ osNoReadyTaskWasFound, 0xA0A0F5F5UL
 
-OsHwSearchForHighPrio: 
+osHwSearchForHighPrio: 
                        push {r4-r7,lr}
                        ldr r0,=OsSchedPrioTypeSize
                        ldr r7, [r0]

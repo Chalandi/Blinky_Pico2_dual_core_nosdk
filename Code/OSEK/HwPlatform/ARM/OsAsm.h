@@ -14,16 +14,20 @@
 #ifndef __OS_ASM_H__
 #define __OS_ASM_H__
 
-void OsDispatch(void);
-void OsCat2IsrIrqWrapper(void);
-void OsStartNewTask(uint32 StackFramePtr, pFunc TaskFuncPtr);
-void OsGetCurrentSP(uint32* CurrentSpPtr);
-void OsGetPSR(uint32* CurrentPsr);
-void OsSetSysCtrlReg(uint32 CtrlRegValue);
-void OsGetSysCtrlReg(uint32* CtrlRegValue);
-void OsSetSysBasepriReg(uint32 BasepriRegValue);
-void OsGetSysBasepriReg(uint32* BasepriRegValue);
-uint32 OsHwGetInterruptPrioBits(void);
-uint32 OsGetSysPrimaskReg(void);
-uint32 OsHwSearchForHighPrio(void);
+#include <stdint.h>
+
+void osDispatchHandler(void);
+void osCat2IsrWrapper(void);
+void osStartNewTask(uint32_t StackFramePtr, pFunc TaskFuncPtr);
+void osGetCurrentSP(uint32_t* CurrentSpPtr);
+void OsGetPSR(uint32_t* CurrentPsr);
+void OsSetSysCtrlReg(uint32_t CtrlRegValue);
+void OsGetSysCtrlReg(uint32_t* CtrlRegValue);
+void OsSetSysBasepriReg(uint32_t BasepriRegValue);
+void OsGetSysBasepriReg(uint32_t* BasepriRegValue);
+
+uint32_t OsGetSysPrimaskReg(void);
+uint32_t OsHwGetInterruptPrioBits(void);
+uint32_t osHwSearchForHighPrio(void);
+
 #endif

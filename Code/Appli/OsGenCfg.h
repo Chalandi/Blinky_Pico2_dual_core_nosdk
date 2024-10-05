@@ -64,8 +64,8 @@ OS_CONFIG_BEGIN
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* SVCall                  */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Reserved                */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Reserved                */
-    OS_INTERRUPT_CAT1_DEF(OsDispatchHandler, 4, NESTED)  /* OsDispatchHandler       */
-    OS_INTERRUPT_CAT2_DEF(SysTickTimer, 4, NOT_NESTED)  /* OsCat2IsrWrapper        */
+    OS_INTERRUPT_CAT1_DEF(osDispatchHandler, 4, NESTED)  /* osDispatchHandler       */
+    OS_INTERRUPT_CAT2_DEF(SysTickTimer, 4, NOT_NESTED)  /* osCat2IsrWrapper        */
 #endif
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* TIMER0_IRQ_0_IRQn       */
     OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* TIMER0_IRQ_1_IRQn       */

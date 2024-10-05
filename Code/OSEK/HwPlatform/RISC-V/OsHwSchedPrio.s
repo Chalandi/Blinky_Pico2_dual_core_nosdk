@@ -25,15 +25,15 @@
 
 .section ".text", "ax"
 .align 4
-.globl  OsHwSearchForHighPrio
-.type OsHwSearchForHighPrio, %function
+.globl  osHwSearchForHighPrio
+.type osHwSearchForHighPrio, %function
 .extern OsSchedPrioTypeSize
 .extern OsHwSchedPrioReg
 .extern __os_sw_clz
 
 .equ osNoReadyTaskWasFound, 0xA0A0F5F5UL
 
-OsHwSearchForHighPrio:
+osHwSearchForHighPrio:
                        addi sp, sp, -4
                        sw ra, 0(sp)
                        la a0, OsSchedPrioTypeSize
@@ -80,7 +80,7 @@ OsHwSearchForHighPrio:
                        addi sp, sp, 4
                        ret
 
-.size OsHwSearchForHighPrio, .-OsHwSearchForHighPrio
+.size osHwSearchForHighPrio, .-osHwSearchForHighPrio
 
 /*******************************************************************************************
   \brief  

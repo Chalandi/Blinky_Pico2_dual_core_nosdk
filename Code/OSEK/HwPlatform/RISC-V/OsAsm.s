@@ -114,7 +114,7 @@
 .endm
 
 /*-----------------------------------------------------------------------------------------------------------------*/
-/* \brief  OsDispatchHandler                                                                                       */
+/* \brief  void osDispatchHandler(void)                                                                            */
 /*                                                                                                                 */
 /* \descr  Context switcher                                                                                        */
 /*                                                                                                                 */
@@ -124,14 +124,14 @@
 /*-----------------------------------------------------------------------------------------------------------------*/
 .section ".text"
 .align 4
-.globl  OsDispatchHandler
-.type   OsDispatchHandler, % function
+.globl  osDispatchHandler
+.type   osDispatchHandler, % function
 .extern osDispatcher
 
 .equ SIO_CPUID, 0xd0000000
 .equ SIO_RISCV_SOFTIRQ, 0xd00001a0
 
-OsDispatchHandler:
+osDispatchHandler:
                    OsSaveCpuContext
                    mv a0, sp
                    la a1, SIO_RISCV_SOFTIRQ
@@ -147,10 +147,10 @@ OsDispatchHandler:
                    csrw mcause, zero
                    mret
 
-.size OsDispatchHandler, .-OsDispatchHandler
+.size osDispatchHandler, .-osDispatchHandler
 
 /* ---------------------------------------------------------------------------------------------------------------- */
-/* \brief  OsCat2IsrWrapper                                                                                         */
+/* \brief  void osCat2IsrWrapper(void)                                                                              */
 /*                                                                                                                  */
 /* \descr  Wrapper for all category 2 interrupts                                                                    */
 /*                                                                                                                  */
@@ -160,8 +160,8 @@ OsDispatchHandler:
 /* ---------------------------------------------------------------------------------------------------------------- */
 .section ".text"
 .align 4
-.globl  OsCat2IsrWrapper
-.type   OsCat2IsrWrapper, % function
+.globl  osCat2IsrWrapper
+.type   osCat2IsrWrapper, % function
 .extern osStoreStackPointer
 .extern osRunCat2Isr
 .extern osGetSavedStackPointer
@@ -169,7 +169,7 @@ OsDispatchHandler:
 .extern osIncNestingDepthLevel
 .extern osDecNestingDepthLevel
 
-OsCat2IsrWrapper:
+osCat2IsrWrapper:
                    OsSaveCpuContext
                    jal osIncNestingDepthLevel
                    mv a0, sp
@@ -183,10 +183,10 @@ OsCat2IsrWrapper:
                    csrw mcause, zero
                    mret
 
-.size OsCat2IsrWrapper, .-OsCat2IsrWrapper
+.size osCat2IsrWrapper, .-osCat2IsrWrapper
 
 /* ------------------------------------------------------------------------------------------------------------------ */
-/* / \brief  OsStartNewTask (OsStartNewTask(uint32 StackFramePtr, pFunc TaskFuncPtr))                                 */
+/* / \brief  void osStartNewTask(uint32 StackFramePtr, pFunc TaskFuncPtr)                                             */
 /* /                                                                                                                  */
 /* / \descr  This function start an OSEK Task for the 1st execution                                                   */
 /* /                                                                                                                  */
@@ -196,11 +196,11 @@ OsCat2IsrWrapper:
 /* ------------------------------------------------------------------------------------------------------------------ */
 .section ".text"
 .align 4
-.globl  OsStartNewTask
-.type   OsStartNewTask, % function
+.globl  osStartNewTask
+.type   osStartNewTask, % function
 .extern osErrTaskExitWithoutTerminate
 
-OsStartNewTask:
+osStartNewTask:
                  mv sp,a0
                  csrrw zero, mepc, a1
                  lw x1, osErrTaskExitWithoutTerminate
@@ -236,10 +236,10 @@ OsStartNewTask:
                  csrw mcause, zero
                  mret
 
-.size OsStartNewTask, .-OsStartNewTask
+.size osStartNewTask, .-osStartNewTask
 
 /* ----------------------------------------------------------------------------------------------------------------- */
-/*  \brief  OsGetCurrentSP : void OsGetCurrentSP(unsigned int* CurrentSpPtr)                                         */
+/*  \brief  osGetCurrentSP : uint32 osGetCurrentSP(void)                                                             */
 /*                                                                                                                   */
 /*  \descr  Get the current stack pointer register value                                                             */
 /*                                                                                                                   */
@@ -249,18 +249,18 @@ OsStartNewTask:
 /* ----------------------------------------------------------------------------------------------------------------- */
 .section ".text"
 .align 4
-.globl  OsGetCurrentSP
-.type   OsGetCurrentSP, % function
+.globl  osGetCurrentSP
+.type   osGetCurrentSP, % function
 
-OsGetCurrentSP:
+osGetCurrentSP:
                  mv a0, sp
                  ret
 
-.size OsGetCurrentSP, .-OsGetCurrentSP
+.size osGetCurrentSP, .-osGetCurrentSP
 
 
 /* ----------------------------------------------------------------------------------------------------------------- */
-/*  \brief  OsSetIntVectTableAddress : void OsSetIntVectTableAddress(unsigned int* address)                          */
+/*  \brief  osSetIntVectTableAddress : void osSetIntVectTableAddress(uint32 address)                                 */
 /*                                                                                                                   */
 /*  \descr                                                                                                           */
 /*                                                                                                                   */
@@ -270,16 +270,16 @@ OsGetCurrentSP:
 /* ----------------------------------------------------------------------------------------------------------------- */
 .section ".text"
 .align 4
-.globl  OsSetIntVectTableAddress
-.type   OsSetIntVectTableAddress, % function
+.globl  osSetIntVectTableAddress
+.type   osSetIntVectTableAddress, % function
 
-OsSetIntVectTableAddress:
+osSetIntVectTableAddress:
                           /* setup the interrupt vector table */
                           ori a0, a0, 3
                           csrw mtvec, a0
                           ret
 
-.size OsSetIntVectTableAddress, .-OsSetIntVectTableAddress
+.size osSetIntVectTableAddress, .-osSetIntVectTableAddress
 
 
 /*

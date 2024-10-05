@@ -29,8 +29,8 @@ void UndefinedHandler(void) { for(;;); }
 void Startup_Init(void);
 void main_Core1 (void) __attribute__((weak, alias("UndefinedHandler")));
 
-void OsCat2IsrWrapper(void)  __attribute__((weak, alias("UndefinedHandler")));
-void OsDispatchHandler(void)  __attribute__((weak, alias("UndefinedHandler")));
+void osCat2IsrWrapper(void)  __attribute__((weak, alias("UndefinedHandler")));
+void osDispatchHandler(void)  __attribute__((weak, alias("UndefinedHandler")));
 
 void __CORE0_STACK_TOP(void);
 void __CORE1_STACK_TOP(void);
@@ -105,8 +105,8 @@ const InterruptHandler __attribute__((section(".intvect_c0"), aligned(128))) __I
     (InterruptHandler)&SVCall,
     (InterruptHandler)0,
     (InterruptHandler)0,
-    (InterruptHandler)&OsDispatchHandler,
-    (InterruptHandler)&OsCat2IsrWrapper,
+    (InterruptHandler)&osDispatchHandler,
+    (InterruptHandler)&osCat2IsrWrapper,
     (InterruptHandler)&TIMER0_IRQ_0_IRQn,
     (InterruptHandler)&TIMER0_IRQ_1_IRQn,
     (InterruptHandler)&TIMER0_IRQ_2_IRQn,
@@ -178,8 +178,8 @@ const InterruptHandler __attribute__((section(".intvect_c1"), aligned(128))) __I
     (InterruptHandler)&SVCall,
     (InterruptHandler)0,
     (InterruptHandler)0,
-    (InterruptHandler)&OsDispatchHandler,
-    (InterruptHandler)&OsCat2IsrWrapper,
+    (InterruptHandler)&osDispatchHandler,
+    (InterruptHandler)&osCat2IsrWrapper,
     (InterruptHandler)&TIMER0_IRQ_0_IRQn,
     (InterruptHandler)&TIMER0_IRQ_1_IRQn,
     (InterruptHandler)&TIMER0_IRQ_2_IRQn,

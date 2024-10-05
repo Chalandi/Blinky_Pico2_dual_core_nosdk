@@ -17,7 +17,7 @@
 .syntax unified
 
 //-----------------------------------------------------------------------------------------------------------------
-// \brief  OsDispatchHandler
+// \brief  void osDispatchHandler(void)
 //
 // \descr  Context switcher
 //
@@ -28,11 +28,11 @@
 .thumb_func
 .section ".text"
 .align 4
-.globl  OsDispatchHandler
-.type   OsDispatchHandler, % function
+.globl  osDispatchHandler
+.type   osDispatchHandler, % function
 .extern osDispatcher
 
-OsDispatchHandler:
+osDispatchHandler:
 
   cpsid i
   push {r4 - r11, lr}
@@ -51,7 +51,7 @@ OsDispatchHandler:
   bx lr
 
 // ----------------------------------------------------------------------------------------------------------------
-// \brief  OsCat2IsrWrapper
+// \brief  void osCat2IsrWrapper(void)
 // 
 // \descr  Wrapper for all category 2 interrupts
 // 
@@ -62,8 +62,8 @@ OsDispatchHandler:
 .thumb_func
 .section ".text"
 .align 4
-.globl  OsCat2IsrWrapper
-.type   OsCat2IsrWrapper, % function
+.globl  osCat2IsrWrapper
+.type   osCat2IsrWrapper, % function
 .extern osStoreStackPointer
 .extern osRunCat2Isr
 .extern osGetSavedStackPointer
@@ -71,7 +71,7 @@ OsDispatchHandler:
 .extern osIncNestingDepthLevel
 .extern osDecNestingDepthLevel
 
-OsCat2IsrWrapper:
+osCat2IsrWrapper:
 
   cpsid i
   push {r4 - r11, lr}
@@ -95,7 +95,7 @@ OsCat2IsrWrapper:
   bx lr
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OsStartNewTask (OsStartNewTask(uint32 StackFramePtr, pFunc TaskFuncPtr))
+/// \brief  void osStartNewTask(uint32 StackFramePtr, pFunc TaskFuncPtr)
 ///
 /// \descr  This function start an OSEK Task for the 1st execution
 ///
@@ -106,11 +106,11 @@ OsCat2IsrWrapper:
 .thumb_func
 .section ".text"
 .align 4
-.globl  OsStartNewTask
-.type   OsStartNewTask, % function
+.globl  osStartNewTask
+.type   osStartNewTask, % function
 .extern osErrTaskExitWithoutTerminate
 
-OsStartNewTask:
+osStartNewTask:
   mov sp,r0
   movw r0, #0
   movt r0, #0x0100
@@ -131,7 +131,7 @@ OsStartNewTask:
   bx r0
 
 //-----------------------------------------------------------------------------------------------------------------
-// \brief  OsGetCurrentSP : void OsGetCurrentSP(unsigned int* CurrentSpPtr)
+// \brief  osGetCurrentSP : void osGetCurrentSP(unsigned int* CurrentSpPtr)
 //
 // \descr  Get the current stack pointer register value
 //
@@ -142,10 +142,10 @@ OsStartNewTask:
 .thumb_func
 .section ".text"
 .align 4
-.globl  OsGetCurrentSP
-.type   OsGetCurrentSP, % function
+.globl  osGetCurrentSP
+.type   osGetCurrentSP, % function
 
-OsGetCurrentSP:
+osGetCurrentSP:
 
   str r13,[r0]
   dsb
@@ -175,7 +175,7 @@ OsGetPSR:
   bx lr
 
 //-----------------------------------------------------------------------------------------------------------------
-// \brief  OsSetSysCtrlReg : void OsSetSysCtrlReg(unsigned int CtrlRegValue)
+// \brief  OsSetSysCtrlReg : void OsSetSysCtrlReg(uint32 CtrlRegValue)
 //
 // \descr  set the system CONTROL register
 //

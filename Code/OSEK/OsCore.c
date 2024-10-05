@@ -228,7 +228,7 @@ uint32 osDispatcher(uint32 StackPtr)
       OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pCurrentStackPointer = NewStackFramePtr;
 
       /* Start the new task */
-      OsStartNewTask(NewStackFramePtr, NewTaskPtr);
+      osStartNewTask(NewStackFramePtr, NewTaskPtr);
 
     }
     else if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus == READY)
