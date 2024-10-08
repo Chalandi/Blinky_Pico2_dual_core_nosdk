@@ -160,7 +160,7 @@ OS_CONFIG_BEGIN
   //=============================================================================
   //  Tasks Configuration
   //=============================================================================
-    OS_TASK_BEGIN
+    OS_TASK_BEGIN(core)
         OS_TASK_DEF(OSTASK_TASK01, 0, 0x800, 1, OS_AUTOSTART, EXTENDED, FULL_PREEMPT)
         OS_TASK_DEF(OSTASK_TASK02, 1, 800, 1, OS_AUTOSTART, EXTENDED, FULL_PREEMPT)
         OS_TASK_DEF(OSTASK_TASK03, 3, 800, 1, OS_AUTOSTART, EXTENDED, FULL_PREEMPT)
@@ -178,7 +178,7 @@ OS_CONFIG_BEGIN
   //=============================================================================
   //  Alarms Configuration
   //=============================================================================
-    OS_ALARM_BEGIN
+    OS_ALARM_BEGIN(core)
         OS_ALARM_DEF(OSALARM_ALARM01, SETEVENT, OSEVT_EVENT01, OSTASK_TASK01, 0)
         OS_ALARM_DEF(OSALARM_ALARM02, ACTIVATETASK, 0, OSTASK_TASK02, 0)
         OS_ALARM_DEF(OSALARM_ALARM03, ALARMCALLBACK, 0, 0, OsTickTimerCallback)
@@ -187,7 +187,7 @@ OS_CONFIG_BEGIN
   //=============================================================================
   //  Resource Configuration
   //=============================================================================
-    OS_RESOURCE_BEGIN
+    OS_RESOURCE_BEGIN(core)
         OS_RESOURCE_DEF(OSRES_RESOURCE01, 4, 7)
         OS_RESOURCE_DEF(OSRES_RESOURCE02, 2, 3)
         OS_RESOURCE_DEF(RES_SCHEDULER, 5, 7)
@@ -196,7 +196,7 @@ OS_CONFIG_BEGIN
   //=============================================================================
   //  Interrupts Configuration
   //=============================================================================
-    OS_INTERRUPT_BEGIN
+    OS_INTERRUPT_BEGIN(core)
         OS_INTERRUPT_CAT2_DEF(ISR_000, 7, NOT_NESTED)  /* Interrupt vector 0 */
         OS_INTERRUPT_CAT2_DEF(ISR_001, 6, NOT_NESTED)  /* Interrupt vector 1 */
         OS_INTERRUPT_CAT2_DEF(Undefined, 0, NOT_NESTED)  /* Interrupt vector 2 */

@@ -37,7 +37,7 @@
 
 
 /* OS Configuration Block */
-extern volatile Ocb_t OCB_Cfg;
+extern volatile Ocb_t* OCB_Cfg[];
 
 
 #endif

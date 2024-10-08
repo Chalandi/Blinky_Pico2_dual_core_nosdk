@@ -29,6 +29,10 @@
 #include"OsGenCfg.h"
 #undef OS_GEN_TCB
 
+#define OS_GEN_OCB_PER_CORE
+#include"OsGenCfg.h"
+#undef OS_GEN_OCB_PER_CORE
+
 #define OS_GEN_OCB
 #include"OsGenCfg.h"
 #undef OS_GEN_OCB
