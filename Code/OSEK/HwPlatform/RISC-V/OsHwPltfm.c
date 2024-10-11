@@ -18,6 +18,7 @@
 #include"OsHwPltfm.h"
 #include"OsInternal.h"
 #include"OsTcb.h"
+#include"RP2350.h"
 
 //=========================================================================================
 // Functions Prototype
@@ -118,13 +119,13 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-  extern const uint32 osNbrOfInterrupts;
-  extern const OsInterruptConfigType IsrLookupTable[];
+  const uint32 osNbrOfInterrupts = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osNbrOfInterrupts;
+
   ISR(Undefined);
 
   for (uint32 InterruptIndex = 0; InterruptIndex < osNbrOfInterrupts; InterruptIndex++)
   {
-    if (IsrLookupTable[InterruptIndex].IsrFunc != pISR(Undefined))
+    if (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
     {
       /* enable the interrupt */
       const uint32 meiea_window_bit = InterruptIndex % 16;
@@ -136,7 +137,7 @@ void osInitInterrupts(void)
       const uint32 meipra_window_bit = InterruptIndex % 4;
       const uint32 meipra_window_idx = InterruptIndex / 4;
 
-      osInterrupt_reg_meipra_window[meipra_window_idx] |= (IsrLookupTable[InterruptIndex].Prio << (4 * meipra_window_bit));
+      osInterrupt_reg_meipra_window[meipra_window_idx] |= (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio << (4 * meipra_window_bit));
     }
   }
 
@@ -239,4 +240,18 @@ void osRestoreSavedIntState(void)
 uint32 osGetActiveInterruptVectorId(void)
 {
   return((riscv_read_set_csr(RVCSR_MEINEXT_OFFSET, 1ul)) >> 2);
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//------------------------------------------------------------------------------------------------------------------
+uint8 osGetCoreId(void)
+{
+  return((uint8_t)HW_PER_SIO->CPUID.reg);
 }

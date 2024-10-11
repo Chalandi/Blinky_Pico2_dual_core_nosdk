@@ -1,45 +1,24 @@
-// ******************************************************************************************************
-// Filename    : OsTcb.c
-// 
-// OS          : OSEK 2.2.3  
-// 
-// CC          : ECC1/BCC1
-//
-// Author      : Chalandi Amine
-//
-// Owner       : Chalandi Amine
-// 
-// Date        : 27.12.2017
-// 
-// Description : Task Control Block definition
-// 
-// ******************************************************************************************************
+#include "OsTcb_Gen.h"
 
-#include"OsTcb.h"
+/* start of code generation */
 
-#ifdef __OS_SINGLE_CORE__
+typedef enum {
+    T1,
+    T2,
+    T3,
+    T4,
+    OS_INVALID_TASK,
+    OS_NUMBER_OF_TASKS = OS_INVALID_TASK
+}OsTaskId_t;
 
-/***************************************************/
-/*            X Macro System Generation            */
-/***************************************************/
+#define OS_NUMBER_OF_LOCAL_TASKS_ON_CORE0   2
+#define OS_NUMBER_OF_LOCAL_TASKS_ON_CORE1   2
 
-#define OS_GEN_DATA_STRUCT
-#include"OsGenCfg.h"
-#undef OS_GEN_DATA_STRUCT
-
-#define OS_GEN_TCB
-#include"OsGenCfg.h"
-#undef OS_GEN_TCB
-
-#define OS_GEN_OCB_PER_CORE
-#include"OsGenCfg.h"
-#undef OS_GEN_OCB_PER_CORE
-
-#define OS_GEN_OCB
-#include"OsGenCfg.h"
-#undef OS_GEN_OCB
-
-#else
+typedef struct
+{
+  uint8_t local_id;
+  uint8_t pinned_core;
+}osObjectCoreAsgn_t;
 
 osObjectCoreAsgn_t osTaskCoreAsgnLookupTable[] = { {.local_id=0, .pinned_core=0}, //T1
                                                    {.local_id=1, .pinned_core=0}, //T2
@@ -47,8 +26,20 @@ osObjectCoreAsgn_t osTaskCoreAsgnLookupTable[] = { {.local_id=0, .pinned_core=0}
                                                    {.local_id=1, .pinned_core=1}  //T4
                                                  };
 
+#define EVT_BLINK_BLUE_LED_FAST (1UL << 0)
+#define EVT_BLINK_BLUE_LED_SLOW (1UL << 1)
+#define EVT_BLINK_RED_LED_FAST  (1UL << 0)
+#define EVT_BLINK_RED_LED_SLOW  (1UL << 1)
 
 
+typedef enum {
+    ALARM_BLINK_BLUE_LED_FAST,
+    ALARM_BLINK_BLUE_LED_SLOW,
+    ALARM_BLINK_RED_LED_FAST,
+    ALARM_BLINK_RED_LED_SLOW,
+    OS_INVALID_ALARM,
+    OS_NUMBER_OF_ALARMS = OS_INVALID_ALARM
+}OsAlarmId_t;
 
 
 osObjectCoreAsgn_t osAlarmCoreAsgnLookupTable[] = { {.local_id=0, .pinned_core=0}, //ALARM_BLINK_BLUE_LED_FAST
@@ -58,13 +49,43 @@ osObjectCoreAsgn_t osAlarmCoreAsgnLookupTable[] = { {.local_id=0, .pinned_core=0
                                                   };
 
 
-uint8_t osResourceCoreAsgnLookupTable[4/*res*/][2/*core*/] = { {0, 0}, //RES_
-                                                               {1, 0}, //RES_
-                                                               {0, 1}, //RES_
-                                                               {1, 1}  //RES_
+typedef enum {
+    RES_SCHEDULER,
+    OS_INVALID_RESOURCE,
+    OS_NUMBER_OF_RESOURCES = OS_INVALID_RESOURCE
+}OsResourceId_t;
+
+
+
+
+uint8_t osResourceCoreAsgnLookupTable[4/*res*/][2/*core*/] = { 0, 0, //RES_
+                                                               1, 0, //RES_
+                                                               0, 1, //RES_
+                                                               1, 1  //RES_
                                                              };
 
 
+
+void OsTask_T1Func(void);
+void OsTask_T2Func(void);
+void OsTask_T3Func(void);
+void OsTask_T4Func(void);
+
+
+extern const OsIntIsrLtType IsrLookupTable_core0[];
+extern const OsIntIsrLtType IsrLookupTable_core1[];
+
+extern void  OsIsr_UndefinedFunc(void);
+extern void  osDispatchHandler(void);
+extern void  OsIsr_SysTickTimerFunc(void);
+
+
+
+
+
+
+
+extern volatile Ocb_t* OCB_Cfg[];
 
 void OsTask_T1Func(void);
 uint32_t __attribute__((section(".osTaskStack_T1"))) Stack_T_T1[(1024 / 4)];
@@ -236,11 +257,11 @@ const OsIntIsrLtType IsrLookupTable_core1[] = {
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
 };
 
-OsInterruptConfigType OsInterruptsConfig_core0 = {  (sizeof(IsrLookupTable_core0) / sizeof(OsIntIsrLtType)),
+OsInterruptConfigType OsInterruptsConfig_core0 = {  sizeof(IsrLookupTable_core0) / sizeof(OsInterruptConfigType),
                                                     (OsIntIsrLtType*)&IsrLookupTable_core0[0],
                                                  };
 
-OsInterruptConfigType OsInterruptsConfig_core1 = {  (sizeof(IsrLookupTable_core1) / sizeof(OsIntIsrLtType)),
+OsInterruptConfigType OsInterruptsConfig_core1 = {  sizeof(IsrLookupTable_core1) / sizeof(OsInterruptConfigType),
                                                     (OsIntIsrLtType*)&IsrLookupTable_core1[0],
                                                  };
 
@@ -270,7 +291,7 @@ static const OsResourceConfigType* OsResourcesConfig_core1[] = {
     &OsResource_RES_SCHEDULER_core1,
 };
 
-static Ocb_t OCB_LcCfg_core0 = {
+volatile Ocb_t OCB_Cfg_core0 = {
     (OsTcbType**)&OsTasksConfig_core0[0],
 
     (OsAlarmConfigType**)&OsAlarmsConfig_core0[0],
@@ -279,11 +300,11 @@ static Ocb_t OCB_LcCfg_core0 = {
 
     (OsInterruptConfigType*)&OsInterruptsConfig_core0,
 
-    0, 0, OS_NUMBER_OF_LOCAL_TASKS_ON_CORE0, 0, 0, 0, 0, 0, 0, 0, 0, {0}, {0}
+    0, 0, OS_NUMBER_OF_LOCAL_TASKS_ON_CORE0, 0, 0, 0, 0, 0, 0, 0, 0, { 0 }, { 0 }
 };
 
 
-static Ocb_t OCB_LcCfg_core1 = {
+volatile Ocb_t OCB_Cfg_core1 = {
     (OsTcbType**)&OsTasksConfig_core1[0],
 
     (OsAlarmConfigType**)&OsAlarmsConfig_core1[0],
@@ -296,17 +317,9 @@ static Ocb_t OCB_LcCfg_core1 = {
 };
 
 volatile Ocb_t* OCB_Cfg[] = {
-    (Ocb_t*)&OCB_LcCfg_core0,
-    (Ocb_t*)&OCB_LcCfg_core1,
+    (volatile Ocb_t*)&OCB_Cfg_core0,
+    (volatile Ocb_t*)&OCB_Cfg_core1,
 };
-
-const uint8 osLogicalToPhysicalCoreIdMapping[2] = {0, /* Physical core */
-                                                                       1 /* Physical core */
-                                                                      };
-
 
 
 //volatile Ocb_t* OCB_Cfg = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())];
-
-
-#endif

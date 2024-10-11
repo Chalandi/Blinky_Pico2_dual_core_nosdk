@@ -58,5 +58,5 @@ void osInitInterrupts(void);
 void osRestoreSavedIntState(void);
 void osSaveAndDisableIntState(void);
 void osSetInterruptPriorityMask(uint32 level);
-
+uint8 osGetCoreId(void);
 #endif

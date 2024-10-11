@@ -55,15 +55,15 @@ void OS_StartOS(OsAppModeType Mode)
     for(uint32 tcbIdx = 0; tcbIdx < OS_NUMBER_OF_TASKS; tcbIdx++)
     {
       /* Init all stacks with the magic marker */
-      const uint32 stack_size = (OCB_Cfg.pTcb[tcbIdx]->pstack_top - OCB_Cfg.pTcb[tcbIdx]->pstack_bot + sizeof(uint32)) / sizeof(uint32);
+      const uint32 stack_size = (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->pstack_top - OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->pstack_bot + sizeof(uint32)) / sizeof(uint32);
 
       for(uint32 offset = 0; offset < stack_size; offset++)
       {
-        ((volatile uint32*)OCB_Cfg.pTcb[tcbIdx]->pstack_bot)[offset] = (uint32)OS_STACK_MAGIC_MARKER;
+        ((volatile uint32*)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->pstack_bot)[offset] = (uint32)OS_STACK_MAGIC_MARKER;
       }
       
       /* Set default tasks priorities */
-      OCB_Cfg.pTcb[tcbIdx]->Prio = OCB_Cfg.pTcb[tcbIdx]->FixedPrio;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->Prio = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->FixedPrio;
     }
     
     /* Init system tick timer */
@@ -72,18 +72,18 @@ void OS_StartOS(OsAppModeType Mode)
     /* Start all autostart task */
     for(uint32 tcbIdx = 0; tcbIdx < OS_NUMBER_OF_TASKS; tcbIdx++)
     {
-      if(OCB_Cfg.pTcb[tcbIdx]->Autostart == OS_AUTOSTART && OCB_Cfg.pTcb[tcbIdx]->TaskStatus == SUSPENDED)
+      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->Autostart == OS_AUTOSTART && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->TaskStatus == SUSPENDED)
       {
         /* Switch to PRE_READY state */
-        OCB_Cfg.pTcb[tcbIdx]->TaskStatus = PRE_READY;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->TaskStatus = PRE_READY;
 
         /* set the current task's ready bit */
-        osSetTaskPrioReady(OCB_Cfg.pTcb[tcbIdx]->Prio);
+        osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->Prio);
         
         /* Update the number of multiple activation */
-        if(OCB_Cfg.pTcb[tcbIdx]->TaskType == BASIC)
+        if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->TaskType == BASIC)
         {
-          OCB_Cfg.pTcb[tcbIdx]->MultipleActivation++;
+          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->MultipleActivation++;
         }
       }
     }
@@ -105,9 +105,9 @@ void OS_StartOS(OsAppModeType Mode)
     /* Start all relative autostart alarms */
     for(uint32 alarmIdx = 0; alarmIdx < OS_NUMBER_OF_ALARMS; alarmIdx++)
     {
-      if(OCB_Cfg.pAlarm[alarmIdx]->AutoStart == ALARM_AUTOSTART)
+      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[alarmIdx]->AutoStart == ALARM_AUTOSTART)
       {
-        OS_SetRelAlarm((OsAlarmType)alarmIdx,OCB_Cfg.pAlarm[alarmIdx]->InitTicks,OCB_Cfg.pAlarm[alarmIdx]->InitCycles);
+        OS_SetRelAlarm((OsAlarmType)alarmIdx,OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[alarmIdx]->InitTicks,OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[alarmIdx]->InitCycles);
       }
     }
         
@@ -115,7 +115,7 @@ void OS_StartOS(OsAppModeType Mode)
     (void)osSchedule();
     
     /* Set the OS running flag */
-    OCB_Cfg.OsIsRunning = OS_TRUE;
+    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIsRunning = OS_TRUE;
 
     /* Call the dispatcher */
     osDispatch();
@@ -178,16 +178,15 @@ static void osReloadTimer(void)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osDispatcher(uint32 StackPtr)
 {
-
   /* Save the current stack pointer of the running task before switching the context */
-  if(OCB_Cfg.CurrentTaskIdx < OS_INTERNAL_TASK_ID)
+  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx < OS_INTERNAL_TASK_ID)
   {
-    OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pCurrentStackPointer = StackPtr;
+    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->pCurrentStackPointer = StackPtr;
 
     /* Check the stack pointer against stack overflow */
-    if( (!(StackPtr <(uint32)(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pstack_top) &&
-           StackPtr >= (uint32)(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pstack_bot)))  ||
-       (*(uint32*)(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pstack_bot) != OS_STACK_MAGIC_MARKER)
+    if( (!(StackPtr <(uint32)(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->pstack_top) &&
+           StackPtr >= (uint32)(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->pstack_bot)))  ||
+       (*(uint32*)(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->pstack_bot) != OS_STACK_MAGIC_MARKER)
       )
     {
       /* Stack overflow */
@@ -197,23 +196,23 @@ uint32 osDispatcher(uint32 StackPtr)
   else
   {
     /* save the system stack */
-    OCB_Cfg.OsCurrentSystemStackPtr = StackPtr;
+    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCurrentSystemStackPtr = StackPtr;
   }
 
   /* Set the new current task */
-  OCB_Cfg.CurrentTaskIdx = OCB_Cfg.HighPrioReadyTaskIdx;
+  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->HighPrioReadyTaskIdx;
   
-  if(OCB_Cfg.CurrentTaskIdx < OS_INTERNAL_TASK_ID)  
+  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx < OS_INTERNAL_TASK_ID)  
   {  
     /* check if we need to create a new stack frame for the new task */
-    if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus == PRE_READY)
+    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus == PRE_READY)
     {
 
       /* Update the current task state */
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = RUNNING;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = RUNNING;
 
       /* Clear the current task's ready bit */
-      osClearTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
+      osClearTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio);
       
       /* Call osPreTaskHook */
       #if(OS_PRETASKHOOK)
@@ -221,22 +220,22 @@ uint32 osDispatcher(uint32 StackPtr)
       #endif
       
       /* Create Stack Frame for the 1st execution */
-      const uint32 NewStackFramePtr = OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pstack_top;
-      const pFunc  NewTaskPtr       = OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->function;
+      const uint32 NewStackFramePtr = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->pstack_top;
+      const pFunc  NewTaskPtr       = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->function;
 
       /* Save the new stack ptr */
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pCurrentStackPointer = NewStackFramePtr;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->pCurrentStackPointer = NewStackFramePtr;
 
       /* Start the new task */
       osStartNewTask(NewStackFramePtr, NewTaskPtr);
 
     }
-    else if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus == READY)
+    else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus == READY)
     {
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = RUNNING;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = RUNNING;
 
       /* Clear the current task's ready bit */
-      osClearTaskPrioReady(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio);
+      osClearTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio);
       
       /* Call osPreTaskHook */
       #if(OS_PRETASKHOOK)
@@ -249,9 +248,9 @@ uint32 osDispatcher(uint32 StackPtr)
     /* there is no ready task in the system 
        The OS will stay in endless loop until
        an event will be occurred */
-    return(OCB_Cfg.OsCurrentSystemStackPtr);
+    return(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCurrentSystemStackPtr);
   }
-  return(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pCurrentStackPointer);
+  return(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->pCurrentStackPointer);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -265,7 +264,7 @@ uint32 osDispatcher(uint32 StackPtr)
 //------------------------------------------------------------------------------------------------------------------
 ISR(SysTickTimer)
 {
-  OCB_Cfg.OsSysTickCounter++;
+  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter++;
   osAlarmsManagement();
   osReloadTimer();
 }
@@ -285,27 +284,27 @@ void osStoreStackPointer(uint32 StackPtrValue)
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
 
   /* save the interrupt nesting level stack pointer */
-  OCB_Cfg.OsIntNestSavedStackPointer[OsInterruptNestingDepth - 1u] = StackPtrValue;
+  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIntNestSavedStackPointer[OsInterruptNestingDepth - 1u] = StackPtrValue;
 
   /* save the interrupt nesting level priority */
-  OCB_Cfg.OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u] = osGetInterruptPriorityMask();
+  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u] = osGetInterruptPriorityMask();
 
   /* store the preempted task context only in nested level 1,
      the other nesting interrupts will use the current stack */
   if(OsInterruptNestingDepth == 1u)
   {
     /* set the Cat2 interrupt flag */
-    OCB_Cfg.OsCat2InterruptLevel = 1;
+    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCat2InterruptLevel = 1;
 
-    if(OCB_Cfg.CurrentTaskIdx < OS_INTERNAL_TASK_ID)
+    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx < OS_INTERNAL_TASK_ID)
     {
       /* preempted from task level */
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pCurrentStackPointer = StackPtrValue; /* current task stack will be used */
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->pCurrentStackPointer = StackPtrValue; /* current task stack will be used */
     }
     else
     {
       /* preempted from OS level */
-      OCB_Cfg.OsCurrentSystemStackPtr = StackPtrValue; /* system stack will be used */
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCurrentSystemStackPtr = StackPtrValue; /* system stack will be used */
     }
   }
 }
@@ -326,18 +325,18 @@ uint32 osGetSavedStackPointer(void)
 
   if(OsInterruptNestingDepth == 1u)
   {
-    if(OCB_Cfg.CurrentTaskIdx < OS_INTERNAL_TASK_ID)
+    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx < OS_INTERNAL_TASK_ID)
     {
-      return(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->pCurrentStackPointer);
+      return(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->pCurrentStackPointer);
     }
     else
     {
-      return(OCB_Cfg.OsCurrentSystemStackPtr);
+      return(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCurrentSystemStackPtr);
     }
   }
   else
   {
-    return(OCB_Cfg.OsIntNestSavedStackPointer[OsInterruptNestingDepth - 1u]);
+    return(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIntNestSavedStackPointer[OsInterruptNestingDepth - 1u]);
   }
 }
 
@@ -356,7 +355,7 @@ uint32 osIntCallDispatch(uint32 StackPtr)
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
 
   /* restore the interrupt nesting priority level */
-  osSetInterruptPriorityMask(OCB_Cfg.OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u]);
+  osSetInterruptPriorityMask(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u]);
 
   if(OsInterruptNestingDepth == 1u)
   {
@@ -364,15 +363,15 @@ uint32 osIntCallDispatch(uint32 StackPtr)
     osDisableIntNesting();
 
     /* Reset the flag */
-    OCB_Cfg.OsCat2InterruptLevel = 0;
+    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCat2InterruptLevel = 0;
     
-    if(OCB_Cfg.OsIntCallDispatcher == 1)
+    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIntCallDispatcher == 1)
     {
       /* The internal system state is changed by the ISR cat2 (an Event is triggered)
          at this point the OS will switch to the new context (target task context) */
 
       /* Reset the flag */
-      OCB_Cfg.OsIntCallDispatcher = 0;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIntCallDispatcher = 0;
 
       /* Call the Dispatcher to execute the context switch process */
       return(osDispatcher(StackPtr));
@@ -430,7 +429,7 @@ void OS_ShutdownOS(OsStatusType Error)
   /* Kill all tasks */
   for(uint32 tcbIdx = 0; tcbIdx < OS_NUMBER_OF_TASKS; tcbIdx++)
   {
-    OCB_Cfg.pTcb[tcbIdx]->TaskStatus = SUSPENDED;
+    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->TaskStatus = SUSPENDED;
   }
   for(;;);
 }
@@ -461,7 +460,7 @@ static void osIdleLoop(void)
 //------------------------------------------------------------------------------------------------------------------
 boolean osIsCat2IntContext(void)
 {
-    return((boolean)OCB_Cfg.OsCat2InterruptLevel);
+    return((boolean)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCat2InterruptLevel);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -532,7 +531,7 @@ void OS_ResumeAllInterrupts(void)
 void OS_SuspendOSInterrupts(void)
 {
   /* Get the global mask prio */
-  OCB_Cfg.OsInterruptSavedLevel = osGetInterruptPriorityMask();
+  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsInterruptSavedLevel = osGetInterruptPriorityMask();
 
   /* Disable OS interrupts */
   osSetInterruptPriorityMask(OS_INT_CAT1_LOWEST_PRIO_LEVEL);
@@ -550,7 +549,7 @@ void OS_SuspendOSInterrupts(void)
 void OS_ResumeOSInterrupts(void)
 {
   /* Restore the global mask prio */
-  osSetInterruptPriorityMask(OCB_Cfg.OsInterruptSavedLevel);
+  osSetInterruptPriorityMask(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsInterruptSavedLevel);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -579,7 +578,7 @@ void OsIsr_UndefinedFunc(void)
 //-----------------------------------------------------------------------------
 uint64 osGetSystemTicksCounter(void)
 {
-  return(OCB_Cfg.OsSysTickCounter);
+  return(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter);
 }
 
 
@@ -594,7 +593,7 @@ uint64 osGetSystemTicksCounter(void)
 //-----------------------------------------------------------------------------
 uint64 osGetSystemTicksElapsedTime(uint64 prvTicks)
 {
-  return((uint64)(OCB_Cfg.OsSysTickCounter - prvTicks));
+  return((uint64)(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter - prvTicks));
 }
 
 //-----------------------------------------------------------------------------
@@ -644,8 +643,8 @@ void osKernelError(OsStatusType err)
 uint32 osGetMaximumStackUsage(uint32 TaskId)
 {
   uint32* pStack = (uint32*)NULL;
-  uint32 Bottom = OCB_Cfg.pTcb[TaskId]->pstack_bot;
-  uint32 Top    = OCB_Cfg.pTcb[TaskId]->pstack_top;
+  uint32 Bottom = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskId]->pstack_bot;
+  uint32 Top    = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskId]->pstack_top;
 
   #define ALIGN4_ADDRESS(x) ((x) & (0xFFFFFFFCUL))
 
@@ -662,6 +661,31 @@ uint32 osGetMaximumStackUsage(uint32 TaskId)
       Bottom = (uint32)pStack;
     }
   }
-  return((uint32)(OCB_Cfg.pTcb[TaskId]->pstack_top) - Top + sizeof(uint32));
+  return((uint32)(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskId]->pstack_top) - Top + sizeof(uint32));
 }
 
+//-----------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//-----------------------------------------------------------------------------
+uint8_t osRemapPhyToLogicalCoreId(uint8_t PhysicalCoreId)
+{
+  const uint8_t size = sizeof(osLogicalToPhysicalCoreIdMapping)/sizeof(uint8_t);
+
+  for(uint8_t core_id = 0; core_id < size; core_id++)
+  {
+    if(PhysicalCoreId == osLogicalToPhysicalCoreIdMapping[core_id])
+    {
+      return(core_id);
+    }
+  }
+
+  /* System Error : the physical core is not assigned to any logical core */
+  osKernelError(E_OS_MULTICORE_NOT_ASSIGNED);
+  return (uint8_t)-1;
+}

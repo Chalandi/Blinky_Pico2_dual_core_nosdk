@@ -22,86 +22,6 @@
 #include"OsAPIs.h"
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  OS_GetResource
-///
-/// \descr  This call serves to enter critical sections in the code that are assigned to the resource referenced 
-///         by <ResID>. A critical section shall always be left using ReleaseResource
-///
-/// \param  OsResourceType ResID: Reference to resource
-///
-/// \return OsStatusType
-//------------------------------------------------------------------------------------------------------------------
-OsStatusType OS_GetResource(OsResourceType ResID)
-{
-  if(ResID < OS_NUMBER_OF_RESOURCE)
-  {
-    if(((OCB_Cfg.pRes[ResID]->AuthorizedTask & (1ul << OCB_Cfg.CurrentTaskIdx)) != 0) &&
-       OCB_Cfg.pRes[ResID]->CurrentOccupiedTask == OS_INVALID_TASK)
-    {
-      /* The resource is available */
-
-      /* reserve the resource to the current task */
-      OCB_Cfg.pRes[ResID]->CurrentOccupiedTask = OCB_Cfg.CurrentTaskIdx;
-
-      /* Set the ceilling prio of the resource to the current task */
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio = OCB_Cfg.pRes[ResID]->ResCeilingPrio;
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio = OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio;
-
-      return(E_OK);
-    }
-    else
-    {
-      /* Resource is occupied by another task */
-      osInternalError(E_OS_ACCESS);
-    }
-        
-  }
-  else
-  {
-    osInternalError(E_OS_ID);
-  }      
-}
-
-//------------------------------------------------------------------------------------------------------------------
-/// \brief  OS_ReleaseResource
-///
-/// \descr  ReleaseResource is the counterpart of GetResource and serves to leave critical sections in the code 
-///         that are assigned to the resource referenced by <ResID>
-///
-/// \param  OsResourceType ResID: Reference to resource
-///
-/// \return OsStatusType
-//------------------------------------------------------------------------------------------------------------------
-OsStatusType OS_ReleaseResource(OsResourceType ResID)
-{
-  if(ResID < OS_NUMBER_OF_RESOURCE)
-  {
-    if(OCB_Cfg.pRes[ResID]->CurrentOccupiedTask == OCB_Cfg.CurrentTaskIdx)
-    {
-      /* Release the resource */
-      OCB_Cfg.pRes[ResID]->CurrentOccupiedTask = OS_INVALID_TASK;
-      
-      /* Set the default prio to the current task */
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio = 0;
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio = OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio;
-
-      /* Call the scheduler */
-      (void)osSchedule();
-
-      return(E_OK);
-    }
-    else
-    {
-      osInternalError(E_OS_NOFUNC);
-    }
-  }
-  else
-  {
-    osInternalError(E_OS_ID);
-  }  
-}
-
-//------------------------------------------------------------------------------------------------------------------
 /// \brief  OS_SetEvent
 ///
 /// \descr  The events of task <TaskID> are set according to the event mask <Mask>. 
@@ -115,7 +35,7 @@ OsStatusType OS_ReleaseResource(OsResourceType ResID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 {
-  if(OCB_Cfg.pTcb[TaskID]->TaskType == BASIC)
+  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskType == BASIC)
   {
     osInternalError(E_OS_ACCESS);
   }
@@ -123,23 +43,23 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
   {
     osInternalError(E_OS_ID);
   }
-  else if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED)
+  else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == SUSPENDED)
   {
     osInternalError(E_OS_STATE);
   }  
   else
   {
-    OCB_Cfg.pTcb[TaskID]->SetEvtMask |= Mask;
+    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->SetEvtMask |= Mask;
     
-    if(OCB_Cfg.pTcb[TaskID]->TaskStatus == WAITING)
+    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == WAITING)
     {
-      if((OCB_Cfg.pTcb[TaskID]->SetEvtMask & OCB_Cfg.pTcb[TaskID]->WaitEvtMask) != 0)
+      if((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->SetEvtMask & OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->WaitEvtMask) != 0)
       {  
         /* Switch state to Ready */
-        OCB_Cfg.pTcb[TaskID]->TaskStatus = READY;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus = READY;
 
         /* set the task's ready bit */
-        osSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
+        osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->Prio);
 
         /* Call the scheduler */
         (void)osSchedule();
@@ -160,7 +80,7 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ClearEvent(OsEventMaskType Mask)
 {
-  if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskType == BASIC)
+  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskType == BASIC)
   {
     osInternalError(E_OS_ACCESS);
   }
@@ -170,7 +90,7 @@ OsStatusType OS_ClearEvent(OsEventMaskType Mask)
   }  
   else
   {
-    OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->SetEvtMask &=(OsEventMaskType)(~Mask);
+    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->SetEvtMask &=(OsEventMaskType)(~Mask);
     return(E_OK);
   }
 }
@@ -188,7 +108,7 @@ OsStatusType OS_ClearEvent(OsEventMaskType Mask)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 {
-  if(OCB_Cfg.pTcb[TaskID]->TaskType == BASIC)
+  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskType == BASIC)
   {
     osInternalError(E_OS_ACCESS);
   }
@@ -196,13 +116,13 @@ OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
   {
     osInternalError(E_OS_ID);
   }
-  else if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED)
+  else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == SUSPENDED)
   {
     osInternalError(E_OS_STATE);
   }  
   else
   {
-    *Event = OCB_Cfg.pTcb[TaskID]->SetEvtMask;
+    *Event = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->SetEvtMask;
     return(E_OK);    
   }  
 }
@@ -219,11 +139,11 @@ OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_WaitEvent(OsEventMaskType Mask)
 {
-  if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0 || OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
+  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio != 0 || OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->FixedPrio)
   {  
     osInternalError(E_OS_RESOURCE);
   }
-  else if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskType == BASIC)
+  else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskType == BASIC)
   { 
     osInternalError(E_OS_ACCESS);
   }
@@ -234,13 +154,13 @@ OsStatusType OS_WaitEvent(OsEventMaskType Mask)
   else
   {  
     /* Store the new event mask*/
-    OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->WaitEvtMask = Mask;
+    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->WaitEvtMask = Mask;
     
     /* Check if the event waiting for is already set */
-    if((OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->SetEvtMask & OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->WaitEvtMask) == 0)
+    if((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->SetEvtMask & OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->WaitEvtMask) == 0)
     {
       /* event not present -> set current task to waiting */
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = WAITING;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = WAITING;
       
       /* Call the scheduler */
       (void)osSchedule();  

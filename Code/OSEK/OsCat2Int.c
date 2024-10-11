@@ -38,7 +38,7 @@
   /* get the active interrupt vector id */
   const uint32 IntId = osGetActiveInterruptVectorId();
 
-  if(IsrLookupTable[IntId].type == NOT_NESTED)
+  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[IntId].type == NOT_NESTED)
   {
     /* disable the nesting of the current interrupt priority level but keep it enabled for category 1 interrupts */
     osSetInterruptPriorityMask(OS_INT_CAT1_LOWEST_PRIO_LEVEL);
@@ -48,7 +48,7 @@
   osEnableIntNesting();
 
   /* call the appropriate interrupt service routine */
-  IsrLookupTable[IntId].IsrFunc();
+  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[IntId].IsrFunc();
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -66,9 +66,9 @@ void osIncNestingDepthLevel(void)
   if(0 == osIsInterruptDisabled())
     osKernelError(E_OS_ENABLEDINT);
 
-  OCB_Cfg.OsInterruptNestingDepth++;
+  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsInterruptNestingDepth++;
 
-  if(OCB_Cfg.OsInterruptNestingDepth >= OS_INTERRUPT_NESTING_DEPTH_LEVEL)
+  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsInterruptNestingDepth >= OS_INTERRUPT_NESTING_DEPTH_LEVEL)
     osKernelError(E_OS_KERNEL_PANIC);
 }
 
@@ -87,9 +87,9 @@ void osDecNestingDepthLevel(void)
   if(0 == osIsInterruptDisabled())
     osKernelError(E_OS_ENABLEDINT);
 
-  OCB_Cfg.OsInterruptNestingDepth--;
+  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsInterruptNestingDepth--;
 
-  if(OCB_Cfg.OsInterruptNestingDepth >= OS_INTERRUPT_NESTING_DEPTH_LEVEL)
+  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsInterruptNestingDepth >= OS_INTERRUPT_NESTING_DEPTH_LEVEL)
     osKernelError(E_OS_KERNEL_PANIC);
 }
 
@@ -109,7 +109,7 @@ uint32 osGetIntNestingLevel(void)
   /* might or might not be called durring interrupt nesting */
 
   osSaveAndDisableIntState();
-  osInterruptNestingDepth = OCB_Cfg.OsInterruptNestingDepth;
+  osInterruptNestingDepth = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsInterruptNestingDepth;
   osRestoreSavedIntState();
 
   return osInterruptNestingDepth;

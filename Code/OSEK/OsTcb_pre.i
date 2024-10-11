@@ -289,44 +289,36 @@ typedef struct
     pIsrFunc IsrFunc;
 } FeIsr_t;
 
-typedef enum eTaskId_core0 {
+enum eTaskId_core0 {
     T1,
     T2,
-    OS_INVALID_TASK
 };
-typedef enum {
+enum eEventId {
     EVT_BLINK_BLUE_LED_FAST = (1UL << 0),
     EVT_BLINK_BLUE_LED_SLOW = (1UL << 1),
-    OS_INVALID_EVENT
-} eEventId;
-typedef enum eAlarmId_core0 {
+};
+enum eAlarmId_core0 {
     ALARM_BLINK_BLUE_LED_FAST,
     ALARM_BLINK_BLUE_LED_SLOW,
-    OS_INVALID_ALARM
 };
-typedef enum eResourceId_core0 {
+enum eResourceId_core0 {
     RES_SCHEDULER,
-    OS_INVALID_RESOURCE
 };
 
-typedef enum eTaskId_core1 {
-    T5,
+enum eTaskId_core1 {
+    T3,
     T4,
-    OS_INVALID_TASK
 };
-typedef enum {
+enum eEventId {
     EVT_BLINK_RED_LED_FAST = (1UL << 0),
     EVT_BLINK_RED_LED_SLOW = (1UL << 1),
-    OS_INVALID_EVENT
-} eEventId;
-typedef enum eAlarmId_core1 {
+};
+enum eAlarmId_core1 {
     ALARM_BLINK_RED_LED_FAST,
     ALARM_BLINK_RED_LED_SLOW,
-    OS_INVALID_ALARM
 };
-typedef enum eResourceId_core1 {
+enum eResourceId_core1 {
     RES_SCHEDULER,
-    OS_INVALID_RESOURCE
 };
 
 void OsTask_T1Func(void);
@@ -334,16 +326,142 @@ void OsTask_T2Func(void);
 
 extern const OsInterruptConfigType IsrLookupTable_core0[];
 extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void osDispatchHandler(void);
 extern void OsIsr_SysTickTimerFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
 
-void OsTask_T5Func(void);
+void OsTask_T3Func(void);
 void OsTask_T4Func(void);
 
 extern const OsInterruptConfigType IsrLookupTable_core1[];
 extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void osDispatchHandler(void);
 extern void OsIsr_SysTickTimerFunc(void);
-
-
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_UndefinedFunc(void);
 
 extern volatile Ocb_t* OCB_Cfg[];
 
@@ -378,22 +496,38 @@ const OsInterruptConfigType IsrLookupTable_core0[] = {
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&osDispatchHandler, (uint8)4, (OsInterruptNestingType)NESTED },
     { (pIsrFunc)&OsIsr_SysTickTimerFunc, (uint8)4, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
@@ -416,10 +550,10 @@ const OsInterruptConfigType IsrLookupTable_core0[] = {
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
 };
 
-void OsTask_T5Func(void);
-uint32 __attribute__((section(".osTaskStack_T5"))) Stack_T_T5[(1024 / 4)];
-const uint32 Stack_T_T5_Size = ((1024 / 4) * 4);
-static OsTcbType OsTcb_T5 = { (pTaskFunc)&OsTask_T5Func, 1, (uint32)1, (uint32)(&Stack_T_T5[(sizeof(Stack_T_T5) / sizeof(uint32)) - 1]), (uint32)(&Stack_T_T5[0]), (uint32)(&Stack_T_T5[(sizeof(Stack_T_T5) / sizeof(uint32)) - 1]), SUSPENDED, 0, 0, 0, 0, 1, 0, EXTENDED, FULL_PREEMPT };
+void OsTask_T3Func(void);
+uint32 __attribute__((section(".osTaskStack_T3"))) Stack_T_T3[(1024 / 4)];
+const uint32 Stack_T_T3_Size = ((1024 / 4) * 4);
+static OsTcbType OsTcb_T3 = { (pTaskFunc)&OsTask_T3Func, 1, (uint32)1, (uint32)(&Stack_T_T3[(sizeof(Stack_T_T3) / sizeof(uint32)) - 1]), (uint32)(&Stack_T_T3[0]), (uint32)(&Stack_T_T3[(sizeof(Stack_T_T3) / sizeof(uint32)) - 1]), SUSPENDED, 0, 0, 0, 0, 1, 0, EXTENDED, FULL_PREEMPT };
 void OsTask_T4Func(void);
 uint32 __attribute__((section(".osTaskStack_T4"))) Stack_T_T4[(1024 / 4)];
 const uint32 Stack_T_T4_Size = ((1024 / 4) * 4);
@@ -447,22 +581,38 @@ const OsInterruptConfigType IsrLookupTable_core1[] = {
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
-    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&osDispatchHandler, (uint8)4, (OsInterruptNestingType)NESTED },
     { (pIsrFunc)&OsIsr_SysTickTimerFunc, (uint8)4, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
+    { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
     { (pIsrFunc)&OsIsr_UndefinedFunc, (uint8)0, (OsInterruptNestingType)NOT_NESTED },
@@ -502,7 +652,7 @@ static const OsResourceConfigType* OsResourcesConfig_core0[OS_INVALID_RESOURCE] 
 };
 
 static const OsTcbType* OsTasksConfig_core1[OS_INVALID_TASK] = {
-    &OsTcb_T5,
+    &OsTcb_T3,
     &OsTcb_T4,
 };
 
@@ -516,19 +666,26 @@ static const OsResourceConfigType* OsResourcesConfig_core1[OS_INVALID_RESOURCE] 
 
 volatile Ocb_t OCB_Cfg_core0 = {
     (OsTcbType**)&OsTasksConfig_core0[0],
+
     (OsAlarmConfigType**)&OsAlarmsConfig_core0[0],
+
     (OsResourceConfigType**)&OsResourcesConfig_core0[0],
 
-    0, 0, OS_INVALID_TASK, 0, 0, 0, 0, 0, 0, 0, 0, {0}, {0}
+    0, 0, OS_INVALID_TASK, 0, 0, 0, 0, 0, 0, 0, 0, { 0 }, { 0 }
 };
 volatile Ocb_t OCB_Cfg_core1 = {
     (OsTcbType**)&OsTasksConfig_core1[0],
+
     (OsAlarmConfigType**)&OsAlarmsConfig_core1[0],
+
     (OsResourceConfigType**)&OsResourcesConfig_core1[0],
-    0, 0, OS_INVALID_TASK, 0, 0, 0, 0, 0, 0, 0, 0, {0}, {0}
+
+    0, 0, OS_INVALID_TASK, 0, 0, 0, 0, 0, 0, 0, 0, { 0 }, { 0 }
 };
 
 volatile Ocb_t* OCB_Cfg[] = {
     (volatile Ocb_t*)&OCB_Cfg_core0,
+
     (volatile Ocb_t*)&OCB_Cfg_core1,
+
 };

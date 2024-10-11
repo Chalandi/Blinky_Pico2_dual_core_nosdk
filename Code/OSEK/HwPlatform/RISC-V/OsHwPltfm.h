@@ -50,6 +50,7 @@ boolean osIsInterruptDisabled(void);
 
 uint32 osGetActiveInterruptVectorId(void);
 uint32 osGetInterruptPriorityMask(void);
+uint8 osGetCoreId(void);
 
 void osCatchAllCpuExceptions(void);
 void osHwTimerInit(void);

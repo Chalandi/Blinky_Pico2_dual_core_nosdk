@@ -32,6 +32,7 @@ uint32 osGetSavedStackPointer(void);
 uint32 osIntCallDispatch(uint32 StackPtr);
 uint64 osGetSystemTicksCounter(void);
 uint64 osGetSystemTicksElapsedTime(uint64 prvTicks);
+uint8_t osRemapPhyToLogicalCoreId(uint8_t PhysicalCoreId);
 
 void OsIsr_UndefinedFunc(void);
 void osAlarmsManagement(void);
@@ -45,6 +46,7 @@ void osKernelError(OsStatusType err);
 void osRunCat2Isr(void);
 void osSetTaskPrioReady(const uint32 prio);
 void osStoreStackPointer(uint32 StackPtrValue);
+
 
 ISR(SysTickTimer);
 ISR(UndefinedFunc);

@@ -18,6 +18,7 @@
 #include"OsHwPltfm.h"
 #include"OsInternal.h"
 #include"OsTcb.h"
+#include"RP2350.h"
 
 //------------------------------------------------------------------------------------------------------------------
 // Defines
@@ -115,25 +116,25 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-  extern const uint32 osNbrOfInterrupts;
-  extern const OsInterruptConfigType IsrLookupTable[];
+  const uint32 osNbrOfInterrupts = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osNbrOfInterrupts;
+
   ISR(Undefined);
 
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();
 
   for (uint32 InterruptIndex = 0; InterruptIndex < osNbrOfInterrupts; InterruptIndex++)
   {
-    if (IsrLookupTable[InterruptIndex].IsrFunc != pISR(Undefined))
+    if (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
     {
       if((InterruptIndex == 4U) || (InterruptIndex == 5U)  || (InterruptIndex == 6U) || (InterruptIndex == 11U) || (InterruptIndex == 14U) || (InterruptIndex == 15U))
       {
         /* set the system handler priority level */
-        SCB_SHPRx[InterruptIndex - 4U] = ((uint8)osRemapOsPriorityValue(IsrLookupTable[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
+        SCB_SHPRx[InterruptIndex - 4U] = ((uint8)osRemapOsPriorityValue(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
       }
       else if(InterruptIndex > 15U)
       {
         /* set the NVIC interrupt priority level */
-        NVIC_IPRx[InterruptIndex - 16U] = ((uint8)osRemapOsPriorityValue(IsrLookupTable[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
+        NVIC_IPRx[InterruptIndex - 16U] = ((uint8)osRemapOsPriorityValue(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
 
         /* enable the NVIC interrupt */
         NVIC_ISERx[(InterruptIndex - 16U) / 32U] = (1UL << ((InterruptIndex - 16U) % 32U));
@@ -256,4 +257,18 @@ void osRestoreSavedIntState(void)
 uint32 osGetActiveInterruptVectorId(void)
 {
   return(GET_ICSR_VECTACTIVE());
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//------------------------------------------------------------------------------------------------------------------
+uint8 osGetCoreId(void)
+{
+  return((uint8_t)HW_PER_SIO->CPUID.reg);
 }

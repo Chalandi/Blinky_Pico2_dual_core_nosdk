@@ -49,4 +49,7 @@ typedef signed long long sint64;
   #define NULL_PTR    (void*)0
 #endif
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #endif

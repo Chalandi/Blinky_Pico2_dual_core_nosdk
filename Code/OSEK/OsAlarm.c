@@ -35,7 +35,7 @@ OsStatusType OS_GetAlarmBase(OsAlarmType AlarmID, OsAlarmBaseRefType Info)
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    Info = &OCB_Cfg.pAlarm[AlarmID];
+    Info = &OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID];
     return(E_OK);  
   }
   else
@@ -59,7 +59,7 @@ OsStatusType OS_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick)
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    *Tick = OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint - (uint32)OCB_Cfg.OsSysTickCounter;
+    *Tick = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint - (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
     return(E_OK);
   }
   else
@@ -85,29 +85,29 @@ OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickTyp
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    if(cycle == 0 && increment > 0 && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
+    if(cycle == 0 && increment > 0 && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_FREE)
     {
       /* One shot alarm */
-      OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
-      OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;
-      OCB_Cfg.pAlarm[AlarmID]->InitCycles      = 0;
-      OCB_Cfg.pAlarm[AlarmID]->InitTicks       = increment;
-      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_USED;
-      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = increment + (uint32)OCB_Cfg.OsSysTickCounter;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles      = 0;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks       = increment;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_USED;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = increment + (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
       return(E_OK);        
     }
-    else if (cycle != 0 &&  cycle >= increment && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
+    else if (cycle != 0 &&  cycle >= increment && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_FREE)
     {
       /* Cyclic alarm */
-      OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
-      OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;
-      OCB_Cfg.pAlarm[AlarmID]->InitCycles      = cycle;
-      OCB_Cfg.pAlarm[AlarmID]->InitTicks       = increment;
-      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_USED;
-      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = increment + cycle + (uint32)OCB_Cfg.OsSysTickCounter;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles      = cycle;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks       = increment;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_USED;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = increment + cycle + (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
       return(E_OK);        
     }
-    else if(OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_USED)
+    else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_USED)
     {
       osInternalError(E_OS_STATE);
     }
@@ -139,29 +139,29 @@ OsStatusType OS_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cy
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    if(cycle == 0 && start > (uint32)OCB_Cfg.OsSysTickCounter && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
+    if(cycle == 0 && start > (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_FREE)
     {
       /* One shot alarm */
-      OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
-      OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
-      OCB_Cfg.pAlarm[AlarmID]->InitCycles      = 0;
-      OCB_Cfg.pAlarm[AlarmID]->InitTicks       = start;
-      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_USED;
-      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = start;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles      = 0;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks       = start;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_USED;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = start;
       return(E_OK);        
     }
-    else if (cycle != 0 &&  start > (uint32)OCB_Cfg.OsSysTickCounter && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
+    else if (cycle != 0 &&  start > (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_FREE)
     {
       /* Cyclic alarm */
-      OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
-      OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
-      OCB_Cfg.pAlarm[AlarmID]->InitCycles      = cycle;
-      OCB_Cfg.pAlarm[AlarmID]->InitTicks       = start;
-      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_USED;
-      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = start;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles      = cycle;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks       = start;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_USED;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = start;
       return(E_OK);        
     }
-    else if(OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_USED)
+    else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_USED)
     {
       osInternalError(E_OS_STATE);
     }
@@ -189,8 +189,8 @@ OsStatusType OS_CancelAlarm(OsAlarmType AlarmID)
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_FREE;
-      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = 0;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_FREE;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = 0;
       return(E_OK);    
   }
   else
@@ -213,24 +213,24 @@ void osAlarmsManagement(void)
 
   for(int AlarmID =0; AlarmID < OS_NUMBER_OF_ALARMS; AlarmID++)
   {
-    if((OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint <= (uint32)OCB_Cfg.OsSysTickCounter) && (OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_USED))
+    if((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint <= (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter) && (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_USED))
     {
       /* Update Timers */
-      if(OCB_Cfg.pAlarm[AlarmID]->AlarmCategory == ALARM_RELATIVE &&  OCB_Cfg.pAlarm[AlarmID]->Alarmtype == ALARM_ONE_SHOT)
+      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory == ALARM_RELATIVE &&  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype == ALARM_ONE_SHOT)
       {
-        OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = 0;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = 0;
       }
-      else if(OCB_Cfg.pAlarm[AlarmID]->AlarmCategory == ALARM_RELATIVE &&  OCB_Cfg.pAlarm[AlarmID]->Alarmtype == ALARM_CYCLIC)
+      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory == ALARM_RELATIVE &&  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype == ALARM_CYCLIC)
       {
-        OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = OCB_Cfg.pAlarm[AlarmID]->InitTicks + OCB_Cfg.pAlarm[AlarmID]->InitCycles + (uint32)OCB_Cfg.OsSysTickCounter;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks + OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles + (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
       }
-      else if(OCB_Cfg.pAlarm[AlarmID]->AlarmCategory == ALARM_ABSOLUTE &&  OCB_Cfg.pAlarm[AlarmID]->Alarmtype == ALARM_ONE_SHOT)
+      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory == ALARM_ABSOLUTE &&  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype == ALARM_ONE_SHOT)
       {
-        OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = 0;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = 0;
       }
-      else if(OCB_Cfg.pAlarm[AlarmID]->AlarmCategory == ALARM_ABSOLUTE &&  OCB_Cfg.pAlarm[AlarmID]->Alarmtype == ALARM_CYCLIC)
+      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory == ALARM_ABSOLUTE &&  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype == ALARM_CYCLIC)
       {
-        OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = OCB_Cfg.pAlarm[AlarmID]->InitCycles + (uint32)OCB_Cfg.OsSysTickCounter;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles + (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
       }
       else
       {
@@ -238,19 +238,19 @@ void osAlarmsManagement(void)
       }
       
       /* Execute Action */
-      if(OCB_Cfg.pAlarm[AlarmID]->Action == ALARM_SET_EVENT)
+      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Action == ALARM_SET_EVENT)
       {
-        OS_SetEvent((OsTaskType)OCB_Cfg.pAlarm[AlarmID]->TaskId, (OsEventMaskType)OCB_Cfg.pAlarm[AlarmID]->Event);
+        OS_SetEvent((OsTaskType)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->TaskId, (OsEventMaskType)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Event);
       }
-      else if(OCB_Cfg.pAlarm[AlarmID]->Action == ALARM_ACTIVE_TASK)
+      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Action == ALARM_ACTIVE_TASK)
       {
-        OS_ActivateTask((OsTaskType)OCB_Cfg.pAlarm[AlarmID]->TaskId);
+        OS_ActivateTask((OsTaskType)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->TaskId);
       }
-      else if(OCB_Cfg.pAlarm[AlarmID]->Action == ALARM_CALLBACK)
+      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Action == ALARM_CALLBACK)
       {
-        if(OCB_Cfg.pAlarm[AlarmID]->CallBackFunc != (void*)0)
+        if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->CallBackFunc != (void*)0)
         {
-          OCB_Cfg.pAlarm[AlarmID]->CallBackFunc();
+          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->CallBackFunc();
         }
         else
         {

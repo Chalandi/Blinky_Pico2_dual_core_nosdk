@@ -255,7 +255,7 @@ OS_MULTICORE_BEGIN
   //=============================================================================
   //  Interrupt Mask Configuration
   //=============================================================================
-  #define OS_INT_CAT1_LOWEST_PRIO_LEVEL       7UL
+  #define OS_INT_CAT1_LOWEST_PRIO_LEVEL       7UL /* define for each core */
 
 
 

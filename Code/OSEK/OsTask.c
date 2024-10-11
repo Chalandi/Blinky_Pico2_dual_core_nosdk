@@ -33,7 +33,7 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetTaskID(OsTaskRefType TaskID)
 {
-  *TaskID = OCB_Cfg.CurrentTaskIdx;
+  *TaskID = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx;
   return(E_OK);
 }
 
@@ -51,7 +51,7 @@ OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State)
 {
   if(TaskID < OS_INTERNAL_TASK_ID)
   {
-    *State = OCB_Cfg.pTcb[TaskID]->TaskStatus;
+    *State = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus;
 
     if(*State == PRE_READY)
     {
@@ -79,16 +79,16 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
 {
   if(TaskID < OS_INTERNAL_TASK_ID)
   {
-    if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED)
+    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == SUSPENDED)
     {
-      OCB_Cfg.pTcb[TaskID]->TaskStatus = PRE_READY;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus = PRE_READY;
 
       /* set the current task's ready bit */
-      osSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
+      osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->Prio);
       
-      if(OCB_Cfg.pTcb[TaskID]->TaskType == BASIC)
+      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskType == BASIC)
       {
-        OCB_Cfg.pTcb[TaskID]->MultipleActivation++;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation++;
       }
 
       /* Call the scheduler */
@@ -96,9 +96,9 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
 
       return(E_OK);
     }
-    else if((OCB_Cfg.pTcb[TaskID]->TaskType == BASIC) && (OCB_Cfg.pTcb[TaskID]->MultipleActivation < OCB_Cfg.pTcb[TaskID]->MaxAllowedMultipleActivation))
+    else if((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskType == BASIC) && (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation < OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MaxAllowedMultipleActivation))
     {
-      OCB_Cfg.pTcb[TaskID]->MultipleActivation++;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation++;
       return(E_OK);
     }
     else
@@ -124,8 +124,8 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_TerminateTask(void)
 {
-  if(  OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0 &&
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
+  if(  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio != 0 &&
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->FixedPrio)
   {
     osInternalError(E_OS_RESOURCE);
   }
@@ -135,24 +135,24 @@ OsStatusType OS_TerminateTask(void)
   }   
   else
   {
-    if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskType == BASIC)
+    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskType == BASIC)
     {
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->MultipleActivation--;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation--;
 
-      if(0 != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->MultipleActivation)
+      if(0 != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation)
       {
-        OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = PRE_READY;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = PRE_READY;
       }
       else
       {
         /* Set the new task state */
-        OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = SUSPENDED;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
       }
     }
     else
     {
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = SUSPENDED;
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->SetEvtMask = 0;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->SetEvtMask = 0;
     }
 
     /* Call the scheduler */
@@ -176,8 +176,8 @@ OsStatusType OS_TerminateTask(void)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ChainTask(OsTaskType TaskID)
 {
-  if( OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0 &&
-      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
+  if( OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio != 0 &&
+      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->FixedPrio)
   {
     osInternalError(E_OS_RESOURCE);
   }
@@ -191,7 +191,7 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
   }
   else
   {
-    if(TaskID == OCB_Cfg.CurrentTaskIdx)
+    if(TaskID == OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx)
     {
       /* If the succeeding task is identical with the current task, this does not result in multiple requests. 
       The task is not transferred to the suspended state, but will immediately become ready again.*/
@@ -202,43 +202,43 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
     }
     else
     {
-      if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskType == BASIC)
+      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskType == BASIC)
       {
-        OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->MultipleActivation--;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation--;
 
-        if(0 != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->MultipleActivation)
+        if(0 != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation)
         {
-          OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = PRE_READY;
-          OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->MultipleActivation++;
-          if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->MultipleActivation > OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->MaxAllowedMultipleActivation)
+          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = PRE_READY;
+          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation++;
+          if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation > OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MaxAllowedMultipleActivation)
           {
             osInternalError(E_OS_LIMIT);
           }
         }
         else
         {
-          OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = SUSPENDED;
+          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
         }
 
-        OCB_Cfg.pTcb[TaskID]->MultipleActivation++;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation++;
 
-        if(OCB_Cfg.pTcb[TaskID]->MultipleActivation > OCB_Cfg.pTcb[TaskID]->MaxAllowedMultipleActivation)
+        if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation > OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MaxAllowedMultipleActivation)
         {
           osInternalError(E_OS_LIMIT);
         }
       }
       else
       {
-        OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = SUSPENDED;
-        OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->SetEvtMask = 0;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->SetEvtMask = 0;
       }
 
-      if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED)
+      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == SUSPENDED)
       {
-        OCB_Cfg.pTcb[TaskID]->TaskStatus = PRE_READY;
+        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus = PRE_READY;
 
        /* set the current task's ready bit */
-       osSetTaskPrioReady(OCB_Cfg.pTcb[TaskID]->Prio);
+       osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->Prio);
       }
 
       (void)osSchedule();

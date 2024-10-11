@@ -48,20 +48,6 @@ typedef enum
   FULL_PREEMPT
 }OsTasksSchedType;
 
-typedef enum
-{
-  CORE0 = 0,
-  CORE1,
-  CORE2,
-  CORE3,
-  CORE4,
-  CORE5,
-  CORE6,
-  CORE7,
-  CORE8,
-  CORE9,
-}OsCoreIdType;
-
 typedef enum 
 {
   E_OK                       = 0,
@@ -89,7 +75,8 @@ typedef enum
   E_OS_SYS_ALARM_MANAGEMENT  = 24,
   E_OS_SYS_WARNING           = 25,
   E_OS_KERNEL_PANIC          = 26,
-  E_OS_ENABLEDINT            = 27
+  E_OS_ENABLEDINT            = 27,
+  E_OS_MULTICORE_NOT_ASSIGNED= 28
 }OsStatusType;
 
 typedef enum
@@ -186,9 +173,23 @@ typedef OsAlarmConfigType** OsAlarmBaseRefType;
 
 typedef struct
 {
+    pIsrFunc IsrFunc;
+    uint8 Prio;
+    OsInterruptNestingType type;
+} OsIntIsrLtType;
+
+typedef struct
+{
+  uint32_t              osNbrOfInterrupts;
+  const OsIntIsrLtType* osIsrLookupTablePtr;
+}OsInterruptConfigType;
+
+typedef struct
+{
   OsTcbType**             pTcb;
   OsAlarmConfigType**     pAlarm;
   OsResourceConfigType**  pRes;
+  OsInterruptConfigType*  pInt;
   uint32                  OsIsRunning;
   uint32                  HighPrioReadyTaskIdx;
   uint32                  CurrentTaskIdx;
@@ -203,14 +204,6 @@ typedef struct
   uint32                  OsIntNestSavedStackPointer[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
   uint32                  OsIntNestSavedPrioLevel[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
 }Ocb_t;
-
-typedef struct
-{
-  pIsrFunc               IsrFunc;
-  uint8                  Prio;
-  OsInterruptNestingType type;
-}OsInterruptConfigType;
-
 
 typedef struct
 {

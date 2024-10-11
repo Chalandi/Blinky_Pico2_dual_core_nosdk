@@ -34,7 +34,8 @@ else
 endif
 
 ERR_MSG_FORMATER_SCRIPT = ../Tools/scripts/CompilerErrorFormater.py
-
+LINKER_ERR_MSG_FORMATER_SCRIPT = ../Tools/scripts/LinkerErrorFormater.py
+FORMAT_LINKER_ERR =
 ############################################################################################
 # Toolchain
 ############################################################################################
@@ -332,8 +333,12 @@ $(OBJ_DIR)/%.o : %.cpp
 
 $(OUTPUT_DIR)/$(PRJ_NAME).elf : $(FILES_O) $(LD_SCRIPT)
 	@-echo +++ link: $(subst \,/,$@)
+ifeq ($(FORMAT_LINKER_ERR), )
 	@$(LD) $(LOPS) $(FILES_O) -o $(OUTPUT_DIR)/$(PRJ_NAME).elf
-
+else
+	@$(LD) $(LOPS) $(FILES_O) -o $(OUTPUT_DIR)/$(PRJ_NAME).elf 2> $(OBJ_DIR)/linker.err || true
+	@-$(PYTHON) $(LINKER_ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/linker.err
+endif
 
 .PHONY : GENERATE
 GENERATE:

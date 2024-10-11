@@ -125,31 +125,31 @@
 #define OS_MULTICORE_BEGIN
 #define OS_CONFIG_BEGIN(core)
 
-#define OS_TASK_BEGIN(core)                                                           typedef enum eTaskId_core##core{
+#define OS_TASK_BEGIN(core)                                                           enum eTaskId_core##core{
 #define OS_TASK_DEF(Name,Prio,StackSize,NbOfActiv,AutoStart,TaskType,SchedType)       Name,
-#define OS_TASK_END                                                                   OS_INVALID_TASK};
+#define OS_TASK_END                                                                   };
 
 #define OS_NUMBER_OF_TASKS   OS_INVALID_TASK
 #define OS_INTERNAL_TASK_ID  OS_INVALID_TASK
 
-#define OS_EVENT_BEGIN                                                           typedef enum{
+#define OS_EVENT_BEGIN                                                           enum eEventId{
 #define OS_EVENT_DEF(Event, Mask)                                                Event = Mask,
-#define OS_EVENT_END                                                             OS_INVALID_EVENT}eEventId;
+#define OS_EVENT_END                                                             };
 
 #define OS_NUMBER_OF_EVENTS  OS_INVALID_EVENT
 
-#define OS_ALARM_BEGIN(core)                                                     typedef enum eAlarmId_core##core{
+#define OS_ALARM_BEGIN(core)                                                     enum eAlarmId_core##core{
 #define OS_ALARM_DEF(Name,Action,Event,task,Callback)                            Name,
 #define OS_ALARM_AUTO_DEF(Name,Increment,Cycle,Action,Event,task,Callback)       Name,
-#define OS_ALARM_END                                                             OS_INVALID_ALARM};
+#define OS_ALARM_END                                                             };
 
 #define OS_NUMBER_OF_ALARMS  OS_INVALID_ALARM
 
-#define OS_RESOURCE_BEGIN(core)                                                  typedef enum eResourceId_core##core{
+#define OS_RESOURCE_BEGIN(core)                                                  enum eResourceId_core##core{
 #define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)                        Name,
-#define OS_RESOURCE_END                                                          OS_INVALID_RESOURCE};
+#define OS_RESOURCE_END                                                          };
 
-#define OS_NUMBER_OF_RESOURCE  OS_INVALID_RESOURCE
+#define OS_NUMBER_OF_RESOURCES  OS_INVALID_RESOURCE
 
 #define OS_INTERRUPT_BEGIN(core)                                                      
 #define OS_INTERRUPT_CAT1_DEF(IsrFunc,Prio,Type)                                
@@ -262,7 +262,7 @@
 #define OS_ALARM_AUTO_DEF(Name,Increment,Cycle,Action,Event,task,Callback)          &OsAlarm_##Name,
 #define OS_ALARM_END                                                                };
 
-#define OS_RESOURCE_BEGIN(core)                                                     static const OsResourceConfigType* OsResourcesConfig_core##core[OS_NUMBER_OF_RESOURCE]={
+#define OS_RESOURCE_BEGIN(core)                                                     static const OsResourceConfigType* OsResourcesConfig_core##core[OS_NUMBER_OF_RESOURCES]={
 #define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks)                           &OsResource_##Name,
 #define OS_RESOURCE_END                                                             };
 
