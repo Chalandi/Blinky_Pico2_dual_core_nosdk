@@ -145,7 +145,7 @@ void main_Core1(void)
   RP2350_MulticoreSync((uint32_t)HW_PER_SIO->CPUID.reg);
 
   /* start the OS */
-  //OS_StartOS(APP_MODE_DEFAULT);
+  OS_StartOS(APP_MODE_DEFAULT);
 
   while(1)
   {
