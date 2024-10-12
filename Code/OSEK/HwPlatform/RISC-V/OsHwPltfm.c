@@ -119,13 +119,13 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-  const uint32 osNbrOfInterrupts = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osNbrOfInterrupts;
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
 
   ISR(Undefined);
 
-  for (uint32 InterruptIndex = 0; InterruptIndex < osNbrOfInterrupts; InterruptIndex++)
+  for (uint32 InterruptIndex = 0; InterruptIndex < OCB_Cfg[osActiveCore]->pInt->osNbrOfInterrupts; InterruptIndex++)
   {
-    if (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
+    if (OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
     {
       /* enable the interrupt */
       const uint32 meiea_window_bit = InterruptIndex % 16;
@@ -137,7 +137,7 @@ void osInitInterrupts(void)
       const uint32 meipra_window_bit = InterruptIndex % 4;
       const uint32 meipra_window_idx = InterruptIndex / 4;
 
-      osInterrupt_reg_meipra_window[meipra_window_idx] |= (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio << (4 * meipra_window_bit));
+      osInterrupt_reg_meipra_window[meipra_window_idx] |= (OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio << (4 * meipra_window_bit));
     }
   }
 

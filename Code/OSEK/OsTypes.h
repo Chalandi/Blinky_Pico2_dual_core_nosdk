@@ -203,6 +203,9 @@ typedef struct
   uint32                  OsInterruptSavedLevel;
   uint32                  OsIntNestSavedStackPointer[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
   uint32                  OsIntNestSavedPrioLevel[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
+  uint32                  OsNumberOfTasks;
+  uint32                  OsNumberOfAlarms;
+  uint32                  OsNumberOfResources;
 }Ocb_t;
 
 typedef struct

@@ -116,25 +116,25 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-  const uint32 osNbrOfInterrupts = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osNbrOfInterrupts;
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
 
   ISR(Undefined);
 
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();
 
-  for (uint32 InterruptIndex = 0; InterruptIndex < osNbrOfInterrupts; InterruptIndex++)
+  for (uint32 InterruptIndex = 0; InterruptIndex < OCB_Cfg[osActiveCore]->pInt->osNbrOfInterrupts; InterruptIndex++)
   {
-    if (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
+    if (OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
     {
       if((InterruptIndex == 4U) || (InterruptIndex == 5U)  || (InterruptIndex == 6U) || (InterruptIndex == 11U) || (InterruptIndex == 14U) || (InterruptIndex == 15U))
       {
         /* set the system handler priority level */
-        SCB_SHPRx[InterruptIndex - 4U] = ((uint8)osRemapOsPriorityValue(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
+        SCB_SHPRx[InterruptIndex - 4U] = ((uint8)osRemapOsPriorityValue(OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
       }
       else if(InterruptIndex > 15U)
       {
         /* set the NVIC interrupt priority level */
-        NVIC_IPRx[InterruptIndex - 16U] = ((uint8)osRemapOsPriorityValue(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
+        NVIC_IPRx[InterruptIndex - 16U] = ((uint8)osRemapOsPriorityValue(OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
 
         /* enable the NVIC interrupt */
         NVIC_ISERx[(InterruptIndex - 16U) / 32U] = (1UL << ((InterruptIndex - 16U) % 32U));

@@ -279,7 +279,10 @@ static Ocb_t OCB_LcCfg_core0 = {
 
     (OsInterruptConfigType*)&OsInterruptsConfig_core0,
 
-    0, 0, OS_NUMBER_OF_LOCAL_TASKS_ON_CORE0, 0, 0, 0, 0, 0, 0, 0, 0, {0}, {0}
+    0, 0, OS_NUMBER_OF_LOCAL_TASKS_ON_CORE0, 0, 0, 0, 0, 0, 0, 0, 0, {0}, {0},
+    sizeof(OsTasksConfig_core0)/sizeof(OsTcbType*),
+    sizeof(OsAlarmsConfig_core0)/sizeof(OsAlarmConfigType*),
+    sizeof(OsResourcesConfig_core0)/sizeof(OsResourceConfigType*)
 };
 
 
@@ -292,7 +295,10 @@ static Ocb_t OCB_LcCfg_core1 = {
 
     (OsInterruptConfigType*)&OsInterruptsConfig_core1,
 
-    0, 0, OS_NUMBER_OF_LOCAL_TASKS_ON_CORE1, 0, 0, 0, 0, 0, 0, 0, 0, {0}, {0}
+    0, 0, OS_NUMBER_OF_LOCAL_TASKS_ON_CORE1, 0, 0, 0, 0, 0, 0, 0, 0, {0}, {0},
+    sizeof(OsTasksConfig_core1)/sizeof(OsTcbType*),
+    sizeof(OsAlarmsConfig_core1)/sizeof(OsAlarmConfigType*),
+    sizeof(OsResourcesConfig_core1)/sizeof(OsResourceConfigType*)
 };
 
 volatile Ocb_t* OCB_Cfg[] = {
@@ -301,8 +307,8 @@ volatile Ocb_t* OCB_Cfg[] = {
 };
 
 const uint8 osLogicalToPhysicalCoreIdMapping[2] = {0, /* Physical core */
-                                                                       1 /* Physical core */
-                                                                      };
+                                                   1 /* Physical core */
+                                                  };
 
 
 

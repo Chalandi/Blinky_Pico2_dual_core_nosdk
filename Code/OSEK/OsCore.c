@@ -44,46 +44,48 @@ void OS_StartOS(OsAppModeType Mode)
 {
   (void) Mode;
 
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
   if(TRUE == osIsInterruptContext())
   {
     return;
   }
   
-  if(OS_NUMBER_OF_TASKS > 0)
+  if(OCB_Cfg[osActiveCore]->OsNumberOfTasks > 0)
   {
     /* INIT TCBs */
-    for(uint32 tcbIdx = 0; tcbIdx < OS_NUMBER_OF_TASKS; tcbIdx++)
+    for(uint32 tcbIdx = 0; tcbIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks; tcbIdx++)
     {
       /* Init all stacks with the magic marker */
-      const uint32 stack_size = (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->pstack_top - OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->pstack_bot + sizeof(uint32)) / sizeof(uint32);
+      const uint32 stack_size = (OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->pstack_top - OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->pstack_bot + sizeof(uint32)) / sizeof(uint32);
 
       for(uint32 offset = 0; offset < stack_size; offset++)
       {
-        ((volatile uint32*)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->pstack_bot)[offset] = (uint32)OS_STACK_MAGIC_MARKER;
+        ((volatile uint32*)OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->pstack_bot)[offset] = (uint32)OS_STACK_MAGIC_MARKER;
       }
       
       /* Set default tasks priorities */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->Prio = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->FixedPrio;
+      OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->Prio = OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->FixedPrio;
     }
     
     /* Init system tick timer */
     osInitTimer();
     
     /* Start all autostart task */
-    for(uint32 tcbIdx = 0; tcbIdx < OS_NUMBER_OF_TASKS; tcbIdx++)
+    for(uint32 tcbIdx = 0; tcbIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks; tcbIdx++)
     {
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->Autostart == OS_AUTOSTART && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->TaskStatus == SUSPENDED)
+      if(OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->Autostart == OS_AUTOSTART && OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->TaskStatus == SUSPENDED)
       {
         /* Switch to PRE_READY state */
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->TaskStatus = PRE_READY;
+        OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->TaskStatus = PRE_READY;
 
         /* set the current task's ready bit */
-        osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->Prio);
+        osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->Prio);
         
         /* Update the number of multiple activation */
-        if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->TaskType == BASIC)
+        if(OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->TaskType == BASIC)
         {
-          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->MultipleActivation++;
+          OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->MultipleActivation++;
         }
       }
     }
@@ -103,11 +105,11 @@ void OS_StartOS(OsAppModeType Mode)
     osStartTimer();
 
     /* Start all relative autostart alarms */
-    for(uint32 alarmIdx = 0; alarmIdx < OS_NUMBER_OF_ALARMS; alarmIdx++)
+    for(uint32 alarmIdx = 0; alarmIdx < OCB_Cfg[osActiveCore]->OsNumberOfAlarms; alarmIdx++)
     {
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[alarmIdx]->AutoStart == ALARM_AUTOSTART)
+      if(OCB_Cfg[osActiveCore]->pAlarm[alarmIdx]->AutoStart == ALARM_AUTOSTART)
       {
-        OS_SetRelAlarm((OsAlarmType)alarmIdx,OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[alarmIdx]->InitTicks,OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[alarmIdx]->InitCycles);
+        OS_SetRelAlarm((OsAlarmType)alarmIdx,OCB_Cfg[osActiveCore]->pAlarm[alarmIdx]->InitTicks,OCB_Cfg[osActiveCore]->pAlarm[alarmIdx]->InitCycles);
       }
     }
         
@@ -115,7 +117,7 @@ void OS_StartOS(OsAppModeType Mode)
     (void)osSchedule();
     
     /* Set the OS running flag */
-    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIsRunning = OS_TRUE;
+    OCB_Cfg[osActiveCore]->OsIsRunning = OS_TRUE;
 
     /* Call the dispatcher */
     osDispatch();
