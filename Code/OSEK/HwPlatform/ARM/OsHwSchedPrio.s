@@ -22,7 +22,7 @@
 .globl  osHwSearchForHighPrio
 .type osHwSearchForHighPrio, %function
 .extern OsSchedPrioTypeSize
-.extern OsHwSchedPrioReg
+.extern osGetOsHwSchedPrioRegAddress
 
 .equ osNoReadyTaskWasFound, 0xA0A0F5F5UL
 
@@ -31,7 +31,8 @@ osHwSearchForHighPrio:
                        ldr r0,=OsSchedPrioTypeSize
                        ldr r7, [r0]
                        add r7,r7, #-4
-                       ldr r4, =OsHwSchedPrioReg
+                       bl osGetOsHwSchedPrioRegAddress
+                       mov r4, r0
                        mov r0, #31
                        add r4, r4, r7
 __ContinueSearching:   

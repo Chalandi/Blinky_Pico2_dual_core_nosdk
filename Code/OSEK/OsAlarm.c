@@ -33,10 +33,22 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetAlarmBase(OsAlarmType AlarmID, OsAlarmBaseRefType Info)
 {
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    Info = &OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID];
-    return(E_OK);  
+    const osObjectCoreAsgn_t osLocalAlarmAssignment = osGetLocalAlarmAssignment(AlarmID);
+    const OsAlarmType LocalAlarmId = osLocalAlarmAssignment.local_id;
+
+    if(osActiveCore == osLocalAlarmAssignment.pinned_core)
+    {
+      Info = &OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmId];
+    }
+    else
+    {
+      /* to be implemented: send the request to the other core */
+    }
+    return(E_OK);
   }
   else
   {
@@ -59,7 +71,16 @@ OsStatusType OS_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick)
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    *Tick = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint - (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
+    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const osObjectCoreAsgn_t osLocalAlarmAssignment = osGetLocalAlarmAssignment(AlarmID);
+    if(osActiveCore == osLocalAlarmAssignment.pinned_core)
+    {
+      *Tick = OCB_Cfg[osActiveCore]->pAlarm[osLocalAlarmAssignment.local_id]->AlarmCheckPoint - (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter;
+    }
+    else
+    {
+      /* to be implemented: send the request to the other core */
+    }
     return(E_OK);
   }
   else
@@ -85,29 +106,39 @@ OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickTyp
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    if(cycle == 0 && increment > 0 && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_FREE)
+    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const osObjectCoreAsgn_t osLocalAlarmAssignment = osGetLocalAlarmAssignment(AlarmID);
+    const OsAlarmType LocalAlarmID = (OsAlarmType)(OsAlarmType)osLocalAlarmAssignment.local_id;
+
+    if(osActiveCore != osLocalAlarmAssignment.pinned_core)
+    {
+      /* to be implemented: send the request to the other core */
+      return(E_OK);
+    }
+
+    if(cycle == 0 && increment > 0 && OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_FREE)
     {
       /* One shot alarm */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles      = 0;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks       = increment;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_USED;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = increment + (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Alarmtype       = ALARM_ONE_SHOT;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->AlarmCategory   = ALARM_RELATIVE;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->InitCycles      = 0;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->InitTicks       = increment;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status          = ALARM_USED;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->AlarmCheckPoint = increment + (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter;
       return(E_OK);        
     }
-    else if (cycle != 0 &&  cycle >= increment && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_FREE)
+    else if (cycle != 0 &&  cycle >= increment && OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_FREE)
     {
       /* Cyclic alarm */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles      = cycle;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks       = increment;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_USED;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = increment + cycle + (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Alarmtype       = ALARM_CYCLIC;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->AlarmCategory   = ALARM_RELATIVE;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->InitCycles      = cycle;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->InitTicks       = increment;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status          = ALARM_USED;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->AlarmCheckPoint = increment + cycle + (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter;
       return(E_OK);        
     }
-    else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_USED)
+    else if(OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_USED)
     {
       osInternalError(E_OS_STATE);
     }
@@ -139,29 +170,39 @@ OsStatusType OS_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cy
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    if(cycle == 0 && start > (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_FREE)
+    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const osObjectCoreAsgn_t osLocalAlarmAssignment = osGetLocalAlarmAssignment(AlarmID);
+    const OsAlarmType LocalAlarmID = (OsAlarmType)osLocalAlarmAssignment.local_id;
+
+    if(osActiveCore != osLocalAlarmAssignment.pinned_core)
+    {
+      /* to be implemented: send the request to the other core */
+      return(E_OK);
+    }
+
+    if(cycle == 0 && start > (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter && OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_FREE)
     {
       /* One shot alarm */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles      = 0;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks       = start;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_USED;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = start;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Alarmtype       = ALARM_ONE_SHOT;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->InitCycles      = 0;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->InitTicks       = start;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status          = ALARM_USED;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->AlarmCheckPoint = start;
       return(E_OK);        
     }
-    else if (cycle != 0 &&  start > (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_FREE)
+    else if (cycle != 0 &&  start > (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter && OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_FREE)
     {
       /* Cyclic alarm */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles      = cycle;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks       = start;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_USED;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = start;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Alarmtype       = ALARM_CYCLIC;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->InitCycles      = cycle;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->InitTicks       = start;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status          = ALARM_USED;
+      OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->AlarmCheckPoint = start;
       return(E_OK);        
     }
-    else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_USED)
+    else if(OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_USED)
     {
       osInternalError(E_OS_STATE);
     }
@@ -189,9 +230,19 @@ OsStatusType OS_CancelAlarm(OsAlarmType AlarmID)
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status          = ALARM_FREE;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = 0;
-      return(E_OK);    
+    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const osObjectCoreAsgn_t osLocalAlarmAssignment = osGetLocalAlarmAssignment(AlarmID);
+    const OsAlarmType LocalAlarmID = (OsAlarmType)osLocalAlarmAssignment.local_id;
+
+    if(osActiveCore != osLocalAlarmAssignment.pinned_core)
+    {
+      /* to be implemented: send the request to the other core */
+      return(E_OK);
+    }
+
+    OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status          = ALARM_FREE;
+    OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->AlarmCheckPoint = 0;
+    return(E_OK);    
   }
   else
   {
@@ -210,27 +261,28 @@ OsStatusType OS_CancelAlarm(OsAlarmType AlarmID)
 //------------------------------------------------------------------------------------------------------------------
 void osAlarmsManagement(void)
 {
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
 
-  for(int AlarmID =0; AlarmID < OS_NUMBER_OF_ALARMS; AlarmID++)
+  for(uint32 AlarmID =0; AlarmID < OCB_Cfg[osActiveCore]->OsNumberOfAlarms; AlarmID++)
   {
-    if((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint <= (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter) && (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Status == ALARM_USED))
+    if((OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->AlarmCheckPoint <= (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter) && (OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->Status == ALARM_USED))
     {
       /* Update Timers */
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory == ALARM_RELATIVE &&  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype == ALARM_ONE_SHOT)
+      if(OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->AlarmCategory == ALARM_RELATIVE &&  OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->Alarmtype == ALARM_ONE_SHOT)
       {
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = 0;
+        OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->AlarmCheckPoint = 0;
       }
-      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory == ALARM_RELATIVE &&  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype == ALARM_CYCLIC)
+      else if(OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->AlarmCategory == ALARM_RELATIVE &&  OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->Alarmtype == ALARM_CYCLIC)
       {
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitTicks + OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles + (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
+        OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->AlarmCheckPoint = OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->InitTicks + OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->InitCycles + (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter;
       }
-      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory == ALARM_ABSOLUTE &&  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype == ALARM_ONE_SHOT)
+      else if(OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->AlarmCategory == ALARM_ABSOLUTE &&  OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->Alarmtype == ALARM_ONE_SHOT)
       {
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = 0;
+        OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->AlarmCheckPoint = 0;
       }
-      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCategory == ALARM_ABSOLUTE &&  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Alarmtype == ALARM_CYCLIC)
+      else if(OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->AlarmCategory == ALARM_ABSOLUTE &&  OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->Alarmtype == ALARM_CYCLIC)
       {
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->AlarmCheckPoint = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->InitCycles + (uint32)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsSysTickCounter;
+        OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->AlarmCheckPoint = OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->InitCycles + (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter;
       }
       else
       {
@@ -238,19 +290,19 @@ void osAlarmsManagement(void)
       }
       
       /* Execute Action */
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Action == ALARM_SET_EVENT)
+      if(OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->Action == ALARM_SET_EVENT)
       {
-        OS_SetEvent((OsTaskType)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->TaskId, (OsEventMaskType)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Event);
+        OS_SetEvent((OsTaskType)OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->TaskId, (OsEventMaskType)OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->Event);
       }
-      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Action == ALARM_ACTIVE_TASK)
+      else if(OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->Action == ALARM_ACTIVE_TASK)
       {
-        OS_ActivateTask((OsTaskType)OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->TaskId);
+        OS_ActivateTask((OsTaskType)OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->TaskId);
       }
-      else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->Action == ALARM_CALLBACK)
+      else if(OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->Action == ALARM_CALLBACK)
       {
-        if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->CallBackFunc != (void*)0)
+        if(OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->CallBackFunc != (void*)0)
         {
-          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pAlarm[AlarmID]->CallBackFunc();
+          OCB_Cfg[osActiveCore]->pAlarm[AlarmID]->CallBackFunc();
         }
         else
         {

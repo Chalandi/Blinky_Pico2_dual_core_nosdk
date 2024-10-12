@@ -33,7 +33,6 @@ static uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit);
 //------------------------------------------------------------------------------------------------------------------
 // Globals
 //------------------------------------------------------------------------------------------------------------------
-volatile uint32 OsHwPltfmSavedIntState = 0;
 
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  osIsInterruptContext
@@ -218,31 +217,9 @@ static uint32 osRemapOsPriorityValue(uint32 level, uint32 IntPrioBit)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-void osSaveAndDisableIntState(void)
+uint32 osGetInterruptGlobalMask(void)
 {
-  OsHwPltfmSavedIntState = OsGetSysPrimaskReg();
-  DISABLE_INTERRUPTS();
-}
-
-//------------------------------------------------------------------------------------------------------------------
-/// \brief  
-///
-/// \descr  
-///
-/// \param  void
-///
-/// \return void
-//------------------------------------------------------------------------------------------------------------------
-void osRestoreSavedIntState(void)
-{
-  if(OsHwPltfmSavedIntState)
-  {
-    DISABLE_INTERRUPTS();
-  }
-  else
-  {
-    ENABLE_INTERRUPTS();
-  }
+  return((OsGetSysPrimaskReg() == 1ul) ? 0ul : 1ul);
 }
 
 //------------------------------------------------------------------------------------------------------------------

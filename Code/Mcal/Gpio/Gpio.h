@@ -43,11 +43,19 @@
 //=============================================================================
 // Defines
 //=============================================================================
+//#define RP2350_TINY_BOARD
 
+#ifndef RP2350_TINY_BOARD
 #define LED_GREEN_CFG()               GPIO_SET_DIRECTION_OUTPUT(25)
 #define LED_GREEN_OFF()               GPIO_SET_OUTPUT_LOW(25)
 #define LED_GREEN_ON()                GPIO_SET_OUTPUT_HIGH(25)
 #define LED_GREEN_TOGGLE()            GPIO_SET_OUTPUT_XOR(25)
+#else
+#define LED_GREEN_CFG()               GPIO_SET_DIRECTION_OUTPUT(19)
+#define LED_GREEN_OFF()               GPIO_SET_OUTPUT_LOW(19)
+#define LED_GREEN_ON()                GPIO_SET_OUTPUT_HIGH(19)
+#define LED_GREEN_TOGGLE()            GPIO_SET_OUTPUT_XOR(19)
+#endif
 
 #define LED_RED_CFG()                 GPIO_SET_DIRECTION_OUTPUT(18)
 #define LED_RED_OFF()                 GPIO_SET_OUTPUT_LOW(18)

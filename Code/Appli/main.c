@@ -81,11 +81,16 @@ void main_Core0(void)
 
   /* Output disable on pin 25 */
   LED_GREEN_CFG();
+  LED_RED_CFG();
 
   /* Start the Core 1 and turn on the led to be sure that we passed successfully the core 1 initiaization */
   if(TRUE == RP2350_StartCore1())
   {
+#ifndef RP2350_TINY_BOARD
     LED_GREEN_ON();
+#else
+    LED_GREEN_OFF();
+#endif
   }
   else
   {
@@ -138,6 +143,9 @@ void main_Core1(void)
 
   /* Synchronize with core 0 */
   RP2350_MulticoreSync((uint32_t)HW_PER_SIO->CPUID.reg);
+
+  /* start the OS */
+  //OS_StartOS(APP_MODE_DEFAULT);
 
   while(1)
   {

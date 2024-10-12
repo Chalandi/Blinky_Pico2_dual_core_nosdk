@@ -28,8 +28,6 @@
 //=========================================================================================
 // Globals
 //=========================================================================================
-volatile uint32 OsHwPltfmSavedIntState = 0;
-
 static uint16 osInterrupt_reg_meiea_window[32] = {0};
 static uint16 osInterrupt_reg_meipra_window[32] = {0};
 
@@ -201,31 +199,17 @@ void osCatchAllCpuExceptions(void)
 }
 
 //------------------------------------------------------------------------------------------------------------------
-/// \brief  osSaveAndDisableIntState
+/// \brief
 ///
-/// \descr  This function save and disable the CPU interrupt state.
+/// \descr
 ///
-/// \param  void
+/// \param  
 ///
-/// \return void
+/// \return 
 //------------------------------------------------------------------------------------------------------------------
-void osSaveAndDisableIntState(void)
+uint32 osGetInterruptGlobalMask(void)
 {
-  OsHwPltfmSavedIntState = riscv_read_clear_csr(RVCSR_MSTATUS_OFFSET, RVCSR_MSTATUS_MIE_BITS);
-}
-
-//------------------------------------------------------------------------------------------------------------------
-/// \brief  osRestoreSavedIntState
-///
-/// \descr  This function restore the saved CPU interrupt state.
-///
-/// \param  void
-///
-/// \return void
-//------------------------------------------------------------------------------------------------------------------
-void osRestoreSavedIntState(void)
-{
-  riscv_write_csr(RVCSR_MSTATUS_OFFSET, OsHwPltfmSavedIntState);
+  return((riscv_read_clear_csr(RVCSR_MSTATUS_OFFSET, RVCSR_MSTATUS_MIE_BITS) >> 3ul) & 0x01);
 }
 
 //------------------------------------------------------------------------------------------------------------------

@@ -28,7 +28,7 @@
 .globl  osHwSearchForHighPrio
 .type osHwSearchForHighPrio, %function
 .extern OsSchedPrioTypeSize
-.extern OsHwSchedPrioReg
+.extern osGetOsHwSchedPrioRegAddress
 .extern __os_sw_clz
 
 .equ osNoReadyTaskWasFound, 0xA0A0F5F5UL
@@ -39,8 +39,8 @@ osHwSearchForHighPrio:
                        la a0, OsSchedPrioTypeSize
                        lw a3, 0(a0)
                        addi a3, a3, -4
-                       la a1, OsHwSchedPrioReg
-                       add a1, a1, a3
+                       jal osGetOsHwSchedPrioRegAddress
+                       add a1, a0, a3
 .L_ContinueSearching:
                        lw a0, 0(a1)
 /*

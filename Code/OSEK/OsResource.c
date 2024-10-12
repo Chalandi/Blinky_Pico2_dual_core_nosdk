@@ -35,17 +35,21 @@ OsStatusType OS_GetResource(OsResourceType ResID)
 {
   if(ResID < OS_NUMBER_OF_RESOURCES)
   {
-    if(((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pRes[ResID]->AuthorizedTask & (1ul << OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx)) != 0) &&
-       OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pRes[ResID]->CurrentOccupiedTask == OS_INVALID_TASK)
+    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const osObjectCoreAsgn_t osLocalResourceAssignment = osGetLocalResourceAssignment(ResID);
+    const OsResourceType LocalResID = osLocalResourceAssignment.local_id;
+    
+    if(((OCB_Cfg[osActiveCore]->pRes[LocalResID]->AuthorizedTask & (1ul << OCB_Cfg[osActiveCore]->CurrentTaskIdx)) != 0) &&
+       OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask == OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
       /* The resource is available */
 
       /* reserve the resource to the current task */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pRes[ResID]->CurrentOccupiedTask = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx;
+      OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask = OCB_Cfg[osActiveCore]->CurrentTaskIdx;
 
       /* Set the ceilling prio of the resource to the current task */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pRes[ResID]->ResCeilingPrio;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio = OCB_Cfg[osActiveCore]->pRes[LocalResID]->ResCeilingPrio;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio;
 
       return(E_OK);
     }
@@ -59,7 +63,7 @@ OsStatusType OS_GetResource(OsResourceType ResID)
   else
   {
     osInternalError(E_OS_ID);
-  }      
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -76,14 +80,18 @@ OsStatusType OS_ReleaseResource(OsResourceType ResID)
 {
   if(ResID < OS_NUMBER_OF_RESOURCES)
   {
-    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pRes[ResID]->CurrentOccupiedTask == OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx)
+    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const osObjectCoreAsgn_t osLocalResourceAssignment = osGetLocalResourceAssignment(ResID);
+    const OsResourceType LocalResID = osLocalResourceAssignment.local_id;
+
+    if(OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask == OCB_Cfg[osActiveCore]->CurrentTaskIdx)
     {
       /* Release the resource */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pRes[ResID]->CurrentOccupiedTask = OS_INVALID_TASK;
+      OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask = OCB_Cfg[osActiveCore]->OsNumberOfTasks;
       
       /* Set the default prio to the current task */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio = 0;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->FixedPrio;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio = 0;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio;
 
       /* Call the scheduler */
       (void)osSchedule();

@@ -35,31 +35,43 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 {
-  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskType == BASIC)
-  {
-    osInternalError(E_OS_ACCESS);
-  }
-  else if(TaskID >= OS_INTERNAL_TASK_ID)
+
+  if(TaskID >= OS_INTERNAL_TASK_ID)
   {
     osInternalError(E_OS_ID);
   }
-  else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == SUSPENDED)
+
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
+  const OsTaskType LocalTaskID = (OsTaskType)osLocalTaskAssignment.local_id;
+
+  if(osActiveCore != osLocalTaskAssignment.pinned_core)
+  {
+    /* to be implemented: send the request to the other core */
+    return(E_OK);
+  }
+
+  if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC)
+  {
+    osInternalError(E_OS_ACCESS);
+  }
+  else if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == SUSPENDED)
   {
     osInternalError(E_OS_STATE);
   }  
   else
   {
-    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->SetEvtMask |= Mask;
+    OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->SetEvtMask |= Mask;
     
-    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == WAITING)
+    if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == WAITING)
     {
-      if((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->SetEvtMask & OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->WaitEvtMask) != 0)
+      if((OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->SetEvtMask & OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->WaitEvtMask) != 0)
       {  
         /* Switch state to Ready */
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus = READY;
+        OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus = READY;
 
         /* set the task's ready bit */
-        osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->Prio);
+        osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->Prio);
 
         /* Call the scheduler */
         (void)osSchedule();
@@ -80,7 +92,9 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ClearEvent(OsEventMaskType Mask)
 {
-  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskType == BASIC)
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
+  if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskType == BASIC)
   {
     osInternalError(E_OS_ACCESS);
   }
@@ -90,7 +104,7 @@ OsStatusType OS_ClearEvent(OsEventMaskType Mask)
   }  
   else
   {
-    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->SetEvtMask &=(OsEventMaskType)(~Mask);
+    OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->SetEvtMask &=(OsEventMaskType)(~Mask);
     return(E_OK);
   }
 }
@@ -108,22 +122,33 @@ OsStatusType OS_ClearEvent(OsEventMaskType Mask)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 {
-  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskType == BASIC)
-  {
-    osInternalError(E_OS_ACCESS);
-  }
-  else if(TaskID >= OS_INTERNAL_TASK_ID)
+  if(TaskID >= OS_INTERNAL_TASK_ID)
   {
     osInternalError(E_OS_ID);
   }
-  else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == SUSPENDED)
+
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
+  const OsTaskType LocalTaskID = (OsTaskType)osLocalTaskAssignment.local_id;
+
+  if(osActiveCore != osLocalTaskAssignment.pinned_core)
+  {
+    /* to be implemented: send the request to the other core */
+    return(E_OK);
+  }
+
+  if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC)
+  {
+    osInternalError(E_OS_ACCESS);
+  }
+  else if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == SUSPENDED)
   {
     osInternalError(E_OS_STATE);
-  }  
+  }
   else
   {
-    *Event = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->SetEvtMask;
-    return(E_OK);    
+    *Event = OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->SetEvtMask;
+    return(E_OK);
   }  
 }
 
@@ -139,11 +164,13 @@ OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_WaitEvent(OsEventMaskType Mask)
 {
-  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio != 0 || OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->FixedPrio)
-  {  
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
+  if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0 || OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
+  {
     osInternalError(E_OS_RESOURCE);
   }
-  else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskType == BASIC)
+  else if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskType == BASIC)
   { 
     osInternalError(E_OS_ACCESS);
   }
@@ -154,19 +181,18 @@ OsStatusType OS_WaitEvent(OsEventMaskType Mask)
   else
   {  
     /* Store the new event mask*/
-    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->WaitEvtMask = Mask;
+    OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->WaitEvtMask = Mask;
     
     /* Check if the event waiting for is already set */
-    if((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->SetEvtMask & OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->WaitEvtMask) == 0)
+    if((OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->SetEvtMask & OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->WaitEvtMask) == 0)
     {
       /* event not present -> set current task to waiting */
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = WAITING;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = WAITING;
       
       /* Call the scheduler */
-      (void)osSchedule();  
-    }    
+      (void)osSchedule();
+    }
     
     return(E_OK);
   }
 }
-      

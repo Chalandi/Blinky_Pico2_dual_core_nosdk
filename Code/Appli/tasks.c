@@ -97,7 +97,7 @@ TASK(T3)
       {
         OS_ClearEvent(EVT_BLINK_RED_LED_FAST);
         T3AliveCounter++;
-        LED_GREEN_TOGGLE();
+        LED_RED_TOGGLE();
       }
     }
     else

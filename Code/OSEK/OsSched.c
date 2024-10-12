@@ -22,7 +22,6 @@
 //=============================================================================
 // Global Variables
 //=============================================================================
-volatile OsSchedPrioType OsHwSchedPrioReg;
 const uint32 OsSchedPrioTypeSize = sizeof(OsSchedPrioType);
 
 //-----------------------------------------------------------------------------
@@ -31,18 +30,18 @@ const uint32 OsSchedPrioTypeSize = sizeof(OsSchedPrioType);
 /// \descr  
 ///
 /// \param  prio 
-/// \param  TaskId 
 ///
 /// \return void 
 //-----------------------------------------------------------------------------
 void osSetTaskPrioReady(const uint32 prio)
 {
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
   if(sizeof(OsSchedPrioType)/sizeof(unsigned long) >= ((prio / 32U) + 1U))
   {
-    *((unsigned long*)&OsHwSchedPrioReg + (prio / 32U)) |= (unsigned long)(1UL << (prio % 32U));
+    *((unsigned long*)&(OCB_Cfg[osActiveCore]->OsHwSchedPrioReg) + (prio / 32U)) |= (unsigned long)(1UL << (prio % 32U));
   }
 }
-
 
 //-----------------------------------------------------------------------------
 /// \brief  
@@ -55,10 +54,28 @@ void osSetTaskPrioReady(const uint32 prio)
 //-----------------------------------------------------------------------------
 void osClearTaskPrioReady(const uint32 prio)
 {
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
   if(sizeof(OsSchedPrioType)/sizeof(unsigned long) >= ((prio / 32U) + 1U))
   {
-    *((unsigned long*)&OsHwSchedPrioReg + (prio / 32U)) &= ~((unsigned long)(1UL << (prio % 32U)));
+    *((unsigned long*)&(OCB_Cfg[osActiveCore]->OsHwSchedPrioReg) + (prio / 32U)) &= ~((unsigned long)(1UL << (prio % 32U)));
   }
+}
+
+//-----------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  prio 
+///
+/// \return void 
+//-----------------------------------------------------------------------------
+uintptr_t osGetOsHwSchedPrioRegAddress(void)
+{
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
+  return((uintptr_t)(&(OCB_Cfg[osActiveCore]->OsHwSchedPrioReg)));
 }
 
 //-----------------------------------------------------------------------------
@@ -72,16 +89,18 @@ void osClearTaskPrioReady(const uint32 prio)
 //-----------------------------------------------------------------------------
 uint32 osGetHighPrioReadyTaskIdx(const uint32 prio)
 {
-  for(uint32 tcbIdx = 0; tcbIdx < OS_NUMBER_OF_TASKS; tcbIdx++)
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
+  for(uint32 tcbIdx = 0; tcbIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks; tcbIdx++)
   {
     /* search for the task that own the prio */
-    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[tcbIdx]->Prio == prio)
+    if(OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->Prio == prio)
     {
       return(tcbIdx);
     }
   }
   /* return the OS internal idle loop index */
-  return((uint32)OS_INTERNAL_TASK_ID); 
+  return((uint32)OCB_Cfg[osActiveCore]->OsNumberOfTasks);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -97,13 +116,15 @@ uint32 osGetHighPrioReadyTaskIdx(const uint32 prio)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_Schedule(void)
 {
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
   if(TRUE == osIsInterruptContext())
   {
     osInternalError(E_OS_CALLEVEL);
   }
-  else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx < OS_INTERNAL_TASK_ID                                                  &&
-          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio != 0                                        &&
-          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->FixedPrio)
+  else if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks        &&
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0  &&
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
   {
     osInternalError(E_OS_RESOURCE);
   }
@@ -113,15 +134,15 @@ OsStatusType OS_Schedule(void)
     OS_SuspendAllInterrupts();
 
     /* Get the high prio task id */
-    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
+    OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
 
     /* Exit the critical section */
     OS_ResumeAllInterrupts();
 
     /* check if we need to switch the context (Preemption case) */
-    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->HighPrioReadyTaskIdx]->Prio > OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio)
+    if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx]->Prio > OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio)
     {
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
+      if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
       {
         /* Call osPostTaskHook */
         #if(OS_POSTTASKHOOK)
@@ -129,18 +150,18 @@ OsStatusType OS_Schedule(void)
         #endif
 
         /* change the state of the current task */
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = READY;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = READY;
 
         /* set the current task's ready bit */
-        osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio);
+        osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio);
 
-        if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsLockDispatcher == OS_FALSE)
+        if(OCB_Cfg[osActiveCore]->OsLockDispatcher == OS_FALSE)
         {
           /* Call the dispatcher to change the current context*/
           osDispatch();
           return(E_OK);
         }
-        else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsLockDispatcher == OS_TRUE)
+        else if(OCB_Cfg[osActiveCore]->OsLockDispatcher == OS_TRUE)
         {
           /* dispatcher is locked ignore context switch */
           return(E_OK);
@@ -164,9 +185,11 @@ OsStatusType OS_Schedule(void)
 //-----------------------------------------------------------------------------
 OsStatusType osSchedule(void)
 {
-  if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx < OS_INTERNAL_TASK_ID                                                  &&
-     OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio != 0                                        &&
-     OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->FixedPrio &&
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
+  if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks                                                                            &&
+     OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0                                                                      &&
+     OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio &&
      FALSE == osIsCat2IntContext())
   {
     osInternalError(E_OS_RESOURCE);
@@ -181,19 +204,19 @@ OsStatusType osSchedule(void)
     OS_SuspendAllInterrupts();
 
     /* Get the high prio task id */
-    OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
+    OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
 
     /* Exit the critical section */
     OS_ResumeAllInterrupts();
 
 
     /* case1: the scheduler is called explicitly by the running task or by an interrupt cat 2 and a ready task is found */
-    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx < OS_INTERNAL_TASK_ID && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->HighPrioReadyTaskIdx < OS_INTERNAL_TASK_ID)
+    if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
         /* check if we need to switch the context (Preemption case) */
-        if((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus == RUNNING) && (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->HighPrioReadyTaskIdx]->Prio > OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio))
+        if((OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == RUNNING) && (OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx]->Prio > OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio))
         {
-          if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
+          if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
           {
             /* Call osPostTaskHook */
             #if(OS_POSTTASKHOOK)
@@ -201,25 +224,25 @@ OsStatusType osSchedule(void)
             #endif
 
             /* change the state of the current task */
-            OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = READY;
+            OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = READY;
 
             /* set the current task's ready bit */
-            osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio);
+            osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio);
 
-            if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCat2InterruptLevel == OS_FALSE && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsLockDispatcher == OS_FALSE)
+            if(OCB_Cfg[osActiveCore]->OsCat2InterruptLevel == OS_FALSE && OCB_Cfg[osActiveCore]->OsLockDispatcher == OS_FALSE)
             {
               /* Call the dispatcher */
               osDispatch();
               return(E_OK);
             }
-            else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsLockDispatcher == OS_TRUE)
+            else if(OCB_Cfg[osActiveCore]->OsLockDispatcher == OS_TRUE)
             {
               return(E_OK);
             }
             else
             {
               /*  Scheduler is called in interrupt cat 2 context, the Dispatcher will be executed later after the ISR */
-              OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIntCallDispatcher = OS_TRUE;
+              OCB_Cfg[osActiveCore]->OsIntCallDispatcher = OS_TRUE;
               return(E_OK);
             }
           }
@@ -229,7 +252,7 @@ OsStatusType osSchedule(void)
             return(E_OK);
           }
         }
-        else if (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus == SUSPENDED || OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus == WAITING)
+        else if (OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == SUSPENDED || OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == WAITING)
         {
           /* Call osPostTaskHook */
           #if(OS_POSTTASKHOOK)
@@ -247,12 +270,12 @@ OsStatusType osSchedule(void)
         }
     }
     /* case 2: - System idle loop is active and the scheduler is called explicitly from an interrupt cat 2 and a ready task is found */
-    else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx == OS_INTERNAL_TASK_ID && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->HighPrioReadyTaskIdx < OS_INTERNAL_TASK_ID)
+    else if(OCB_Cfg[osActiveCore]->CurrentTaskIdx == OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCat2InterruptLevel == OS_TRUE && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIsRunning == OS_TRUE)
+      if(OCB_Cfg[osActiveCore]->OsCat2InterruptLevel == OS_TRUE && OCB_Cfg[osActiveCore]->OsIsRunning == OS_TRUE)
       {
         /* call the dispatcher after the execution of ISR cat2 */
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIntCallDispatcher = OS_TRUE;
+        OCB_Cfg[osActiveCore]->OsIntCallDispatcher = OS_TRUE;
         return(E_OK);
       }
       else
@@ -262,10 +285,10 @@ OsStatusType osSchedule(void)
       }
     }
    /* case 3: the scheduler is called explicitly by the running task or by an interrupt cat 2 and no ready task is found */
-    else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx < OS_INTERNAL_TASK_ID && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->HighPrioReadyTaskIdx == OS_INTERNAL_TASK_ID)
+    else if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx == OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
       /* check the current task state */
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus == RUNNING)
+      if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == RUNNING)
       {
         /* no context switch is needed */
         return(E_OK);
@@ -279,7 +302,7 @@ OsStatusType osSchedule(void)
         osPostTaskHook();
         #endif
 
-        if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsCat2InterruptLevel == OS_FALSE)
+        if(OCB_Cfg[osActiveCore]->OsCat2InterruptLevel == OS_FALSE)
         {
           /* The scheduler is called outside an interrupt context */
           osDispatch();
@@ -288,13 +311,13 @@ OsStatusType osSchedule(void)
         else
         {
           /* call the dispatcher after the execution of ISR cat2 */
-          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->OsIntCallDispatcher = OS_TRUE;
+          OCB_Cfg[osActiveCore]->OsIntCallDispatcher = OS_TRUE;
           return(E_OK);
         }
       }
     }
    /* case 4: System idle loop is active and the scheduler is called explicitly from an interrupt cat 2 and no ready task is found */
-    else if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx == OS_INTERNAL_TASK_ID && OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->HighPrioReadyTaskIdx == OS_INTERNAL_TASK_ID)
+    else if(OCB_Cfg[osActiveCore]->CurrentTaskIdx == OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx == OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
       /* no context switch is needed */
       return(E_OK);

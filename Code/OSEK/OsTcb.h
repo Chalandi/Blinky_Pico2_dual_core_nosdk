@@ -54,12 +54,6 @@ typedef enum {
 #define OS_NUMBER_OF_LOCAL_TASKS_ON_CORE1   2
 #define OS_INTERNAL_TASK_ID  OS_INVALID_TASK
 
-typedef struct
-{
-  uint8_t local_id;
-  uint8_t pinned_core;
-}osObjectCoreAsgn_t;
-
 #define EVT_BLINK_BLUE_LED_FAST (1UL << 0)
 #define EVT_BLINK_BLUE_LED_SLOW (1UL << 1)
 #define EVT_BLINK_RED_LED_FAST  (1UL << 0)
@@ -89,6 +83,10 @@ void OsTask_T4Func(void);
 
 extern const OsIntIsrLtType IsrLookupTable_core0[];
 extern const OsIntIsrLtType IsrLookupTable_core1[];
+
+extern const osObjectCoreAsgn_t osTaskCoreAsgnLookupTable[];
+extern const osObjectCoreAsgn_t osAlarmCoreAsgnLookupTable[];
+extern const uint8_t osResourceCoreAsgnLookupTable[4/*res*/][2/*core*/];
 
 extern const uint8 osLogicalToPhysicalCoreIdMapping[2];
 

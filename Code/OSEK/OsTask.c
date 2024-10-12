@@ -33,7 +33,9 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetTaskID(OsTaskRefType TaskID)
 {
-  *TaskID = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx;
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
+  *TaskID = OCB_Cfg[osActiveCore]->CurrentTaskIdx;
   return(E_OK);
 }
 
@@ -49,19 +51,29 @@ OsStatusType OS_GetTaskID(OsTaskRefType TaskID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State)
 {
-  if(TaskID < OS_INTERNAL_TASK_ID)
+  if(TaskID >= OS_INTERNAL_TASK_ID)
   {
-    *State = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus;
+    osInternalError(E_OS_ID);
+  }
 
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
+  const OsTaskType LocalTaskID = osLocalTaskAssignment.local_id;
+
+  if(osActiveCore != osLocalTaskAssignment.pinned_core)
+  {
+    /* to be implemented: send the request to the other core */
+    return(E_OK);
+  }
+  else
+  {
+    *State = OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus;
+    
     if(*State == PRE_READY)
     {
       *State = READY; /* Change PRE_READY to READY to be conform to OSEK SPEC */
     }
     return(E_OK);
-  }
-  else
-  {
-    osInternalError(E_OS_ID);
   }
 }
 
@@ -79,16 +91,20 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
 {
   if(TaskID < OS_INTERNAL_TASK_ID)
   {
-    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == SUSPENDED)
+    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
+    const OsTaskType LocalTaskID = osLocalTaskAssignment.local_id;
+
+    if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == SUSPENDED)
     {
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus = PRE_READY;
+      OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus = PRE_READY;
 
       /* set the current task's ready bit */
-      osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->Prio);
+      osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->Prio);
       
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskType == BASIC)
+      if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC)
       {
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation++;
+        OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation++;
       }
 
       /* Call the scheduler */
@@ -96,9 +112,9 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
 
       return(E_OK);
     }
-    else if((OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskType == BASIC) && (OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation < OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MaxAllowedMultipleActivation))
+    else if((OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC) && (OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation < OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MaxAllowedMultipleActivation))
     {
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation++;
+      OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation++;
       return(E_OK);
     }
     else
@@ -124,8 +140,10 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_TerminateTask(void)
 {
-  if(  OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio != 0 &&
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->FixedPrio)
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+
+  if(  OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0 &&
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
   {
     osInternalError(E_OS_RESOURCE);
   }
@@ -135,24 +153,24 @@ OsStatusType OS_TerminateTask(void)
   }   
   else
   {
-    if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskType == BASIC)
+    if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskType == BASIC)
     {
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation--;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation--;
 
-      if(0 != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation)
+      if(0 != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation)
       {
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = PRE_READY;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = PRE_READY;
       }
       else
       {
         /* Set the new task state */
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
       }
     }
     else
     {
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->SetEvtMask = 0;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->SetEvtMask = 0;
     }
 
     /* Call the scheduler */
@@ -176,8 +194,17 @@ OsStatusType OS_TerminateTask(void)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ChainTask(OsTaskType TaskID)
 {
-  if( OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->CeilingPrio != 0 &&
-      OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->Prio != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->FixedPrio)
+  if(TaskID >= OS_INTERNAL_TASK_ID)
+  {
+    osInternalError(E_OS_ID);
+  }
+
+  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
+  const OsTaskType LocalTaskID = osLocalTaskAssignment.local_id;
+
+  if( OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0 &&
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
   {
     osInternalError(E_OS_RESOURCE);
   }
@@ -185,13 +212,9 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
   {
     osInternalError(E_OS_CALLEVEL);
   } 
-  else if(TaskID >= OS_INTERNAL_TASK_ID)
-  {
-    osInternalError(E_OS_ID);
-  }
   else
   {
-    if(TaskID == OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx)
+    if(LocalTaskID == OCB_Cfg[osActiveCore]->CurrentTaskIdx)
     {
       /* If the succeeding task is identical with the current task, this does not result in multiple requests. 
       The task is not transferred to the suspended state, but will immediately become ready again.*/
@@ -202,43 +225,43 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
     }
     else
     {
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskType == BASIC)
+      if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskType == BASIC)
       {
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation--;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation--;
 
-        if(0 != OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation)
+        if(0 != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation)
         {
-          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = PRE_READY;
-          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation++;
-          if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MultipleActivation > OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->MaxAllowedMultipleActivation)
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = PRE_READY;
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation++;
+          if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation > OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MaxAllowedMultipleActivation)
           {
             osInternalError(E_OS_LIMIT);
           }
         }
         else
         {
-          OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
         }
 
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation++;
+        OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation++;
 
-        if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MultipleActivation > OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->MaxAllowedMultipleActivation)
+        if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation > OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MaxAllowedMultipleActivation)
         {
           osInternalError(E_OS_LIMIT);
         }
       }
       else
       {
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->CurrentTaskIdx]->SetEvtMask = 0;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->SetEvtMask = 0;
       }
 
-      if(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus == SUSPENDED)
+      if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == SUSPENDED)
       {
-        OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->TaskStatus = PRE_READY;
+        OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus = PRE_READY;
 
        /* set the current task's ready bit */
-       osSetTaskPrioReady(OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())]->pTcb[TaskID]->Prio);
+       osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->Prio);
       }
 
       (void)osSchedule();

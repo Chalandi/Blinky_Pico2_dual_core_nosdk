@@ -186,6 +186,12 @@ typedef struct
 
 typedef struct
 {
+  uint32_t local_id;
+  uint32_t pinned_core;
+}osObjectCoreAsgn_t;
+
+typedef struct
+{
   OsTcbType**             pTcb;
   OsAlarmConfigType**     pAlarm;
   OsResourceConfigType**  pRes;
@@ -200,9 +206,11 @@ typedef struct
   uint32                  OsCurrentSystemStackPtr;
   uint32                  OsInterruptNestingDepth;
   uint32                  OsInterruptNestingSavedLevel;
-  uint32                  OsInterruptSavedLevel;
+  uint32                  OsInterruptSavedPrioLevel;
+  uint32                  OsInterruptSavedGlobalMask;
   uint32                  OsIntNestSavedStackPointer[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
   uint32                  OsIntNestSavedPrioLevel[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
+  OsSchedPrioType         OsHwSchedPrioReg;
   uint32                  OsNumberOfTasks;
   uint32                  OsNumberOfAlarms;
   uint32                  OsNumberOfResources;

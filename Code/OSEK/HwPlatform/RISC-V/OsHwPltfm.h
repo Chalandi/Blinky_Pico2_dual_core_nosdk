@@ -49,6 +49,7 @@ boolean osIsInterruptContext(void);
 boolean osIsInterruptDisabled(void);
 
 uint32 osGetActiveInterruptVectorId(void);
+uint32 osGetInterruptGlobalMask(void);
 uint32 osGetInterruptPriorityMask(void);
 uint8 osGetCoreId(void);
 
@@ -57,8 +58,6 @@ void osHwTimerInit(void);
 void osHwTimerReload(void);
 void osHwTimerStart(void);
 void osInitInterrupts(void);
-void osRestoreSavedIntState(void);
-void osSaveAndDisableIntState(void);
 void osSetInterruptPriorityMask(uint32 level);
 
 #endif
