@@ -28,8 +28,8 @@
 //=========================================================================================
 // Globals
 //=========================================================================================
-static uint16 osInterrupt_reg_meiea_window[32] = {0};
-static uint16 osInterrupt_reg_meipra_window[32] = {0};
+//static uint16 osInterrupt_reg_meiea_window[32]  = {0};
+//static uint16 osInterrupt_reg_meipra_window[32] = {0};
 
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  osIsInterruptContext
@@ -118,7 +118,8 @@ void osHwTimerReload(void)
 void osInitInterrupts(void)
 {
   const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
-
+  uint16 osInterrupt_reg_meiea_window[32]  = {0};
+  uint16 osInterrupt_reg_meipra_window[32] = {0};
   ISR(Undefined);
 
   for (uint32 InterruptIndex = 0; InterruptIndex < OCB_Cfg[osActiveCore]->pInt->osNbrOfInterrupts; InterruptIndex++)

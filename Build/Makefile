@@ -90,6 +90,7 @@ VERBOSE_GCC = -frecord-gcc-switches -fverbose-asm
 COPS  = $(OPT)                                        \
         $(ARCH)                                       \
         $(DEFS)                                       \
+        -ffreestanding                                \
         -MD                                           \
         -Wa,-adhln=$(OBJ_DIR)/$(basename $(@F)).lst   \
         -g3                                           \
@@ -116,6 +117,7 @@ COPS  = $(OPT)                                        \
 CPPOPS  = $(OPT)                                        \
           $(ARCH)                                       \
           $(DEFS)                                       \
+          -ffreestanding                                \
           -Wa,-adhln=$(OBJ_DIR)/$(basename $(@F)).lst   \
           -g3                                           \
           -Wconversion                                  \
@@ -217,7 +219,8 @@ SRC_FILES := $(SRC_DIR)/Appli/main.c                                         \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/image_definition_block.c \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/boot.s                   \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/IntVect.c                \
-             $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/util.s
+             $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/util.s                   \
+             $(SRC_DIR)/Std/StdLib.c
 
 
 PIO_SRC_FILES :=
