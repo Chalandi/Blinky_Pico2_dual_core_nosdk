@@ -33,7 +33,7 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetTaskID(OsTaskRefType TaskID)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   *TaskID = OCB_Cfg[osActiveCore]->CurrentTaskIdx;
   return(E_OK);
@@ -56,7 +56,7 @@ OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State)
     osInternalError(E_OS_ID);
   }
 
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
   const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
   const OsTaskType LocalTaskID = osLocalTaskAssignment.local_id;
 
@@ -91,7 +91,7 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
 {
   if(TaskID < OS_INTERNAL_TASK_ID)
   {
-    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
     const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
     const OsTaskType LocalTaskID = osLocalTaskAssignment.local_id;
 
@@ -140,7 +140,7 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_TerminateTask(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(  OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0 &&
       OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
@@ -199,7 +199,7 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
     osInternalError(E_OS_ID);
   }
 
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
   const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
   const OsTaskType LocalTaskID = osLocalTaskAssignment.local_id;
 

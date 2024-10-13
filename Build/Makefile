@@ -63,6 +63,7 @@ CPP     = $(TOOLCHAIN)-g++
 LD      = $(TOOLCHAIN)-gcc
 OBJDUMP = $(TOOLCHAIN)-objdump
 OBJCOPY = $(TOOLCHAIN)-objcopy
+SIZE    = $(TOOLCHAIN)-size
 READELF = $(TOOLCHAIN)-readelf
 
 ############################################################################################
@@ -358,3 +359,8 @@ GENERATE:
 	@$(OBJCOPY) $(OUTPUT_DIR)/$(PRJ_NAME).elf -O binary $(OUTPUT_DIR)/$(PRJ_NAME).bin
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).uf2
 	@$(PICOTOOL) uf2 convert --quiet $(OUTPUT_DIR)/$(PRJ_NAME).elf $(OUTPUT_DIR)/$(PRJ_NAME).uf2 --family $(PICOTOOL_FAMILY_ID) --abs-block
+ifneq ($(OS_SIZE_SCRIPT), )
+	@-echo  
+	@$(PYTHON) $(OS_SIZE_SCRIPT) $(OUTPUT_DIR)/$(PRJ_NAME).map --sections .text .data .bss
+	@-echo  
+endif

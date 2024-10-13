@@ -35,7 +35,7 @@ const uint32 OsSchedPrioTypeSize = sizeof(OsSchedPrioType);
 //-----------------------------------------------------------------------------
 void osSetTaskPrioReady(const uint32 prio)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(sizeof(OsSchedPrioType)/sizeof(unsigned long) >= ((prio / 32U) + 1U))
   {
@@ -54,7 +54,7 @@ void osSetTaskPrioReady(const uint32 prio)
 //-----------------------------------------------------------------------------
 void osClearTaskPrioReady(const uint32 prio)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(sizeof(OsSchedPrioType)/sizeof(unsigned long) >= ((prio / 32U) + 1U))
   {
@@ -73,7 +73,7 @@ void osClearTaskPrioReady(const uint32 prio)
 //-----------------------------------------------------------------------------
 uintptr_t osGetOsHwSchedPrioRegAddress(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   return((uintptr_t)(&(OCB_Cfg[osActiveCore]->OsHwSchedPrioReg)));
 }
@@ -89,7 +89,7 @@ uintptr_t osGetOsHwSchedPrioRegAddress(void)
 //-----------------------------------------------------------------------------
 uint32 osGetHighPrioReadyTaskIdx(const uint32 prio)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   for(uint32 tcbIdx = 0; tcbIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks; tcbIdx++)
   {
@@ -116,7 +116,7 @@ uint32 osGetHighPrioReadyTaskIdx(const uint32 prio)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_Schedule(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(TRUE == osIsInterruptContext())
   {
@@ -185,7 +185,7 @@ OsStatusType OS_Schedule(void)
 //-----------------------------------------------------------------------------
 OsStatusType osSchedule(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks                                                                            &&
      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0                                                                      &&

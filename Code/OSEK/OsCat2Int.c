@@ -36,7 +36,7 @@
  void osRunCat2Isr(void)
 {
   const uint32 IntId        = osGetActiveInterruptVectorId();
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[IntId].type == NOT_NESTED)
   {
@@ -62,7 +62,7 @@
 //------------------------------------------------------------------------------------------------------------------
 void osIncNestingDepthLevel(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* called by the OS with interrupt disabled, no need to lock the internal resource */
   if(0 == osIsInterruptDisabled())
@@ -85,7 +85,7 @@ void osIncNestingDepthLevel(void)
 //------------------------------------------------------------------------------------------------------------------
 void osDecNestingDepthLevel(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* called by the OS with interrupt disabled, no need to lock the internal resource */
   if(0 == osIsInterruptDisabled())
@@ -108,7 +108,7 @@ void osDecNestingDepthLevel(void)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osGetIntNestingLevel(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
   uint32 osInterruptNestingDepth = 0;
 
   /* might or might not be called durring interrupt nesting */
@@ -159,7 +159,7 @@ void osEnableIntNesting(void)
 //------------------------------------------------------------------------------------------------------------------
 boolean osIsCat2IntContext(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
   return((boolean)OCB_Cfg[osActiveCore]->OsCat2InterruptLevel);
 }
 
@@ -202,7 +202,7 @@ void OS_EnableAllInterrupts(void)
 //------------------------------------------------------------------------------------------------------------------
 void OS_SuspendAllInterrupts(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* Get the global mask prio */
   OCB_Cfg[osActiveCore]->OsInterruptSavedGlobalMask = osGetInterruptGlobalMask();
@@ -222,7 +222,7 @@ void OS_SuspendAllInterrupts(void)
 //------------------------------------------------------------------------------------------------------------------
 void OS_ResumeAllInterrupts(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(OCB_Cfg[osActiveCore]->OsInterruptSavedGlobalMask)
   {
@@ -245,7 +245,7 @@ void OS_ResumeAllInterrupts(void)
 //------------------------------------------------------------------------------------------------------------------
 void OS_SuspendOSInterrupts(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* Get the global mask prio */
   OCB_Cfg[osActiveCore]->OsInterruptSavedPrioLevel = osGetInterruptPriorityMask();
@@ -265,7 +265,7 @@ void OS_SuspendOSInterrupts(void)
 //------------------------------------------------------------------------------------------------------------------
 void OS_ResumeOSInterrupts(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* Restore the global mask prio */
   osSetInterruptPriorityMask(OCB_Cfg[osActiveCore]->OsInterruptSavedPrioLevel);

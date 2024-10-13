@@ -21,7 +21,7 @@
 #include"Platform_Types.h"
 #include"OsHwPltfm.h"
 #include"OsGenPrioTypes.h"
-
+#include"OsIpc.h"
 typedef void (*pTaskFunc)(void);
 typedef void (*pIsrFunc)(void);
 

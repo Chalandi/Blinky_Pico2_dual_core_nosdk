@@ -3,6 +3,8 @@ SRC_FILES += $(SRC_DIR)/OSEK/OsAlarm.c
 SRC_FILES += $(SRC_DIR)/OSEK/OsCat2Int.c
 SRC_FILES += $(SRC_DIR)/OSEK/OsCore.c
 SRC_FILES += $(SRC_DIR)/OSEK/OsEvt.c
+SRC_FILES += $(SRC_DIR)/OSEK/OsFifo.c
+SRC_FILES += $(SRC_DIR)/OSEK/OsIpc.c
 SRC_FILES += $(SRC_DIR)/OSEK/OsResource.c
 SRC_FILES += $(SRC_DIR)/OSEK/OsSched.c
 SRC_FILES += $(SRC_DIR)/OSEK/OsTask.c
@@ -15,3 +17,6 @@ SRC_FILES += $(SRC_DIR)/OSEK/HwPlatform/$(CORE_FAMILY)/OsHwSchedPrio.s
 
 INC_FILES += $(SRC_DIR)/OSEK
 INC_FILES += $(SRC_DIR)/OSEK/HwPlatform/$(CORE_FAMILY)
+
+
+OS_SIZE_SCRIPT=$(SRC_DIR)/OSEK/OsSize.py

@@ -115,7 +115,7 @@ void osHwTimerReload(void)
 //------------------------------------------------------------------------------------------------------------------
 void osInitInterrupts(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   ISR(Undefined);
 

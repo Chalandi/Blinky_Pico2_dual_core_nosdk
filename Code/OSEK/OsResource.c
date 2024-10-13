@@ -35,7 +35,7 @@ OsStatusType OS_GetResource(OsResourceType ResID)
 {
   if(ResID < OS_NUMBER_OF_RESOURCES)
   {
-    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
     const osObjectCoreAsgn_t osLocalResourceAssignment = osGetLocalResourceAssignment(ResID);
     const OsResourceType LocalResID = osLocalResourceAssignment.local_id;
     
@@ -80,7 +80,7 @@ OsStatusType OS_ReleaseResource(OsResourceType ResID)
 {
   if(ResID < OS_NUMBER_OF_RESOURCES)
   {
-    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
     const osObjectCoreAsgn_t osLocalResourceAssignment = osGetLocalResourceAssignment(ResID);
     const OsResourceType LocalResID = osLocalResourceAssignment.local_id;
 

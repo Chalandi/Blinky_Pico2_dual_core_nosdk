@@ -41,7 +41,7 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
     osInternalError(E_OS_ID);
   }
 
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
   const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
   const OsTaskType LocalTaskID = (OsTaskType)osLocalTaskAssignment.local_id;
 
@@ -92,7 +92,7 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ClearEvent(OsEventMaskType Mask)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskType == BASIC)
   {
@@ -127,7 +127,7 @@ OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
     osInternalError(E_OS_ID);
   }
 
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
   const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
   const OsTaskType LocalTaskID = (OsTaskType)osLocalTaskAssignment.local_id;
 
@@ -164,7 +164,7 @@ OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_WaitEvent(OsEventMaskType Mask)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0 || OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
   {

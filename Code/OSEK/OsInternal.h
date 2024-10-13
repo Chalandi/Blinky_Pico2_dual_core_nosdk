@@ -32,7 +32,7 @@ uint32 osGetSavedStackPointer(void);
 uint32 osIntCallDispatch(uint32 StackPtr);
 uint64 osGetSystemTicksCounter(void);
 uint64 osGetSystemTicksElapsedTime(uint64 prvTicks);
-uint8_t osRemapPhyToLogicalCoreId(uint8_t PhysicalCoreId);
+uint8_t osGetLogicalCoreId(uint8_t PhysicalCoreId);
 
 void OsIsr_UndefinedFunc(void);
 void osAlarmsManagement(void);

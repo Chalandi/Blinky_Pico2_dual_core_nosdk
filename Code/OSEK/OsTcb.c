@@ -67,11 +67,11 @@ const uint8_t osResourceCoreAsgnLookupTable[4/*res*/][2/*core*/] = { {0, 0}, //R
 
 
 void OsTask_T1Func(void);
-uint32_t __attribute__((section(".osTaskStack_T1"))) Stack_T_T1[(1024 / 4)];
+uint32_t /*__attribute__((section(".osTaskStack_T1")))*/ Stack_T_T1[(1024 / 4)];
 const uint32_t Stack_T_T1_Size = ((1024 / 4) * 4);
 static OsTcbType OsTcb_T1 = { (pTaskFunc)&OsTask_T1Func, 1, (uint32_t)1, (uint32_t)(&Stack_T_T1[(sizeof(Stack_T_T1) / sizeof(uint32_t)) - 1]), (uint32_t)(&Stack_T_T1[0]), (uint32_t)(&Stack_T_T1[(sizeof(Stack_T_T1) / sizeof(uint32_t)) - 1]), SUSPENDED, 0, 0, 0, 0, 1, 0, EXTENDED, FULL_PREEMPT };
 void OsTask_T2Func(void);
-uint32_t __attribute__((section(".osTaskStack_T2"))) Stack_T_T2[(1024 / 4)];
+uint32_t /*__attribute__((section(".osTaskStack_T2")))*/ Stack_T_T2[(1024 / 4)];
 const uint32_t Stack_T_T2_Size = ((1024 / 4) * 4);
 static OsTcbType OsTcb_T2 = { (pTaskFunc)&OsTask_T2Func, 5, (uint32_t)1, (uint32_t)(&Stack_T_T2[(sizeof(Stack_T_T2) / sizeof(uint32_t)) - 1]), (uint32_t)(&Stack_T_T2[0]), (uint32_t)(&Stack_T_T2[(sizeof(Stack_T_T2) / sizeof(uint32_t)) - 1]), SUSPENDED, 0, 0, 0, 0, 1, 0, EXTENDED, FULL_PREEMPT };
 
@@ -159,11 +159,11 @@ const OsIntIsrLtType IsrLookupTable_core0[] = {
 };
 
 void OsTask_T3Func(void);
-uint32_t __attribute__((section(".osTaskStack_T3"))) Stack_T_T3[(1024 / 4)];
+uint32_t /*__attribute__((section(".osTaskStack_T3")))*/ Stack_T_T3[(1024 / 4)];
 const uint32_t Stack_T_T3_Size = ((1024 / 4) * 4);
 static OsTcbType OsTcb_T3 = { (pTaskFunc)&OsTask_T3Func, 1, (uint32_t)1, (uint32_t)(&Stack_T_T3[(sizeof(Stack_T_T3) / sizeof(uint32_t)) - 1]), (uint32_t)(&Stack_T_T3[0]), (uint32_t)(&Stack_T_T3[(sizeof(Stack_T_T3) / sizeof(uint32_t)) - 1]), SUSPENDED, 0, 0, 0, 0, 1, 0, EXTENDED, FULL_PREEMPT };
 void OsTask_T4Func(void);
-uint32_t __attribute__((section(".osTaskStack_T4"))) Stack_T_T4[(1024 / 4)];
+uint32_t /*__attribute__((section(".osTaskStack_T4")))*/ Stack_T_T4[(1024 / 4)];
 const uint32_t Stack_T_T4_Size = ((1024 / 4) * 4);
 static OsTcbType OsTcb_T4 = { (pTaskFunc)&OsTask_T4Func, 5, (uint32_t)1, (uint32_t)(&Stack_T_T4[(sizeof(Stack_T_T4) / sizeof(uint32_t)) - 1]), (uint32_t)(&Stack_T_T4[0]), (uint32_t)(&Stack_T_T4[(sizeof(Stack_T_T4) / sizeof(uint32_t)) - 1]), SUSPENDED, 0, 0, 0, 0, 1, 0, EXTENDED, FULL_PREEMPT };
 
@@ -325,7 +325,7 @@ const uint8 osLogicalToPhysicalCoreIdMapping[2] = {0, /* Physical core */
 
 
 
-//volatile Ocb_t* OCB_Cfg = OCB_Cfg[osRemapPhyToLogicalCoreId(osGetCoreId())];
+//volatile Ocb_t* OCB_Cfg = OCB_Cfg[osGetLogicalCoreId(osGetCoreId())];
 
 
 #endif

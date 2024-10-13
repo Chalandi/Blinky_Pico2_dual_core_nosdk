@@ -44,7 +44,7 @@ void OS_StartOS(OsAppModeType Mode)
 {
   (void) Mode;
 
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(TRUE == osIsInterruptContext())
   {
@@ -180,7 +180,7 @@ static void osReloadTimer(void)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osDispatcher(uint32 StackPtr)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* Save the current stack pointer of the running task before switching the context */
   if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
@@ -268,7 +268,7 @@ uint32 osDispatcher(uint32 StackPtr)
 //------------------------------------------------------------------------------------------------------------------
 ISR(SysTickTimer)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   OCB_Cfg[osActiveCore]->OsSysTickCounter++;
   osAlarmsManagement();
@@ -286,7 +286,7 @@ ISR(SysTickTimer)
 //------------------------------------------------------------------------------------------------------------------
 void osStoreStackPointer(uint32 StackPtrValue)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* get the interrupt nesting level */
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
@@ -328,7 +328,7 @@ void osStoreStackPointer(uint32 StackPtrValue)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osGetSavedStackPointer(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* get the interrupt nesting level */
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
@@ -361,7 +361,7 @@ uint32 osGetSavedStackPointer(void)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osIntCallDispatch(uint32 StackPtr)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* get the interrupt nesting level */
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
@@ -430,7 +430,7 @@ OsAppModeType OS_GetActiveApplicationMode(void)
 //------------------------------------------------------------------------------------------------------------------
 void OS_ShutdownOS(OsStatusType Error)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
 #if(OS_SHUTDOWNHOOK)
   osShutdownHook(Error);
@@ -474,7 +474,7 @@ static void osIdleLoop(void)
 //-----------------------------------------------------------------------------
 uint64 osGetSystemTicksCounter(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   return(OCB_Cfg[osActiveCore]->OsSysTickCounter);
 }
@@ -491,7 +491,7 @@ uint64 osGetSystemTicksCounter(void)
 //-----------------------------------------------------------------------------
 uint64 osGetSystemTicksElapsedTime(uint64 prvTicks)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   return((uint64)(OCB_Cfg[osActiveCore]->OsSysTickCounter - prvTicks));
 }
@@ -542,7 +542,7 @@ void osKernelError(OsStatusType err)
 //-----------------------------------------------------------------------------
 uint32 osGetMaximumStackUsage(uint32 LocalTaskId)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
   uint32* pStack = (uint32*)NULL;
   uint32 Bottom = OCB_Cfg[osActiveCore]->pTcb[LocalTaskId]->pstack_bot;
   uint32 Top    = OCB_Cfg[osActiveCore]->pTcb[LocalTaskId]->pstack_top;
@@ -574,7 +574,7 @@ uint32 osGetMaximumStackUsage(uint32 LocalTaskId)
 ///
 /// \return 
 //-----------------------------------------------------------------------------
-uint8_t osRemapPhyToLogicalCoreId(uint8_t PhysicalCoreId)
+uint8_t osGetLogicalCoreId(uint8_t PhysicalCoreId)
 {
   const uint8_t size = sizeof(osLogicalToPhysicalCoreIdMapping)/sizeof(uint8_t);
 
@@ -647,7 +647,7 @@ osObjectCoreAsgn_t osGetLocalTaskAssignment(uint32_t SystemTaskId)
 osObjectCoreAsgn_t osGetLocalResourceAssignment(uint32_t SystemResourceId)
 {
   osObjectCoreAsgn_t osLocalResourceMap;
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(SystemResourceId <= OS_NUMBER_OF_RESOURCES)
   {

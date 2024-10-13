@@ -33,7 +33,7 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetAlarmBase(OsAlarmType AlarmID, OsAlarmBaseRefType Info)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
@@ -71,7 +71,7 @@ OsStatusType OS_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick)
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
     const osObjectCoreAsgn_t osLocalAlarmAssignment = osGetLocalAlarmAssignment(AlarmID);
     if(osActiveCore == osLocalAlarmAssignment.pinned_core)
     {
@@ -106,7 +106,7 @@ OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickTyp
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
     const osObjectCoreAsgn_t osLocalAlarmAssignment = osGetLocalAlarmAssignment(AlarmID);
     const OsAlarmType LocalAlarmID = (OsAlarmType)(OsAlarmType)osLocalAlarmAssignment.local_id;
 
@@ -170,7 +170,7 @@ OsStatusType OS_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cy
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
     const osObjectCoreAsgn_t osLocalAlarmAssignment = osGetLocalAlarmAssignment(AlarmID);
     const OsAlarmType LocalAlarmID = (OsAlarmType)osLocalAlarmAssignment.local_id;
 
@@ -230,7 +230,7 @@ OsStatusType OS_CancelAlarm(OsAlarmType AlarmID)
 {
   if(AlarmID < OS_NUMBER_OF_ALARMS)
   {
-    const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+    const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
     const osObjectCoreAsgn_t osLocalAlarmAssignment = osGetLocalAlarmAssignment(AlarmID);
     const OsAlarmType LocalAlarmID = (OsAlarmType)osLocalAlarmAssignment.local_id;
 
@@ -261,7 +261,7 @@ OsStatusType OS_CancelAlarm(OsAlarmType AlarmID)
 //------------------------------------------------------------------------------------------------------------------
 void osAlarmsManagement(void)
 {
-  const uint32 osActiveCore = osRemapPhyToLogicalCoreId(osGetCoreId());
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   for(uint32 AlarmID =0; AlarmID < OCB_Cfg[osActiveCore]->OsNumberOfAlarms; AlarmID++)
   {
