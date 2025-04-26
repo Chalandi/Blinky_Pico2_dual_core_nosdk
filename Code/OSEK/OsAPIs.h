@@ -39,6 +39,9 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask);
 OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickType cycle);
 OsStatusType OS_TerminateTask(void);
 OsStatusType OS_WaitEvent(OsEventMaskType Mask);
+OsStatusType OS_GetSpinlock(OsSpinlockIdType SpinlockId);
+OsStatusType OS_ReleaseSpinlock(OsSpinlockIdType SpinlockId);
+OsStatusType OS_TryToGetSpinlock(OsSpinlockIdType SpinlockId, OsTryToGetSpinlockType* Success);
 
 void OS_DisableAllInterrupts(void);
 void OS_EnableAllInterrupts(void);

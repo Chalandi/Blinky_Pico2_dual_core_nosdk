@@ -12,8 +12,7 @@
 //===============================================================================================================================
 TASK(T1)
 {
-  static uint32 T1AliveCounter = 0;
-  OsEventMaskType OsWaitEventMask = EVT_BLINK_BLUE_LED_FAST;
+  OsEventMaskType OsWaitEventMask = EVT_BLINK_BLUE_LED_FAST | EVT_TOGGLE_BLUE_LED;
   OsEventMaskType Events = 0;
   (void)OS_SetRelAlarm(ALARM_BLINK_BLUE_LED_FAST,0,1000);
 
@@ -26,8 +25,13 @@ TASK(T1)
       if((Events & EVT_BLINK_BLUE_LED_FAST) == EVT_BLINK_BLUE_LED_FAST)
       {
         OS_ClearEvent(EVT_BLINK_BLUE_LED_FAST);
-        T1AliveCounter++;
         LED_GREEN_TOGGLE();
+      }
+
+      if((Events & EVT_TOGGLE_BLUE_LED) == EVT_TOGGLE_BLUE_LED)
+      {
+        OS_ClearEvent(EVT_TOGGLE_BLUE_LED);
+        LED_BLUE_TOGGLE();
       }
     }
     else
@@ -82,7 +86,6 @@ TASK(T2)
 //===============================================================================================================================
 TASK(T3)
 {
-  static uint32 T3AliveCounter = 0;
   OsEventMaskType OsWaitEventMask = EVT_BLINK_RED_LED_FAST;
   OsEventMaskType Events = 0;
   (void)OS_SetRelAlarm(ALARM_BLINK_RED_LED_FAST,0,1000);
@@ -96,8 +99,8 @@ TASK(T3)
       if((Events & EVT_BLINK_RED_LED_FAST) == EVT_BLINK_RED_LED_FAST)
       {
         OS_ClearEvent(EVT_BLINK_RED_LED_FAST);
-        T3AliveCounter++;
         LED_RED_TOGGLE();
+        OS_SetEvent(T1, EVT_TOGGLE_BLUE_LED);
       }
     }
     else

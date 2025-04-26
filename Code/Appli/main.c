@@ -28,6 +28,12 @@
 //=============================================================================
 
 //=============================================================================
+// Defines
+//=============================================================================
+//#define DEBUG_CORE0
+//#define DEBUG_CORE1
+
+//=============================================================================
 // Prototypes
 //=============================================================================
 void main_Core0(void);
@@ -37,8 +43,11 @@ void BlockingDelay(uint32 delay);
 //=============================================================================
 // Globals
 //=============================================================================
-#ifdef DEBUG
+#ifdef DEBUG_CORE0
   volatile boolean boHaltCore0 = TRUE;
+#endif
+
+#ifdef DEBUG_CORE1
   volatile boolean boHaltCore1 = TRUE;
 #endif
 
@@ -59,6 +68,7 @@ int main(void)
 
   /* start the OS */
   OS_StartOS(APP_MODE_DEFAULT);
+  for(;;);
 }
 
 //-----------------------------------------------------------------------------------------
@@ -70,7 +80,7 @@ int main(void)
 //-----------------------------------------------------------------------------------------
 void main_Core0(void)
 {
-#ifdef DEBUG
+#ifdef DEBUG_CORE0
   while(boHaltCore0);
 #endif
 
@@ -82,6 +92,7 @@ void main_Core0(void)
   /* Output disable on pin 25 */
   LED_GREEN_CFG();
   LED_RED_CFG();
+  LED_BLUE_CFG();
 
   /* Start the Core 1 and turn on the led to be sure that we passed successfully the core 1 initiaization */
   if(TRUE == RP2350_StartCore1())
@@ -90,6 +101,8 @@ void main_Core0(void)
     LED_GREEN_ON();
 #else
     LED_GREEN_OFF();
+    LED_RED_ON();
+    LED_BLUE_ON();
 #endif
   }
   else
@@ -115,7 +128,9 @@ void main_Core0(void)
 
 void main_Core1(void)
 {
-#ifdef DEBUG
+  DISABLE_INTERRUPTS();
+
+#ifdef DEBUG_CORE1
   while(boHaltCore1);
 #endif
 

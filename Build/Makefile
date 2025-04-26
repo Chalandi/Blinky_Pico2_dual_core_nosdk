@@ -305,12 +305,15 @@ $(PIO_OUT_DIR)/%.h : %.pio
 
 .PHONY : CLEAN
 CLEAN :
-	@-rm -rf $(OUTPUT_DIR) *.o    2>/dev/null || true
-	@-rm -rf $(OUTPUT_DIR) *.hex  2>/dev/null || true
-	@-rm -rf $(OUTPUT_DIR) *.elf  2>/dev/null || true
-	@-rm -rf $(OUTPUT_DIR) *.list 2>/dev/null || true
-	@-rm -rf $(OUTPUT_DIR) *.map  2>/dev/null || true
-	@-rm -rf $(OUTPUT_DIR) *.txt  2>/dev/null || true
+	@-rm -rf $(OUTPUT_DIR)/$(PRJ_NAME).bin     2>/dev/null || true
+	@-rm -rf $(OUTPUT_DIR)/$(PRJ_NAME).dis     2>/dev/null || true
+	@-rm -rf $(OUTPUT_DIR)/$(PRJ_NAME).elf     2>/dev/null || true
+	@-rm -rf $(OUTPUT_DIR)/$(PRJ_NAME).hex     2>/dev/null || true
+	@-rm -rf $(OUTPUT_DIR)/$(PRJ_NAME).map     2>/dev/null || true
+	@-rm -rf $(OUTPUT_DIR)/$(PRJ_NAME).readelf 2>/dev/null || true
+	@-rm -rf $(OUTPUT_DIR)/$(PRJ_NAME).sym     2>/dev/null || true
+	@-rm -rf $(OUTPUT_DIR)/$(PRJ_NAME).uf2     2>/dev/null || true
+	@-rm -rf $(OBJ_DIR)                        2>/dev/null || true
 	@-mkdir -p $(subst \,/,$(OUTPUT_DIR))
 
 $(OBJ_DIR)/%.o : %.c

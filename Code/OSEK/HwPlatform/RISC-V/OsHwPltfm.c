@@ -167,7 +167,7 @@ void osInitInterrupts(void)
 void osSetInterruptPriorityMask(uint32 level)
 {
   uint32 new_meinext = (osGetInterruptPriorityMask() & ~(0x1ful << 16)) | (level << 16);
-  riscv_write_csr(RVCSR_MEINEXT_OFFSET, new_meinext);
+  riscv_write_csr(RVCSR_MEICONTEXT_OFFSET, new_meinext);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ void osSetInterruptPriorityMask(uint32 level)
 //------------------------------------------------------------------------------------------------------------------
 uint32 osGetInterruptPriorityMask(void)
 {
-  return ((riscv_read_csr(RVCSR_MEINEXT_OFFSET) >> 16) & 0x1ful);
+  return ((riscv_read_csr(RVCSR_MEICONTEXT_OFFSET) >> 16) & 0x1ful);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -239,4 +239,19 @@ uint32 osGetActiveInterruptVectorId(void)
 uint8 osGetCoreId(void)
 {
   return((uint8_t)HW_PER_SIO->CPUID.reg);
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//------------------------------------------------------------------------------------------------------------------
+void osClearPendingInterrupt(uint32_t InterruptId)
+{
+  (void)InterruptId;
+  /* current interrupt pending flag is cleared already in osGetActiveInterruptVectorId() when entering the ISR */
 }

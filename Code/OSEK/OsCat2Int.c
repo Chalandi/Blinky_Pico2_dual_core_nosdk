@@ -25,6 +25,11 @@
 #include"OsHwPltfm.h"
 
 //------------------------------------------------------------------------------------------------------------------
+// Defines
+//------------------------------------------------------------------------------------------------------------------
+#define OS_INTERRUPT_NESTED_API_CALL_MARKER    (1ul << 31)
+
+//------------------------------------------------------------------------------------------------------------------
 /// \brief  osRunCat2Isr
 ///
 /// \descr  This function is the entry point of all category 2 interrupts
@@ -41,7 +46,7 @@
   if(OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[IntId].type == NOT_NESTED)
   {
     /* disable the nesting of the current interrupt priority level but keep it enabled for category 1 interrupts */
-    osSetInterruptPriorityMask(OS_INT_CAT1_LOWEST_PRIO_LEVEL);
+    osSetInterruptPriorityMask(OCB_Cfg[osActiveCore]->pInt->osIntCat1LowestPrioLevel);
   }
 
   /* enable interrupt nesting before calling the ISR */
@@ -204,8 +209,18 @@ void OS_SuspendAllInterrupts(void)
 {
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
-  /* Get the global mask prio */
-  OCB_Cfg[osActiveCore]->OsInterruptSavedGlobalMask = osGetInterruptGlobalMask();
+  /* check for nested call */
+  if((OCB_Cfg[osActiveCore]->OsInterruptSavedGlobalMask & OS_INTERRUPT_NESTED_API_CALL_MARKER) != 0)
+  {
+    /* susspend is called before calling Resume first */
+    DISABLE_INTERRUPTS();
+    for(;;);
+  }
+  else
+  {
+    /* Get the global mask prio */
+    OCB_Cfg[osActiveCore]->OsInterruptSavedGlobalMask = (osGetInterruptGlobalMask() | OS_INTERRUPT_NESTED_API_CALL_MARKER);
+  }
 
   /* Disable all interrupts */
   DISABLE_INTERRUPTS();
@@ -223,6 +238,17 @@ void OS_SuspendAllInterrupts(void)
 void OS_ResumeAllInterrupts(void)
 {
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
+
+  if((OCB_Cfg[osActiveCore]->OsInterruptSavedGlobalMask & OS_INTERRUPT_NESTED_API_CALL_MARKER) == 0)
+  {
+    /* Resume is called without calling suspend first */
+    DISABLE_INTERRUPTS();
+    for(;;);
+  }
+  else
+  {
+    OCB_Cfg[osActiveCore]->OsInterruptSavedGlobalMask &= ~(OS_INTERRUPT_NESTED_API_CALL_MARKER); 
+  }
 
   if(OCB_Cfg[osActiveCore]->OsInterruptSavedGlobalMask)
   {
@@ -247,11 +273,21 @@ void OS_SuspendOSInterrupts(void)
 {
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
-  /* Get the global mask prio */
-  OCB_Cfg[osActiveCore]->OsInterruptSavedPrioLevel = osGetInterruptPriorityMask();
+  /* check for nested call */
+  if((OCB_Cfg[osActiveCore]->OsInterruptSavedPrioLevel & OS_INTERRUPT_NESTED_API_CALL_MARKER) != 0)
+  {
+    /* OS_SuspendOSInterrupts nested a previous OS_SuspendOSInterrupts call */
+    DISABLE_INTERRUPTS();
+    for(;;);
+  }
+  else
+  {
+    /* Get the active interrupt priority level */
+    OCB_Cfg[osActiveCore]->OsInterruptSavedPrioLevel = (osGetInterruptPriorityMask() | OS_INTERRUPT_NESTED_API_CALL_MARKER);
+  }
 
   /* Disable OS interrupts */
-  osSetInterruptPriorityMask(OS_INT_CAT1_LOWEST_PRIO_LEVEL);
+  osSetInterruptPriorityMask(OCB_Cfg[osActiveCore]->pInt->osIntCat1LowestPrioLevel);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -266,6 +302,17 @@ void OS_SuspendOSInterrupts(void)
 void OS_ResumeOSInterrupts(void)
 {
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
+
+  if((OCB_Cfg[osActiveCore]->OsInterruptSavedPrioLevel & OS_INTERRUPT_NESTED_API_CALL_MARKER) == 0)
+  {
+    /* OS_ResumeOSInterrupts is called without calling OS_SuspendOSInterrupts first */
+    DISABLE_INTERRUPTS();
+    for(;;);
+  }
+  else
+  {
+    OCB_Cfg[osActiveCore]->OsInterruptSavedPrioLevel &= ~(OS_INTERRUPT_NESTED_API_CALL_MARKER); 
+  }
 
   /* Restore the global mask prio */
   osSetInterruptPriorityMask(OCB_Cfg[osActiveCore]->OsInterruptSavedPrioLevel);

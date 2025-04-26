@@ -24,12 +24,13 @@
 #define SCB_ICSR             0xE000ED04UL
 #define SET_PENDSV()         (*(volatile uint32*)(SCB_ICSR)) |= 1UL<<28
 #define CLEAR_PENDSV()       (*(volatile uint32*)(SCB_ICSR)) &= ~(1UL<<28)
-#define GET_ICSR_VECTACTIVE()   ((*(volatile uint32*)(SCB_ICSR)) & (uint32)0x1FUL)
+#define GET_ICSR_VECTACTIVE()   ((*(volatile uint32*)(SCB_ICSR)) & (uint32)0xFFUL)
 
-#define NVIC_ISERx ((volatile uint32 *)(0xE000E100UL))
-#define NVIC_IPRx  ((volatile uint8 *) (0xE000E400UL))
-#define SCB_SHPRx  ((volatile uint8 *) (0xE000ED18UL))
-#define NVIC_ISPRx ((volatile uint8 *) (0xE000E200UL))
+#define NVIC_ISERx ((volatile uint32*)(0xE000E100UL))
+#define NVIC_IPRx  ((volatile uint8*)(0xE000E400UL))
+#define NVIC_ICPRx ((volatile uint32*)(0xE000E280UL))
+#define SCB_SHPRx  ((volatile uint8*)(0xE000ED18UL))
+#define NVIC_ISPRx ((volatile uint32*)(0xE000E200UL))
 
 
 #define osDispatch()         SET_PENDSV(); __asm("DSB"); __asm("NOP")
@@ -57,7 +58,10 @@ void osHwTimerReload(void);
 void osHwTimerStart(void);
 void osInitInterrupts(void);
 void osSetInterruptPriorityMask(uint32 level);
-
+void osClearPendingInterrupt(uint32_t InterruptId);
 uint8 osGetCoreId(void);
+
+void osHwAcquireSpinLock(uint32_t* lock);
+void osHwReleaseSpinLock(uint32_t* lock);
 
 #endif

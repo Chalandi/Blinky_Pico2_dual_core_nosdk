@@ -43,35 +43,35 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
   const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
-  const OsTaskType LocalTaskID = (OsTaskType)osLocalTaskAssignment.local_id;
+  const OsTaskType osLocalTaskID = (OsTaskType)osLocalTaskAssignment.local_id;
 
   if(osActiveCore != osLocalTaskAssignment.pinned_core)
   {
-    /* to be implemented: send the request to the other core */
-    return(E_OK);
+    //return(osCrossCore_SetEvent(osActiveCore, osLocalTaskAssignment.pinned_core, TaskID, Mask));
+    return(osCrossCore_SetEvent(TaskID, Mask));
   }
 
-  if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC)
+  if(OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->TaskType == BASIC)
   {
     osInternalError(E_OS_ACCESS);
   }
-  else if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == SUSPENDED)
+  else if(OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->TaskStatus == SUSPENDED)
   {
     osInternalError(E_OS_STATE);
   }  
   else
   {
-    OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->SetEvtMask |= Mask;
+    OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->SetEvtMask |= Mask;
     
-    if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == WAITING)
+    if(OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->TaskStatus == WAITING)
     {
-      if((OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->SetEvtMask & OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->WaitEvtMask) != 0)
+      if((OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->SetEvtMask & OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->WaitEvtMask) != 0)
       {  
         /* Switch state to Ready */
-        OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus = READY;
+        OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->TaskStatus = READY;
 
         /* set the task's ready bit */
-        osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->Prio);
+        osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->Prio);
 
         /* Call the scheduler */
         (void)osSchedule();
@@ -129,25 +129,24 @@ OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
   const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
-  const OsTaskType LocalTaskID = (OsTaskType)osLocalTaskAssignment.local_id;
+  const OsTaskType osLocalTaskID = (OsTaskType)osLocalTaskAssignment.local_id;
 
   if(osActiveCore != osLocalTaskAssignment.pinned_core)
   {
-    /* to be implemented: send the request to the other core */
-    return(E_OK);
+    return(osCrossCore_GetEvent(TaskID, Event));
   }
 
-  if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC)
+  if(OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->TaskType == BASIC)
   {
     osInternalError(E_OS_ACCESS);
   }
-  else if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == SUSPENDED)
+  else if(OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->TaskStatus == SUSPENDED)
   {
     osInternalError(E_OS_STATE);
   }
   else
   {
-    *Event = OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->SetEvtMask;
+    *Event = OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->SetEvtMask;
     return(E_OK);
   }  
 }

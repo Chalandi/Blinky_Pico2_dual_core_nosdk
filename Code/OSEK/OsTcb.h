@@ -58,7 +58,7 @@ typedef enum {
 #define EVT_BLINK_BLUE_LED_SLOW (1UL << 1)
 #define EVT_BLINK_RED_LED_FAST  (1UL << 0)
 #define EVT_BLINK_RED_LED_SLOW  (1UL << 1)
-
+#define EVT_TOGGLE_BLUE_LED     (1UL << 2)
 
 typedef enum {
     ALARM_BLINK_BLUE_LED_FAST,
@@ -80,6 +80,7 @@ void OsTask_T2Func(void);
 void OsTask_T3Func(void);
 void OsTask_T4Func(void);
 
+#define OS_NUMBER_OF_CORES 2ul
 
 extern const OsIntIsrLtType IsrLookupTable_core0[];
 extern const OsIntIsrLtType IsrLookupTable_core1[];
@@ -90,11 +91,14 @@ extern const uint8_t osResourceCoreAsgnLookupTable[4/*res*/][2/*core*/];
 
 extern const uint8 osLogicalToPhysicalCoreIdMapping[2];
 
-extern void  OsIsr_UndefinedFunc(void);
 extern void  osDispatchHandler(void);
-extern void  OsIsr_SysTickTimerFunc(void);
 
-extern volatile Ocb_t* OCB_Cfg[];
+extern void OsIsr_UndefinedFunc(void);
+extern void OsIsr_SysTickTimerFunc(void);
+extern void OsIsr_osCrossCoreReceiveRequestFunc(void);
+
+extern volatile Ocb_t* OCB_Cfg[OS_NUMBER_OF_CORES];
+
 
 #endif /*__OS_SINGLE_CORE__*/
 

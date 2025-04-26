@@ -59,5 +59,9 @@ void osHwTimerReload(void);
 void osHwTimerStart(void);
 void osInitInterrupts(void);
 void osSetInterruptPriorityMask(uint32 level);
+void osClearPendingInterrupt(uint32_t InterruptId);
+
+void osHwAcquireSpinLock(uint32_t* lock);
+void osHwReleaseSpinLock(uint32_t* lock);
 
 #endif

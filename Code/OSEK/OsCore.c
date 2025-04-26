@@ -31,6 +31,16 @@ static void osInitTimer(void);
 static void osStartTimer(void);
 static void osIdleLoop(void);
 
+//=============================================================================
+// Globals
+//=============================================================================
+#if (OS_NUMBER_OF_CORES > 1)
+  static uint32 osMulticoreLock  = 0;
+  static volatile uint32 osMulticoreSyncVal = 0;
+
+  #define OS_MULTICORE_SYNC_MASK   (uint32)((1ul << OS_NUMBER_OF_CORES) - 1)
+#endif
+
 //------------------------------------------------------------------------------------------------------------------
 /// \brief  OS_StartOS
 ///
@@ -48,7 +58,7 @@ void OS_StartOS(OsAppModeType Mode)
 
   if(TRUE == osIsInterruptContext())
   {
-    return;
+    for(;;);
   }
   
   if(OCB_Cfg[osActiveCore]->OsNumberOfTasks > 0)
@@ -92,11 +102,16 @@ void OS_StartOS(OsAppModeType Mode)
 
     /* Init Interrupts */
     osInitInterrupts();
-    
+
+    /* Synchronize all cores */
+    osMulticoreSync();
+
     /* Call startup hook function */
     #if(OS_STARTUPHOOK)
     osStartupHook();
     #endif
+
+    /* Synchronize all cores */
 
     /* Enable the interrupts */
     ENABLE_INTERRUPTS();
@@ -112,7 +127,7 @@ void OS_StartOS(OsAppModeType Mode)
         OS_SetRelAlarm((OsAlarmType)alarmIdx,OCB_Cfg[osActiveCore]->pAlarm[alarmIdx]->InitTicks,OCB_Cfg[osActiveCore]->pAlarm[alarmIdx]->InitCycles);
       }
     }
-        
+
     /* Call Scheduler */
     (void)osSchedule();
     
@@ -660,4 +675,29 @@ osObjectCoreAsgn_t osGetLocalResourceAssignment(uint32_t SystemResourceId)
     osKernelError(E_OS_ID);
     return((osObjectCoreAsgn_t){0});
   }
+}
+//-----------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//-----------------------------------------------------------------------------
+void osMulticoreSync(void)
+{
+#if (OS_NUMBER_OF_CORES > 1)
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
+
+  /* aquire the multicore lock */
+  osHwAcquireSpinLock(&osMulticoreLock);
+
+  osMulticoreSyncVal |= (1UL << osActiveCore);
+
+  /* release the multicore lock */
+  osHwReleaseSpinLock(&osMulticoreLock);
+
+  while(osMulticoreSyncVal != OS_MULTICORE_SYNC_MASK);
+#endif
 }

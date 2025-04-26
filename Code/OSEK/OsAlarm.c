@@ -43,12 +43,13 @@ OsStatusType OS_GetAlarmBase(OsAlarmType AlarmID, OsAlarmBaseRefType Info)
     if(osActiveCore == osLocalAlarmAssignment.pinned_core)
     {
       Info = &OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmId];
+      return(E_OK);
     }
     else
     {
-      /* to be implemented: send the request to the other core */
+      /* do we need multicore support here ? */
+      return(E_OK);
     }
-    return(E_OK);
   }
   else
   {
@@ -76,12 +77,12 @@ OsStatusType OS_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick)
     if(osActiveCore == osLocalAlarmAssignment.pinned_core)
     {
       *Tick = OCB_Cfg[osActiveCore]->pAlarm[osLocalAlarmAssignment.local_id]->AlarmCheckPoint - (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter;
+      return(E_OK);
     }
     else
     {
-      /* to be implemented: send the request to the other core */
+      return(osCrossCore_GetAlarm(AlarmID, Tick));
     }
-    return(E_OK);
   }
   else
   {
@@ -112,8 +113,7 @@ OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickTyp
 
     if(osActiveCore != osLocalAlarmAssignment.pinned_core)
     {
-      /* to be implemented: send the request to the other core */
-      return(E_OK);
+      return(osCrossCore_SetRelAlarm(AlarmID, increment, cycle));
     }
 
     if(cycle == 0 && increment > 0 && OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_FREE)
@@ -176,8 +176,7 @@ OsStatusType OS_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cy
 
     if(osActiveCore != osLocalAlarmAssignment.pinned_core)
     {
-      /* to be implemented: send the request to the other core */
-      return(E_OK);
+      return(osCrossCore_SetAbsAlarm(AlarmID, start, cycle));
     }
 
     if(cycle == 0 && start > (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter && OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_FREE)
@@ -236,8 +235,7 @@ OsStatusType OS_CancelAlarm(OsAlarmType AlarmID)
 
     if(osActiveCore != osLocalAlarmAssignment.pinned_core)
     {
-      /* to be implemented: send the request to the other core */
-      return(E_OK);
+      return(osCrossCore_CancelAlarm(AlarmID));
     }
 
     OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status          = ALARM_FREE;

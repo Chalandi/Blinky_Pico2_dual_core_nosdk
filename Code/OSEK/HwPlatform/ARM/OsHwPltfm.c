@@ -133,10 +133,13 @@ void osInitInterrupts(void)
       else if(InterruptIndex > 15U)
       {
         /* set the NVIC interrupt priority level */
-        NVIC_IPRx[InterruptIndex - 16U] = ((uint8)osRemapOsPriorityValue(OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
+        NVIC_IPRx[InterruptIndex - 16U] |= ((uint8)osRemapOsPriorityValue(OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
+
+        /* clear the NVIC interrupt pending */
+        NVIC_ICPRx[(InterruptIndex - 16U) / 32U] |= (1UL << ((InterruptIndex - 16U) % 32U));
 
         /* enable the NVIC interrupt */
-        NVIC_ISERx[(InterruptIndex - 16U) / 32U] = (1UL << ((InterruptIndex - 16U) % 32U));
+        NVIC_ISERx[(InterruptIndex - 16U) / 32U] |= (1UL << ((InterruptIndex - 16U) % 32U));
       }
       else
       {
@@ -248,4 +251,18 @@ uint32 osGetActiveInterruptVectorId(void)
 uint8 osGetCoreId(void)
 {
   return((uint8_t)HW_PER_SIO->CPUID.reg);
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//------------------------------------------------------------------------------------------------------------------
+void osClearPendingInterrupt(uint32_t InterruptId)
+{
+  NVIC->ICPR[(InterruptId / 32)] |= (1ul << (InterruptId % 32));
 }

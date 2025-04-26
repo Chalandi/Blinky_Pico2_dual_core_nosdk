@@ -160,7 +160,7 @@ boolean RP2350_StartCore1(void)
   }
 
   /* Clear the stiky bits of the FIFO_ST on core 0 */
-  HW_PER_SIO->FIFO_ST.reg = 0xFFu;
+  //HW_PER_SIO->FIFO_ST.reg = 0xFFu;
 
   return(TRUE);
 }

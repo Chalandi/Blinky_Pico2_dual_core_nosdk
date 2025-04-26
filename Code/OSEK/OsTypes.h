@@ -50,33 +50,34 @@ typedef enum
 
 typedef enum 
 {
-  E_OK                       = 0,
-  E_OS_ACCESS                = 1,
-  E_OS_CALLEVEL              = 2,
-  E_OS_ID                    = 3,
-  E_OS_LIMIT                 = 4,
-  E_OS_NOFUNC                = 5,
-  E_OS_RESOURCE              = 6,
-  E_OS_STATE                 = 7,
-  E_OS_VALUE                 = 8,
-  E_OS_SERVICEID             = 9,
-  E_OS_ILLEGAL_ADDRESS       = 10,
-  E_OS_MISSINGEND            = 11,
-  E_OS_DISABLEDINT           = 12,
-  E_OS_STACKFAULT            = 13,
-  E_OS_PROTECTION_MEMORY     = 14,
-  E_OS_PROTECTION_TIME       = 15,
-  E_OS_PROTECTION_ARRIVAL    = 16,
-  E_OS_PROTECTION_LOCKED     = 17,
-  E_OS_PROTECTION_EXCEPTION  = 18,
-  E_OS_SYS_ASSERTION         = 20,
-  E_OS_SYS_ABORT             = 21,
-  E_OS_SYS_API_ERROR         = 23,
-  E_OS_SYS_ALARM_MANAGEMENT  = 24,
-  E_OS_SYS_WARNING           = 25,
-  E_OS_KERNEL_PANIC          = 26,
-  E_OS_ENABLEDINT            = 27,
-  E_OS_MULTICORE_NOT_ASSIGNED= 28
+  E_OK                        = 0,
+  E_OS_ACCESS                 = 1,
+  E_OS_CALLEVEL               = 2,
+  E_OS_ID                     = 3,
+  E_OS_LIMIT                  = 4,
+  E_OS_NOFUNC                 = 5,
+  E_OS_RESOURCE               = 6,
+  E_OS_STATE                  = 7,
+  E_OS_VALUE                  = 8,
+  E_OS_SERVICEID              = 9,
+  E_OS_ILLEGAL_ADDRESS        = 10,
+  E_OS_MISSINGEND             = 11,
+  E_OS_DISABLEDINT            = 12,
+  E_OS_STACKFAULT             = 13,
+  E_OS_PROTECTION_MEMORY      = 14,
+  E_OS_PROTECTION_TIME        = 15,
+  E_OS_PROTECTION_ARRIVAL     = 16,
+  E_OS_PROTECTION_LOCKED      = 17,
+  E_OS_PROTECTION_EXCEPTION   = 18,
+  E_OS_SYS_ASSERTION          = 20,
+  E_OS_SYS_ABORT              = 21,
+  E_OS_SYS_API_ERROR          = 23,
+  E_OS_SYS_ALARM_MANAGEMENT   = 24,
+  E_OS_SYS_WARNING            = 25,
+  E_OS_KERNEL_PANIC           = 26,
+  E_OS_ENABLEDINT             = 27,
+  E_OS_MULTICORE_NOT_ASSIGNED = 28,
+  E_OS_MULTICORE_COM_LOST     = 29
 }OsStatusType;
 
 typedef enum
@@ -181,6 +182,7 @@ typedef struct
 typedef struct
 {
   uint32_t              osNbrOfInterrupts;
+  uint32_t              osIntCat1LowestPrioLevel;
   const OsIntIsrLtType* osIsrLookupTablePtr;
 }OsInterruptConfigType;
 
@@ -189,6 +191,8 @@ typedef struct
   uint32_t local_id;
   uint32_t pinned_core;
 }osObjectCoreAsgn_t;
+
+typedef uint32_t OsCoreId;
 
 typedef struct
 {
@@ -210,6 +214,7 @@ typedef struct
   uint32                  OsInterruptSavedGlobalMask;
   uint32                  OsIntNestSavedStackPointer[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
   uint32                  OsIntNestSavedPrioLevel[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
+  uint32                  OsCrossCoreBuffer[10];
   OsSchedPrioType         OsHwSchedPrioReg;
   uint32                  OsNumberOfTasks;
   uint32                  OsNumberOfAlarms;
@@ -220,6 +225,19 @@ typedef struct
 {
   pIsrFunc IsrFunc;
 }FeIsr_t;
+
+#ifndef OsSpinlockIdType
+typedef enum
+{
+  INVALID_SPINLOCK = 0
+}OsSpinlockIdType;
+#endif
+
+typedef enum
+{
+  TRYTOGETSPINLOCK_SUCCESS = 0,
+  TRYTOGETSPINLOCK_NOSUCCESS
+}OsTryToGetSpinlockType;
 
 #define TASK(x)                void OsTask_##x##Func(void)
 #define ISR(x)                 void OsIsr_##x##Func(void)

@@ -315,4 +315,54 @@ OsHwGetInterruptPrioBits:
                  sub r0, r0, r2
                  bx lr
 
+/*******************************************************************************************
+  \brief  void osHwAcquireSpinLock(uint32_t* lock)
+  
+  \param  
+  
+  \return 
+********************************************************************************************/
+.thumb_func
+.section ".text", "ax"
+.align 8
+.globl osHwAcquireSpinLock
+.type  osHwAcquireSpinLock, % function
+
+osHwAcquireSpinLock:
+                mov     r1, #1
+.L_loop:
+                ldaex   r2, [r0]
+                cmp     r2, #0
+                bne     .L_loop
+                strex   r2, r1, [r0]
+                cmp     r2, #0
+                bne     .L_loop
+                dmb
+                bx      lr
+
+
+.size osHwAcquireSpinLock, .-osHwAcquireSpinLock
+
+/*******************************************************************************************
+  \brief  
+  
+  \param  
+  
+  \return 
+********************************************************************************************/
+.thumb_func
+.section ".text", "ax"
+.align 8
+.globl osHwReleaseSpinLock
+.type  osHwReleaseSpinLock,  % function
+
+osHwReleaseSpinLock:
+                  dmb
+                  mov     r1, #0
+                  stl     r1, [r0]
+                  bx      lr
+
+
+.size osHwReleaseSpinLock, .-osHwReleaseSpinLock
+
 

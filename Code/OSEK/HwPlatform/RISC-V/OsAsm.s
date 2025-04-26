@@ -281,6 +281,53 @@ osSetIntVectTableAddress:
 
 .size osSetIntVectTableAddress, .-osSetIntVectTableAddress
 
+/* ----------------------------------------------------------------------------------------------------------------- */
+/*  \brief  void osHwAcquireSpinLock(uint32* lock)                                                                   */
+/*                                                                                                                   */
+/*  \descr                                                                                                           */
+/*                                                                                                                   */
+/*  \param                                                                                                           */
+/*                                                                                                                   */
+/*  \return void                                                                                                     */
+/* ----------------------------------------------------------------------------------------------------------------- */
+.section ".text", "ax"
+.align 2
+.globl osHwAcquireSpinLock
+.type  osHwAcquireSpinLock, @function
+
+
+osHwAcquireSpinLock:  lr.w a1, (a0)
+                      bne zero, a1, osHwAcquireSpinLock
+                      add a1, zero, 1
+                      sc.w t0, a1, (a0)
+                      bnez t0, osHwAcquireSpinLock
+                      ret
+
+.size osHwAcquireSpinLock, .-osHwAcquireSpinLock
+
+/* ----------------------------------------------------------------------------------------------------------------- */
+/*  \brief  void osHwReleaseSpinLock(uint32_t* lock)                                                                 */
+/*                                                                                                                   */
+/*  \descr                                                                                                           */
+/*                                                                                                                   */
+/*  \param                                                                                                           */
+/*                                                                                                                   */
+/*  \return void                                                                                                     */
+/* ----------------------------------------------------------------------------------------------------------------- */
+.section ".text", "ax"
+.align 2
+.globl osHwReleaseSpinLock
+.type  osHwReleaseSpinLock, @function
+
+
+osHwReleaseSpinLock: lr.w a1, (a0)
+                     add a2, zero, 1
+                     bne a2, a1, osHwReleaseSpinLock
+                     sc.w t0, zero, (a0)
+                     bnez t0, osHwReleaseSpinLock
+                     ret
+
+.size osHwReleaseSpinLock, .-osHwReleaseSpinLock
 
 /*
 

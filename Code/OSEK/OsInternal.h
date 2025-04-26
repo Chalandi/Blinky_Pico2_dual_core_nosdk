@@ -47,6 +47,7 @@ void osKernelError(OsStatusType err);
 void osRunCat2Isr(void);
 void osSetTaskPrioReady(const uint32 prio);
 void osStoreStackPointer(uint32 StackPtrValue);
+void osMulticoreSync(void);
 
 osObjectCoreAsgn_t osGetLocalAlarmAssignment(uint32_t SystemAlarmId);
 osObjectCoreAsgn_t osGetLocalTaskAssignment(uint32_t SystemTaskId);
@@ -54,5 +55,17 @@ osObjectCoreAsgn_t osGetLocalResourceAssignment(uint32_t SystemResourceId);
 
 ISR(SysTickTimer);
 ISR(UndefinedFunc);
+ISR(osCrossCoreReceiveRequest);
+
+//OsStatusType osCrossCore_SetEvent(OsCoreId ActiveCore, OsCoreId TargetCore, OsTaskType TaskID, OsEventMaskType Mask);
+OsStatusType osCrossCore_SetEvent(OsTaskType TaskID, OsEventMaskType Mask);
+OsStatusType osCrossCore_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event);
+OsStatusType osCrossCore_ActivateTask(OsTaskType TaskID);
+OsStatusType osCrossCore_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State);
+OsStatusType osCrossCore_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick);
+OsStatusType osCrossCore_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickType cycle);
+OsStatusType osCrossCore_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cycle);
+OsStatusType osCrossCore_CancelAlarm(OsAlarmType AlarmID);
+OsStatusType osCrossCore_ShutdownAllCores(void);
 
 #endif

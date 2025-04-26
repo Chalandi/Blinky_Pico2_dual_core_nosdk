@@ -1,6 +1,6 @@
 void OnProjectLoad (void) {
   Project.AddPathSubstitute ("/mnt/d/Git_Repo/Blinky_Pico2_dual_core_nosdk/Code", "D:/Git_Repo/Blinky_Pico2_dual_core_nosdk/Code");
-  Project.SetDevice ("Cortex-M33");
+  Project.SetDevice ("RP2350_M33_1");
   Project.SetHostIF ("USB", "");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("4 MHz");

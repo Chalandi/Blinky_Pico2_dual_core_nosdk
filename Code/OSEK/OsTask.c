@@ -62,8 +62,7 @@ OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State)
 
   if(osActiveCore != osLocalTaskAssignment.pinned_core)
   {
-    /* to be implemented: send the request to the other core */
-    return(E_OK);
+    return(osCrossCore_GetTaskState(TaskID, State));
   }
   else
   {

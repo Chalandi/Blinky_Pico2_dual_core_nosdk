@@ -1,0 +1,10 @@
+void OnProjectLoad (void) {
+  Project.AddPathSubstitute ("/mnt/d/Git_Repo/Blinky_Pico2_dual_core_nosdk/Code", "D:/Git_Repo/Blinky_Pico2_dual_core_nosdk/Code");
+  Project.SetDevice ("RP2350_RV32_1");
+  Project.SetHostIF ("USB", "");
+  Project.SetTargetIF ("SWD");
+  Project.SetTIFSpeed ("4 MHz");
+  Project.AddSvdFile ("$(InstallDir)/Config/CPU/RV32IFD.svd");
+  Project.AddSvdFile ("$(ProjectDir)/../Code/Mcal/RP2350.svd");
+  File.Open ("$(ProjectDir)/../Output/riscv_baremetal_pico2_dual_core_nosdk.elf");
+}
