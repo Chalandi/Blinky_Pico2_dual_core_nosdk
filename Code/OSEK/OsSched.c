@@ -122,38 +122,38 @@ OsStatusType OS_Schedule(void)
   {
     osInternalError(E_OS_CALLEVEL);
   }
-  else if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks        &&
-          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0  &&
-          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
+  else if(OCB_Cfg[osActiveCore]->OsCurrentTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks        &&
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->CeilingPrio != 0  &&
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->FixedPrio)
   {
     osInternalError(E_OS_RESOURCE);
   }
   else
   {
     /* Enter the critical section */
-    OS_SuspendAllInterrupts();
+    OS_SuspendOSInterrupts();
 
     /* Get the high prio task id */
-    OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
+    OCB_Cfg[osActiveCore]->OsHighPrioReadyTaskId = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
 
     /* Exit the critical section */
-    OS_ResumeAllInterrupts();
+    OS_ResumeOSInterrupts();
 
     /* check if we need to switch the context (Preemption case) */
-    if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx]->Prio > OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio)
+    if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsHighPrioReadyTaskId]->Prio > OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio)
     {
-      if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
+      if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskSchedType == FULL_PREEMPT)
       {
         /* Call osPostTaskHook */
-        #if(OS_POSTTASKHOOK)
-        osPostTaskHook();
+        #ifdef OS_POSTTASKHOOK
+        (OCB_Cfg[osActiveCore]->OsPostTaskHook)();
         #endif
 
         /* change the state of the current task */
-        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = READY;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = READY;
 
         /* set the current task's ready bit */
-        osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio);
+        osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio);
 
         if(OCB_Cfg[osActiveCore]->OsLockDispatcher == OS_FALSE)
         {
@@ -187,9 +187,9 @@ OsStatusType osSchedule(void)
 {
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
-  if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks                                                                            &&
-     OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0                                                                      &&
-     OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio &&
+  if(OCB_Cfg[osActiveCore]->OsCurrentTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks                                                                            &&
+     OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->CeilingPrio != 0                                                                      &&
+     OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->FixedPrio &&
      FALSE == osIsCat2IntContext())
   {
     osInternalError(E_OS_RESOURCE);
@@ -201,33 +201,33 @@ OsStatusType osSchedule(void)
   else
   {
     /* Enter the critical section */
-    OS_SuspendAllInterrupts();
+    OS_SuspendOSInterrupts();
 
     /* Get the high prio task id */
-    OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
+    OCB_Cfg[osActiveCore]->OsHighPrioReadyTaskId = osGetHighPrioReadyTaskIdx((uint32)osHwSearchForHighPrio());
 
     /* Exit the critical section */
-    OS_ResumeAllInterrupts();
+    OS_ResumeOSInterrupts();
 
 
     /* case1: the scheduler is called explicitly by the running task or by an interrupt cat 2 and a ready task is found */
-    if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
+    if(OCB_Cfg[osActiveCore]->OsCurrentTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->OsHighPrioReadyTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
         /* check if we need to switch the context (Preemption case) */
-        if((OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == RUNNING) && (OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx]->Prio > OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio))
+        if((OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus == RUNNING) && (OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsHighPrioReadyTaskId]->Prio > OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio))
         {
-          if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
+          if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskSchedType == FULL_PREEMPT)
           {
             /* Call osPostTaskHook */
-            #if(OS_POSTTASKHOOK)
-            osPostTaskHook();
+            #ifdef OS_POSTTASKHOOK
+            (OCB_Cfg[osActiveCore]->OsPostTaskHook)();
             #endif
 
             /* change the state of the current task */
-            OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = READY;
+            OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = READY;
 
             /* set the current task's ready bit */
-            osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio);
+            osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio);
 
             if(OCB_Cfg[osActiveCore]->OsCat2InterruptLevel == OS_FALSE && OCB_Cfg[osActiveCore]->OsLockDispatcher == OS_FALSE)
             {
@@ -252,11 +252,11 @@ OsStatusType osSchedule(void)
             return(E_OK);
           }
         }
-        else if (OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == SUSPENDED || OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == WAITING)
+        else if (OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus == SUSPENDED || OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus == WAITING)
         {
           /* Call osPostTaskHook */
-          #if(OS_POSTTASKHOOK)
-          osPostTaskHook();
+          #ifdef OS_POSTTASKHOOK
+          (OCB_Cfg[osActiveCore]->OsPostTaskHook)();
           #endif
 
           /* Call the dispatcher */
@@ -270,7 +270,7 @@ OsStatusType osSchedule(void)
         }
     }
     /* case 2: - System idle loop is active and the scheduler is called explicitly from an interrupt cat 2 and a ready task is found */
-    else if(OCB_Cfg[osActiveCore]->CurrentTaskIdx == OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
+    else if(OCB_Cfg[osActiveCore]->OsCurrentTaskId == OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->OsHighPrioReadyTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
       if(OCB_Cfg[osActiveCore]->OsCat2InterruptLevel == OS_TRUE && OCB_Cfg[osActiveCore]->OsIsRunning == OS_TRUE)
       {
@@ -285,10 +285,10 @@ OsStatusType osSchedule(void)
       }
     }
    /* case 3: the scheduler is called explicitly by the running task or by an interrupt cat 2 and no ready task is found */
-    else if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx == OCB_Cfg[osActiveCore]->OsNumberOfTasks)
+    else if(OCB_Cfg[osActiveCore]->OsCurrentTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->OsHighPrioReadyTaskId == OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
       /* check the current task state */
-      if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == RUNNING)
+      if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus == RUNNING)
       {
         /* no context switch is needed */
         return(E_OK);
@@ -298,8 +298,8 @@ OsStatusType osSchedule(void)
         /* context switch need to be performed => System will goes to os internal idle loop */
 
         /* Call PostTaskHook */
-        #if(OS_POSTTASKHOOK)
-        osPostTaskHook();
+        #ifdef OS_POSTTASKHOOK
+        (OCB_Cfg[osActiveCore]->OsPostTaskHook)();
         #endif
 
         if(OCB_Cfg[osActiveCore]->OsCat2InterruptLevel == OS_FALSE)
@@ -317,7 +317,7 @@ OsStatusType osSchedule(void)
       }
     }
    /* case 4: System idle loop is active and the scheduler is called explicitly from an interrupt cat 2 and no ready task is found */
-    else if(OCB_Cfg[osActiveCore]->CurrentTaskIdx == OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx == OCB_Cfg[osActiveCore]->OsNumberOfTasks)
+    else if(OCB_Cfg[osActiveCore]->OsCurrentTaskId == OCB_Cfg[osActiveCore]->OsNumberOfTasks && OCB_Cfg[osActiveCore]->OsHighPrioReadyTaskId == OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
       /* no context switch is needed */
       return(E_OK);

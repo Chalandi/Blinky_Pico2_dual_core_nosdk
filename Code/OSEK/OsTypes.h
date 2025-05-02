@@ -19,9 +19,11 @@
 #define __OS_TYPES_H__
 
 #include"Platform_Types.h"
-#include"OsHwPltfm.h"
 #include"OsGenPrioTypes.h"
-#include"OsIpc.h"
+
+typedef uint32_t OsCoreId;
+#include"OsHwPltfm.h"
+
 typedef void (*pTaskFunc)(void);
 typedef void (*pIsrFunc)(void);
 
@@ -77,8 +79,13 @@ typedef enum
   E_OS_KERNEL_PANIC           = 26,
   E_OS_ENABLEDINT             = 27,
   E_OS_MULTICORE_NOT_ASSIGNED = 28,
-  E_OS_MULTICORE_COM_LOST     = 29
+  E_OS_MULTICORE_COM_LOST     = 29,
+  E_OS_NESTING_DEPTH_EXCEEDED = 30,
+  E_OS_NESTING_DEADLOCK       = 31
 }OsStatusType;
+
+typedef void (*pHookFunc)(void);
+typedef void (*pHookFuncE)(OsStatusType error);
 
 typedef enum
 {
@@ -118,6 +125,7 @@ typedef OsEventMaskType* OsEventMaskRefType;
 typedef OsTaskType* OsTaskRefType; 
 typedef OsTaskStateType* OsTaskStateRefType;
 typedef unsigned int OsResourceType;
+typedef unsigned int OsSpinlockIdType;
 typedef unsigned int OsAppModeType;
 typedef unsigned int OsAlarmType;
 typedef unsigned int OsTickType;
@@ -127,7 +135,7 @@ typedef OsTickType* OsTickRefType;
 
 typedef struct
 {
-  const    pTaskFunc         function;
+  const    pTaskFunc         Function;
   const    uint32            FixedPrio;
   const    uint32            Autostart;
   const    uint32            pstack_top;
@@ -146,25 +154,32 @@ typedef struct
 
 typedef struct
 {
-           OsTickType             InitTicks;
-           OsTickType             InitCycles;
-  const    OsEventMaskType        Event;
-  const    OsTaskType             TaskId;
-  const    OsAlarmActionType      Action;
-  const    uint32                 AutoStart;
-           OsAlarmStatusType      Status;
-           OsAlarmCounterType     Alarmtype;
-           OsAlarmCategoryType    AlarmCategory;
-           OsTickType             AlarmCheckPoint;
-           pTaskFunc              CallBackFunc;
+           OsTickType           InitTicks;
+           OsTickType           InitCycles;
+  const    OsEventMaskType      Event;
+  const    OsTaskType           TaskId;
+  const    OsAlarmActionType    Action;
+  const    uint32               AutoStart;
+           OsAlarmStatusType    Status;
+           OsAlarmCounterType   Alarmtype;
+           OsAlarmCategoryType  AlarmCategory;
+           OsTickType           AlarmCheckPoint;
+           pTaskFunc            CallBackFunc;
 }OsAlarmConfigType;
 
 typedef struct
 {
-  const uint32 ResCeilingPrio;
-  uint32 CurrentOccupiedTask;
-  const uint32 AuthorizedTask;
+  const uint32  ResCeilingPrio;
+  uint32        Occupied;
+  uint32        CurrentOccupiedTask;
+  const uint32  AuthorizedTask;
 }OsResourceConfigType;
+
+typedef struct
+{
+  uint32  Lock;
+  uint32  CurrentOccupiedTask;
+}OsSpinlockConfigType;
 
 typedef OsAlarmConfigType** OsAlarmBaseRefType;
 
@@ -176,49 +191,107 @@ typedef struct
 {
     pIsrFunc IsrFunc;
     uint8 Prio;
-    OsInterruptNestingType type;
+    OsInterruptNestingType NestingType;
+    uint8 category;
 } OsIntIsrLtType;
 
 typedef struct
 {
-  uint32_t              osNbrOfInterrupts;
-  uint32_t              osIntCat1LowestPrioLevel;
-  const OsIntIsrLtType* osIsrLookupTablePtr;
+  uint32_t               OsNbrOfInterrupts;
+  uint32_t               OsIntCat1LowestPrioLevel;
+  uint32                 OsInterruptNestingDepth;
+  uint32                 OsInterruptSavedPrioLevel;
+  uint32                 OsInterruptSavedGlobalMask;
+  uint16                 OsInterruptSuspendOsNestingCall;
+  uint16                 OsInterruptSuspendAllNestingCall;
+  uint32                 OsIntNestSavedStackPointer[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
+  uint32                 OsIntNestSavedPrioLevel[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
+  const OsIntIsrLtType*  OsIsrLookupTablePtr;
 }OsInterruptConfigType;
 
 typedef struct
 {
-  uint32_t local_id;
-  uint32_t pinned_core;
+  uint32_t  local_id;
+  uint32_t  pinned_core;
 }osObjectCoreAsgn_t;
 
-typedef uint32_t OsCoreId;
+//typedef uint32_t OsCoreId;
+
+/* FIFO types */
+typedef struct {
+  uint32_t        PopPtr;
+  uint32_t        PushPtr;
+  const uint32_t  size;
+  uint8_t*        buf;
+}OsCircularFifoQueueDataType;
+
+#define OS_CIRCULAR_FIFO_DEF(id,fifosize) uint8_t buffer_##id[fifosize]={0};   \
+                                          OsCircularFifoQueueDataType Fifo_##id = {0,0,fifosize,buffer_##id}
+
+/* IPC types */
+
+typedef enum
+{
+  IPC_MBX_MODE_LOCAL = 0,
+  IPC_MBX_MODE_BROADCAST
+}OsIpcMbxModeType;
+
+typedef struct{
+  const OsTaskType                   owner;  /* id of the task owned the mailbox */
+  const OsResourceType               res;    /* resource used to protect the mailbox */
+  const OsEventMaskType              evt;    /* event used to notify the owner of a new msg in the mailbox */
+  uint32                             lock;   /* spinlock used to protect the mailbox in multicore context */
+  const OsIpcMbxModeType             mode;   /* local/cross-core mailbox */
+  OsCircularFifoQueueDataType* const pQueue; /* pointer to the circulair fifo queue */
+}OsIpcMbxCfgType;
+
+
+typedef struct{
+  uint16  id;    /* Message Id (channel) */
+  uint16  size;  /* size of the data pointed by pdata */
+  uint8*  pdata; /* pointer to the data */
+}OsIpcMbxdataType;
+
+typedef enum{
+  IPC_NOK = 0,
+  IPC_OK
+}IpcStatus;
+
+#define OS_IPC_DEF_MBX_QUEUE(name, taskId, size, ressource, event, _mode)   OS_CIRCULAR_FIFO_DEF(name,size); \
+               OsIpcMbxCfgType IpcMbx_##name = {.owner=taskId, .res=ressource, .evt=event, .lock = 0, .mode = _mode, .pQueue=&Fifo_##name}
+
+#define pIPC(Name) &IpcMbx_##Name
+#define gIPC(Name) IpcMbx_##Name
+
 
 typedef struct
 {
   OsTcbType**             pTcb;
   OsAlarmConfigType**     pAlarm;
   OsResourceConfigType**  pRes;
+  OsSpinlockConfigType**  pSpinlock;
   OsInterruptConfigType*  pInt;
   uint32                  OsIsRunning;
-  uint32                  HighPrioReadyTaskIdx;
-  uint32                  CurrentTaskIdx;
+  uint32                  OsHighPrioReadyTaskId;
+  uint32                  OsCurrentTaskId;
   uint64                  OsSysTickCounter;
   uint32                  OsIntCallDispatcher;
   uint32                  OsLockDispatcher;
   uint32                  OsCat2InterruptLevel;
   uint32                  OsCurrentSystemStackPtr;
-  uint32                  OsInterruptNestingDepth;
-  uint32                  OsInterruptNestingSavedLevel;
-  uint32                  OsInterruptSavedPrioLevel;
-  uint32                  OsInterruptSavedGlobalMask;
-  uint32                  OsIntNestSavedStackPointer[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
-  uint32                  OsIntNestSavedPrioLevel[OS_INTERRUPT_NESTING_DEPTH_LEVEL];
   uint32                  OsCrossCoreBuffer[10];
+  uint32                  OsCrossCoreBufferLock;
+  uint32                  OsCrossCoreBufferSyncFlag;
   OsSchedPrioType         OsHwSchedPrioReg;
+  uint32                  OsSpinlockNestingDepth;
   uint32                  OsNumberOfTasks;
   uint32                  OsNumberOfAlarms;
   uint32                  OsNumberOfResources;
+  pHookFunc               OsStartupHook;
+  pHookFunc               OsPreTaskHook;
+  pHookFunc               OsPostTaskHook;
+  pHookFuncE              OsShutdownHook;
+  pHookFuncE              OsErrorHook;
 }Ocb_t;
 
 typedef struct
@@ -226,18 +299,14 @@ typedef struct
   pIsrFunc IsrFunc;
 }FeIsr_t;
 
-#ifndef OsSpinlockIdType
-typedef enum
-{
-  INVALID_SPINLOCK = 0
-}OsSpinlockIdType;
-#endif
 
 typedef enum
 {
-  TRYTOGETSPINLOCK_SUCCESS = 0,
-  TRYTOGETSPINLOCK_NOSUCCESS
+  TRYTOGETSPINLOCK_NOSUCCESS = 0,
+  TRYTOGETSPINLOCK_SUCCESS
 }OsTryToGetSpinlockType;
+
+
 
 #define TASK(x)                void OsTask_##x##Func(void)
 #define ISR(x)                 void OsIsr_##x##Func(void)
@@ -247,6 +316,7 @@ typedef enum
 #define pISR(x)                (pIsrFunc)&OsIsr_##x##Func
 #define pALARMCALLBACK(x)      (pIsrFunc)&OsAlarmCallback_##x##Func
 #define osInternalError(x)     osKernelError(x); return(x)
+
 
 #define PRAGMA(x) _Pragma(#x)
 

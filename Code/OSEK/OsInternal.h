@@ -57,15 +57,23 @@ ISR(SysTickTimer);
 ISR(UndefinedFunc);
 ISR(osCrossCoreReceiveRequest);
 
-//OsStatusType osCrossCore_SetEvent(OsCoreId ActiveCore, OsCoreId TargetCore, OsTaskType TaskID, OsEventMaskType Mask);
-OsStatusType osCrossCore_SetEvent(OsTaskType TaskID, OsEventMaskType Mask);
-OsStatusType osCrossCore_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event);
-OsStatusType osCrossCore_ActivateTask(OsTaskType TaskID);
-OsStatusType osCrossCore_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State);
-OsStatusType osCrossCore_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick);
-OsStatusType osCrossCore_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickType cycle);
-OsStatusType osCrossCore_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cycle);
-OsStatusType osCrossCore_CancelAlarm(OsAlarmType AlarmID);
-OsStatusType osCrossCore_ShutdownAllCores(void);
+uint8_t  osCircularFifoQueue_IsEmpty(OsCircularFifoQueueDataType* pfifo);
+uint8_t  osCircularFifoQueue_IsFull(OsCircularFifoQueueDataType* pfifo);
+uint32_t osCircularFifoQueue_GetAvailableSize(OsCircularFifoQueueDataType* pfifo);
+uint32_t osCircularFifoQueue_GetCurrentConsumption(OsCircularFifoQueueDataType* pfifo);
+uint8_t  osCircularFifoQueue_Push(OsCircularFifoQueueDataType* pfifo, uint8_t* data, uint32_t size);
+uint8_t  osCircularFifoQueue_Pop(OsCircularFifoQueueDataType* pfifo, uint8_t* data, uint32_t size);
+uint8_t  osCircularFifoQueue_ReadCopy(OsCircularFifoQueueDataType* pfifo, uint8_t* data, uint32_t size);
+
+
+OsStatusType osCrossCore_SetEvent(OsCoreId ActiveCore, OsCoreId TargetCore, OsTaskType TaskID, OsEventMaskType Mask);
+OsStatusType osCrossCore_GetEvent(OsCoreId ActiveCore, OsCoreId TargetCore, OsTaskType TaskID, OsEventMaskRefType Event);
+OsStatusType osCrossCore_ActivateTask(OsCoreId ActiveCore, OsCoreId TargetCore, OsTaskType TaskID);
+OsStatusType osCrossCore_GetTaskState(OsCoreId ActiveCore, OsCoreId TargetCore, OsTaskType TaskID, OsTaskStateRefType State);
+OsStatusType osCrossCore_GetAlarm(OsCoreId ActiveCore, OsCoreId TargetCore, OsAlarmType AlarmID, OsTickRefType Tick);
+OsStatusType osCrossCore_SetRelAlarm(OsCoreId ActiveCore, OsCoreId TargetCore, OsAlarmType AlarmID, OsTickType increment, OsTickType cycle);
+OsStatusType osCrossCore_SetAbsAlarm(OsCoreId ActiveCore, OsCoreId TargetCore, OsAlarmType AlarmID, OsTickType start, OsTickType cycle);
+OsStatusType osCrossCore_CancelAlarm(OsCoreId ActiveCore, OsCoreId TargetCore, OsAlarmType AlarmID);
+
 
 #endif

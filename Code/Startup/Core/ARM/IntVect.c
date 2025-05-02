@@ -89,7 +89,7 @@ void POWMAN_IRQ_TIMER_IRQn(void) __attribute__((weak, alias("UndefinedHandler"))
 //=============================================================================
 // Interrupt vector table Core0
 //=============================================================================
-const InterruptHandler __attribute__((section(".intvect_c0"), aligned(128))) __INTVECT_Core0[] =
+const InterruptHandler __attribute__((section(".intvect_c0"), aligned(512))) __INTVECT_Core0[] =
 {
     (InterruptHandler)&__CORE0_STACK_TOP,
     (InterruptHandler)&Startup_Init,
@@ -132,7 +132,7 @@ const InterruptHandler __attribute__((section(".intvect_c0"), aligned(128))) __I
     (InterruptHandler)&IO_IRQ_BANK0_NS_IRQn,
     (InterruptHandler)&IO_IRQ_QSPI_IRQn,
     (InterruptHandler)&IO_IRQ_QSPI_NS_IRQn,
-    (InterruptHandler)&osCat2IsrWrapper,
+    (InterruptHandler)&SIO_IRQ_FIFO_IRQn,
     (InterruptHandler)&osCat2IsrWrapper,
     (InterruptHandler)&SIO_IRQ_FIFO_NS_IRQn,
     (InterruptHandler)&SIO_IRQ_BELL_NS_IRQn,
@@ -162,7 +162,7 @@ const InterruptHandler __attribute__((section(".intvect_c0"), aligned(128))) __I
 //=============================================================================
 // Interrupt vector table Core1
 //=============================================================================
-const InterruptHandler __attribute__((section(".intvect_c1"), aligned(128))) __INTVECT_Core1[] =
+const InterruptHandler __attribute__((section(".intvect_c1"), aligned(512))) __INTVECT_Core1[] =
 {
     (InterruptHandler)&__CORE1_STACK_TOP,
     (InterruptHandler)&main_Core1,
@@ -205,7 +205,7 @@ const InterruptHandler __attribute__((section(".intvect_c1"), aligned(128))) __I
     (InterruptHandler)&IO_IRQ_BANK0_NS_IRQn,
     (InterruptHandler)&IO_IRQ_QSPI_IRQn,
     (InterruptHandler)&IO_IRQ_QSPI_NS_IRQn,
-    (InterruptHandler)&osCat2IsrWrapper,
+    (InterruptHandler)&SIO_IRQ_FIFO_IRQn,
     (InterruptHandler)&osCat2IsrWrapper,
     (InterruptHandler)&SIO_IRQ_FIFO_NS_IRQn,
     (InterruptHandler)&SIO_IRQ_BELL_NS_IRQn,

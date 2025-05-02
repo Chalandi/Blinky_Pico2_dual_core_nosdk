@@ -1,2 +1,2 @@
 clear
-py .\MyOilGen.py -i .\myOilFile.oil -process -html ./Gen/osek.html -gen ./Gen
+py .\OilConfigGenerator.py -i .\singlecore.templ.oil -gen ./Gen

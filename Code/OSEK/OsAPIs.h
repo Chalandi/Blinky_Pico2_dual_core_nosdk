@@ -43,6 +43,9 @@ OsStatusType OS_GetSpinlock(OsSpinlockIdType SpinlockId);
 OsStatusType OS_ReleaseSpinlock(OsSpinlockIdType SpinlockId);
 OsStatusType OS_TryToGetSpinlock(OsSpinlockIdType SpinlockId, OsTryToGetSpinlockType* Success);
 
+IpcStatus OS_IpcSendData(OsIpcMbxCfgType* const  MsgBox, OsIpcMbxdataType const* Msgdata);
+IpcStatus OS_IpcReceiveData(OsIpcMbxCfgType* const  MsgBox, OsIpcMbxdataType const* Msgdata);
+
 void OS_DisableAllInterrupts(void);
 void OS_EnableAllInterrupts(void);
 void OS_ResumeAllInterrupts(void);

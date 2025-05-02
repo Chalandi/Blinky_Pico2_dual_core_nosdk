@@ -7,8 +7,10 @@ from tabulate import tabulate
 # Globals
 OsTaskTotalNumber   = 0
 OsTasksList         = []
+OsTasksList_per_core = [[], []]
 osTaskEvents        = []
 osTaskResources     = []
+osTaskResources_per_core = [[], []]
 
 # Globals used for formating data for print function
 OsTaskEventPre    = []
@@ -30,6 +32,7 @@ def OilTaskParser(args, Oilfile):
     Task_stacksize_pattern   = re.compile(r"StackSize\s*=\s*(\w+);")
     Task_event_pattern       = re.compile(r"EVENT\s*=\s*(\w+);")
     Task_resource_pattern    = re.compile(r"RESOURCE\s*=\s*(\w+);")
+    Task_core_pattern        = re.compile(r"CORE\s*=\s*(\w+);")
     
     # find all tasks pattern
     tasks = task_pattern.findall(Oilfile)
@@ -48,6 +51,7 @@ def OilTaskParser(args, Oilfile):
         Task_activation_match = Task_activation_pattern.search(task_properties)
         Task_autostart_match  = Task_autostart_pattern.search(task_properties)
         Task_stacksize_match  = Task_stacksize_pattern.search(task_properties)
+        Task_core_match       = Task_core_pattern.search(task_properties)
 
         Task_type       = Task_type_match.group(1) if Task_type_match else None
         Task_schedule   = Task_schedule_match.group(1) if Task_schedule_match else None
@@ -55,10 +59,12 @@ def OilTaskParser(args, Oilfile):
         Task_activation = Task_activation_match.group(1) if Task_activation_match else None
         Task_autostart  = Task_autostart_match.group(1) if Task_autostart_match else None
         Task_stacksize  = Task_stacksize_match.group(1) if Task_stacksize_match else None
+        Task_core       = Task_core_match.group(1) if Task_core_match else "0"
         
         # Update the tasks list
-        #                     0     ,   1      ,    2         ,      3       ,      4         ,       5,            6,           7
-        OsTasksList.append([Task_name, Task_type, Task_schedule, Task_priority, Task_activation, Task_autostart, Task_stacksize, 0])
+        #                     0     ,   1      ,    2         ,      3       ,      4         ,       5,            6,           7,     8
+        OsTasksList.append([Task_name, Task_type, Task_schedule, Task_priority, Task_activation, Task_autostart, Task_stacksize, 0, Task_core])
+        OsTasksList_per_core[int(Task_core)].append([Task_name, Task_type, Task_schedule, Task_priority, Task_activation, Task_autostart, Task_stacksize, 0])
 
         # Search for task's events
         Task_event_match = Task_event_pattern.findall(task_properties)
@@ -71,8 +77,13 @@ def OilTaskParser(args, Oilfile):
         # Search for task's resources
         Task_resource_match = Task_resource_pattern.findall(task_properties)
         osTaskResources.append(Task_resource_match)
+        osTaskResources_per_core[int(Task_core)].append(Task_resource_match)
 
         for OsTaskResource in osTaskResources :
             OsTaskResourcePre = [Task_name, '\n'.join(OsTaskResource)]
         OsTaskResourceL.append(OsTaskResourcePre)  
 
+    #print(f"OsTasksList_per_core[0] = {OsTasksList_per_core[0]}")
+    #print(f"Total tasks in core 0 = {len(OsTasksList_per_core[0])}")
+    #print(f"OsTasksList_per_core[1] = {OsTasksList_per_core[1]}")
+    #print(f"Total tasks in core 1 = {len(OsTasksList_per_core[1])}")

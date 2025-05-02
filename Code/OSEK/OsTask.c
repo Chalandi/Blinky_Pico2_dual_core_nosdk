@@ -33,9 +33,20 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetTaskID(OsTaskRefType TaskID)
 {
-  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
+  const uint32_t osActiveCore  = osGetLogicalCoreId(osGetCoreId());
+  const uint32_t local_task_id = OCB_Cfg[osActiveCore]->OsCurrentTaskId;
 
-  *TaskID = OCB_Cfg[osActiveCore]->CurrentTaskIdx;
+  for(uint32_t task_id = 0; task_id < OS_NUMBER_OF_TASKS; task_id++)
+  {
+    if((local_task_id == osTaskCoreAsgnLookupTable[task_id].local_id) &&
+      (osActiveCore == osTaskCoreAsgnLookupTable[task_id].pinned_core))
+      {
+        *TaskID = task_id;
+        return(E_OK);
+      }
+  }
+
+  *TaskID = OS_INVALID_TASK;
   return(E_OK);
 }
 
@@ -51,7 +62,7 @@ OsStatusType OS_GetTaskID(OsTaskRefType TaskID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State)
 {
-  if(TaskID >= OS_INTERNAL_TASK_ID)
+  if(TaskID >= OS_NUMBER_OF_TASKS)
   {
     osInternalError(E_OS_ID);
   }
@@ -62,7 +73,7 @@ OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State)
 
   if(osActiveCore != osLocalTaskAssignment.pinned_core)
   {
-    return(osCrossCore_GetTaskState(TaskID, State));
+    return(osCrossCore_GetTaskState(osActiveCore, osLocalTaskAssignment.pinned_core, TaskID, State));
   }
   else
   {
@@ -88,37 +99,44 @@ OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ActivateTask(OsTaskType TaskID)
 {
-  if(TaskID < OS_INTERNAL_TASK_ID)
+  if(TaskID < OS_NUMBER_OF_TASKS)
   {
     const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
     const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
     const OsTaskType LocalTaskID = osLocalTaskAssignment.local_id;
 
-    if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == SUSPENDED)
+    if(osActiveCore != osLocalTaskAssignment.pinned_core)
     {
-      OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus = PRE_READY;
-
-      /* set the current task's ready bit */
-      osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->Prio);
-      
-      if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC)
-      {
-        OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation++;
-      }
-
-      /* Call the scheduler */
-      (void)osSchedule();
-
-      return(E_OK);
-    }
-    else if((OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC) && (OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation < OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MaxAllowedMultipleActivation))
-    {
-      OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation++;
-      return(E_OK);
+      return(osCrossCore_ActivateTask(osActiveCore, osLocalTaskAssignment.pinned_core, TaskID));
     }
     else
     {
-      osInternalError(E_OS_LIMIT);
+      if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == SUSPENDED)
+      {
+        OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus = PRE_READY;
+
+        /* set the current task's ready bit */
+        osSetTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->Prio);
+      
+        if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC)
+        {
+          OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation++;
+        }
+
+        /* Call the scheduler */
+        (void)osSchedule();
+
+        return(E_OK);
+      }
+      else if((OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskType == BASIC) && (OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation < OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MaxAllowedMultipleActivation))
+      {
+        OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation++;
+        return(E_OK);
+      }
+      else
+      {
+        osInternalError(E_OS_LIMIT);
+      }
     }
   }
   else
@@ -141,8 +159,8 @@ OsStatusType OS_TerminateTask(void)
 {
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
-  if(  OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0 &&
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
+  if(  OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->CeilingPrio != 0 &&
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->FixedPrio)
   {
     osInternalError(E_OS_RESOURCE);
   }
@@ -152,24 +170,24 @@ OsStatusType OS_TerminateTask(void)
   }   
   else
   {
-    if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskType == BASIC)
+    if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskType == BASIC)
     {
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation--;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->MultipleActivation--;
 
-      if(0 != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation)
+      if(0 != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->MultipleActivation)
       {
-        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = PRE_READY;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = PRE_READY;
       }
       else
       {
         /* Set the new task state */
-        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = SUSPENDED;
       }
     }
     else
     {
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->SetEvtMask = 0;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = SUSPENDED;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->SetEvtMask = 0;
     }
 
     /* Call the scheduler */
@@ -193,7 +211,7 @@ OsStatusType OS_TerminateTask(void)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ChainTask(OsTaskType TaskID)
 {
-  if(TaskID >= OS_INTERNAL_TASK_ID)
+  if(TaskID >= OS_NUMBER_OF_TASKS)
   {
     osInternalError(E_OS_ID);
   }
@@ -202,8 +220,8 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
   const osObjectCoreAsgn_t osLocalTaskAssignment = osGetLocalTaskAssignment(TaskID);
   const OsTaskType LocalTaskID = osLocalTaskAssignment.local_id;
 
-  if( OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0 &&
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
+  if( OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->CeilingPrio != 0 &&
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->FixedPrio)
   {
     osInternalError(E_OS_RESOURCE);
   }
@@ -213,9 +231,9 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
   } 
   else
   {
-    if(LocalTaskID == OCB_Cfg[osActiveCore]->CurrentTaskIdx)
+    if(LocalTaskID == OCB_Cfg[osActiveCore]->OsCurrentTaskId)
     {
-      /* If the succeeding task is identical with the current task, this does not result in multiple requests. 
+      /* If the succeeding task is identical with the current task, this does not result in multiple requests.
       The task is not transferred to the suspended state, but will immediately become ready again.*/
 
       (void)osSchedule();
@@ -224,22 +242,22 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
     }
     else
     {
-      if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskType == BASIC)
+      if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskType == BASIC)
       {
-        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation--;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->MultipleActivation--;
 
-        if(0 != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation)
+        if(0 != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->MultipleActivation)
         {
-          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = PRE_READY;
-          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation++;
-          if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MultipleActivation > OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->MaxAllowedMultipleActivation)
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = PRE_READY;
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->MultipleActivation++;
+          if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->MultipleActivation > OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->MaxAllowedMultipleActivation)
           {
             osInternalError(E_OS_LIMIT);
           }
         }
         else
         {
-          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
+          OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = SUSPENDED;
         }
 
         OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->MultipleActivation++;
@@ -251,8 +269,8 @@ OsStatusType OS_ChainTask(OsTaskType TaskID)
       }
       else
       {
-        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = SUSPENDED;
-        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->SetEvtMask = 0;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = SUSPENDED;
+        OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->SetEvtMask = 0;
       }
 
       if(OCB_Cfg[osActiveCore]->pTcb[LocalTaskID]->TaskStatus == SUSPENDED)

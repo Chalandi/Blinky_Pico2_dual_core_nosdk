@@ -35,10 +35,14 @@ def OilEventsParser(args, Oilfile):
         if (int(event_mask) & (int(event_mask) - 1)) != 0 :
             print(event_name+" mask value (" + str(hex(event_mask)) + ") is incorrect, more than one bit is set !")
             exit()
+        # check if the event_mask is higher than 32-bit
+        if (int(event_mask) > 0xffffffff):
+            print(event_name+" mask value (" + str(hex(event_mask)) + ") does not fit in 32-bit !")
+            exit()
 
         # Fill the event list
         EventsList.append([event_name, hex(event_mask)])
-
+    #print(f"EventsList = {EventsList}")
 
 def OilEventsGetMask(event):
     for idx in range(EventsTotalNumber):

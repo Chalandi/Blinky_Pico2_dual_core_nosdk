@@ -36,7 +36,7 @@
 OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 {
 
-  if(TaskID >= OS_INTERNAL_TASK_ID)
+  if(TaskID >= OS_NUMBER_OF_TASKS)
   {
     osInternalError(E_OS_ID);
   }
@@ -47,8 +47,7 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 
   if(osActiveCore != osLocalTaskAssignment.pinned_core)
   {
-    //return(osCrossCore_SetEvent(osActiveCore, osLocalTaskAssignment.pinned_core, TaskID, Mask));
-    return(osCrossCore_SetEvent(TaskID, Mask));
+    return(osCrossCore_SetEvent(osActiveCore, osLocalTaskAssignment.pinned_core, TaskID, Mask));
   }
 
   if(OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->TaskType == BASIC)
@@ -94,7 +93,7 @@ OsStatusType OS_ClearEvent(OsEventMaskType Mask)
 {
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
-  if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskType == BASIC)
+  if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskType == BASIC)
   {
     osInternalError(E_OS_ACCESS);
   }
@@ -104,7 +103,7 @@ OsStatusType OS_ClearEvent(OsEventMaskType Mask)
   }  
   else
   {
-    OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->SetEvtMask &=(OsEventMaskType)(~Mask);
+    OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->SetEvtMask &=(OsEventMaskType)(~Mask);
     return(E_OK);
   }
 }
@@ -122,7 +121,7 @@ OsStatusType OS_ClearEvent(OsEventMaskType Mask)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 {
-  if(TaskID >= OS_INTERNAL_TASK_ID)
+  if(TaskID >= OS_NUMBER_OF_TASKS)
   {
     osInternalError(E_OS_ID);
   }
@@ -133,7 +132,7 @@ OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 
   if(osActiveCore != osLocalTaskAssignment.pinned_core)
   {
-    return(osCrossCore_GetEvent(TaskID, Event));
+    return(osCrossCore_GetEvent(osActiveCore, osLocalTaskAssignment.pinned_core, TaskID, Event));
   }
 
   if(OCB_Cfg[osActiveCore]->pTcb[osLocalTaskID]->TaskType == BASIC)
@@ -165,11 +164,11 @@ OsStatusType OS_WaitEvent(OsEventMaskType Mask)
 {
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
-  if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio != 0 || OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio)
+  if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->CeilingPrio != 0 || OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio != OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->FixedPrio)
   {
     osInternalError(E_OS_RESOURCE);
   }
-  else if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskType == BASIC)
+  else if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskType == BASIC)
   { 
     osInternalError(E_OS_ACCESS);
   }
@@ -180,13 +179,13 @@ OsStatusType OS_WaitEvent(OsEventMaskType Mask)
   else
   {  
     /* Store the new event mask*/
-    OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->WaitEvtMask = Mask;
+    OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->WaitEvtMask = Mask;
     
     /* Check if the event waiting for is already set */
-    if((OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->SetEvtMask & OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->WaitEvtMask) == 0)
+    if((OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->SetEvtMask & OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->WaitEvtMask) == 0)
     {
       /* event not present -> set current task to waiting */
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = WAITING;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = WAITING;
       
       /* Call the scheduler */
       (void)osSchedule();

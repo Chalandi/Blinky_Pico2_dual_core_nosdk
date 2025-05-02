@@ -68,7 +68,11 @@ int main(void)
 
   /* start the OS */
   OS_StartOS(APP_MODE_DEFAULT);
-  for(;;);
+
+  while(1)
+  {
+    __asm("nop");
+  }
 }
 
 //-----------------------------------------------------------------------------------------
@@ -86,13 +90,19 @@ void main_Core0(void)
 
 #ifdef CORE_FAMILY_ARM
   /* Disable interrupts on core 0 */
-  __asm volatile("CPSID i");
+  DISABLE_INTERRUPTS();
 #endif
 
   /* Output disable on pin 25 */
   LED_GREEN_CFG();
   LED_RED_CFG();
   LED_BLUE_CFG();
+
+  GPIO_SET_DIRECTION_OUTPUT(2); 
+  GPIO_SET_DIRECTION_OUTPUT(3); 
+  GPIO_SET_DIRECTION_OUTPUT(6); 
+  GPIO_SET_DIRECTION_OUTPUT(4); 
+  GPIO_SET_DIRECTION_OUTPUT(15);
 
   /* Start the Core 1 and turn on the led to be sure that we passed successfully the core 1 initiaization */
   if(TRUE == RP2350_StartCore1())
@@ -113,7 +123,6 @@ void main_Core0(void)
       __asm volatile("NOP");
     }
   }
-
 }
 
 //-----------------------------------------------------------------------------------------
@@ -126,18 +135,17 @@ void main_Core0(void)
   volatile uint64_t* pMTIMECMP = (volatile uint64_t*)&(HW_PER_SIO->MTIMECMP.reg);
   volatile uint64_t* pMTIME    = (volatile uint64_t*)&(HW_PER_SIO->MTIME.reg);
 
-void main_Core1(void)
+void __attribute__((naked)) main_Core1(void)
 {
-  DISABLE_INTERRUPTS();
-
 #ifdef DEBUG_CORE1
   while(boHaltCore1);
 #endif
 
   /* Note: Core 1 is started with interrupt enabled by the BootRom */
+  DISABLE_INTERRUPTS();
 
   /* Clear the stiky bits of the FIFO_ST on core 1 */
-  HW_PER_SIO->FIFO_ST.reg = 0xFFu;
+  HW_PER_SIO->FIFO_ST.reg = 0x0Cul;
 
 #ifdef CORE_FAMILY_ARM
 

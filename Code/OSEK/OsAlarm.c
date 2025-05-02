@@ -81,7 +81,7 @@ OsStatusType OS_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick)
     }
     else
     {
-      return(osCrossCore_GetAlarm(AlarmID, Tick));
+      return(osCrossCore_GetAlarm(osActiveCore, osLocalAlarmAssignment.pinned_core, AlarmID, Tick));
     }
   }
   else
@@ -113,7 +113,7 @@ OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickTyp
 
     if(osActiveCore != osLocalAlarmAssignment.pinned_core)
     {
-      return(osCrossCore_SetRelAlarm(AlarmID, increment, cycle));
+      return(osCrossCore_SetRelAlarm(osActiveCore, osLocalAlarmAssignment.pinned_core, AlarmID, increment, cycle));
     }
 
     if(cycle == 0 && increment > 0 && OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_FREE)
@@ -176,7 +176,7 @@ OsStatusType OS_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cy
 
     if(osActiveCore != osLocalAlarmAssignment.pinned_core)
     {
-      return(osCrossCore_SetAbsAlarm(AlarmID, start, cycle));
+      return(osCrossCore_SetAbsAlarm(osActiveCore, osLocalAlarmAssignment.pinned_core, AlarmID, start, cycle));
     }
 
     if(cycle == 0 && start > (uint32)OCB_Cfg[osActiveCore]->OsSysTickCounter && OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status == ALARM_FREE)
@@ -235,7 +235,7 @@ OsStatusType OS_CancelAlarm(OsAlarmType AlarmID)
 
     if(osActiveCore != osLocalAlarmAssignment.pinned_core)
     {
-      return(osCrossCore_CancelAlarm(AlarmID));
+      return(osCrossCore_CancelAlarm(osActiveCore, osLocalAlarmAssignment.pinned_core, AlarmID));
     }
 
     OCB_Cfg[osActiveCore]->pAlarm[LocalAlarmID]->Status          = ALARM_FREE;

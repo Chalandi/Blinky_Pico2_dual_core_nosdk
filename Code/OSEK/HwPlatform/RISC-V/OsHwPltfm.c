@@ -122,9 +122,9 @@ void osInitInterrupts(void)
   uint16 osInterrupt_reg_meipra_window[32] = {0};
   ISR(Undefined);
 
-  for (uint32 InterruptIndex = 0; InterruptIndex < OCB_Cfg[osActiveCore]->pInt->osNbrOfInterrupts; InterruptIndex++)
+  for (uint32 InterruptIndex = 0; InterruptIndex < OCB_Cfg[osActiveCore]->pInt->OsNbrOfInterrupts; InterruptIndex++)
   {
-    if (OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
+    if (OCB_Cfg[osActiveCore]->pInt->OsIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
     {
       /* enable the interrupt */
       const uint32 meiea_window_bit = InterruptIndex % 16;
@@ -136,7 +136,7 @@ void osInitInterrupts(void)
       const uint32 meipra_window_bit = InterruptIndex % 4;
       const uint32 meipra_window_idx = InterruptIndex / 4;
 
-      osInterrupt_reg_meipra_window[meipra_window_idx] |= (OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio << (4 * meipra_window_bit));
+      osInterrupt_reg_meipra_window[meipra_window_idx] |= (OCB_Cfg[osActiveCore]->pInt->OsIsrLookupTablePtr[InterruptIndex].Prio << (4 * meipra_window_bit));
     }
   }
 
@@ -254,4 +254,41 @@ void osClearPendingInterrupt(uint32_t InterruptId)
 {
   (void)InterruptId;
   /* current interrupt pending flag is cleared already in osGetActiveInterruptVectorId() when entering the ISR */
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//------------------------------------------------------------------------------------------------------------------
+void osGenerateCrossCoreInterrupt(OsCoreId ActiveCore, OsCoreId TargetCore)
+{
+  (void)ActiveCore;
+  (void)TargetCore;
+  HW_PER_SIO->DOORBELL_OUT_SET.reg |= (1ul << 0);
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//------------------------------------------------------------------------------------------------------------------
+void osClearCrossCoreInterrupt(void)
+{
+  HW_PER_SIO->DOORBELL_IN_CLR.reg |= (1ul << 0);
+}
+
+uint32_t osHwTryToAcquireSpinLock(uint32_t* lock)
+{
+  (void)lock;
+  #warning "osHwTryToAcquireSpinLock is not implemented"
+  return 0;
 }

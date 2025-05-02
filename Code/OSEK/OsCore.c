@@ -78,9 +78,6 @@ void OS_StartOS(OsAppModeType Mode)
       OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->Prio = OCB_Cfg[osActiveCore]->pTcb[tcbIdx]->FixedPrio;
     }
     
-    /* Init system tick timer */
-    osInitTimer();
-    
     /* Start all autostart task */
     for(uint32 tcbIdx = 0; tcbIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks; tcbIdx++)
     {
@@ -100,25 +97,6 @@ void OS_StartOS(OsAppModeType Mode)
       }
     }
 
-    /* Init Interrupts */
-    osInitInterrupts();
-
-    /* Synchronize all cores */
-    osMulticoreSync();
-
-    /* Call startup hook function */
-    #if(OS_STARTUPHOOK)
-    osStartupHook();
-    #endif
-
-    /* Synchronize all cores */
-
-    /* Enable the interrupts */
-    ENABLE_INTERRUPTS();
-    
-    /* Start system tick timer */
-    osStartTimer();
-
     /* Start all relative autostart alarms */
     for(uint32 alarmIdx = 0; alarmIdx < OCB_Cfg[osActiveCore]->OsNumberOfAlarms; alarmIdx++)
     {
@@ -130,6 +108,26 @@ void OS_StartOS(OsAppModeType Mode)
 
     /* Call Scheduler */
     (void)osSchedule();
+
+    /* Init Interrupts */
+    osInitInterrupts();
+
+    /* Synchronize all cores */
+    osMulticoreSync();
+
+    /* Call startup hook function */
+    #ifdef OS_STARTUPHOOK
+    (OCB_Cfg[osActiveCore]->OsStartupHook)();
+    #endif
+
+   /* Init system tick timer */
+    osInitTimer();
+
+    /* Start system tick timer */
+    osStartTimer();
+
+    /* Enable the interrupts */
+    ENABLE_INTERRUPTS();
     
     /* Set the OS running flag */
     OCB_Cfg[osActiveCore]->OsIsRunning = OS_TRUE;
@@ -198,14 +196,14 @@ uint32 osDispatcher(uint32 StackPtr)
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
   /* Save the current stack pointer of the running task before switching the context */
-  if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
+  if(OCB_Cfg[osActiveCore]->OsCurrentTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
   {
-    OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->pCurrentStackPointer = StackPtr;
+    OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->pCurrentStackPointer = StackPtr;
 
     /* Check the stack pointer against stack overflow */
-    if( (!(StackPtr <(uint32)(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->pstack_top) &&
-           StackPtr >= (uint32)(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->pstack_bot)))  ||
-       (*(uint32*)(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->pstack_bot) != OS_STACK_MAGIC_MARKER)
+    if( (!(StackPtr <(uint32)(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->pstack_top) &&
+           StackPtr >= (uint32)(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->pstack_bot)))  ||
+       (*(uint32*)(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->pstack_bot) != OS_STACK_MAGIC_MARKER)
       )
     {
       /* Stack overflow */
@@ -219,46 +217,46 @@ uint32 osDispatcher(uint32 StackPtr)
   }
 
   /* Set the new current task */
-  OCB_Cfg[osActiveCore]->CurrentTaskIdx = OCB_Cfg[osActiveCore]->HighPrioReadyTaskIdx;
+  OCB_Cfg[osActiveCore]->OsCurrentTaskId = OCB_Cfg[osActiveCore]->OsHighPrioReadyTaskId;
   
-  if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
+  if(OCB_Cfg[osActiveCore]->OsCurrentTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
   {  
     /* check if we need to create a new stack frame for the new task */
-    if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == PRE_READY)
+    if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus == PRE_READY)
     {
 
       /* Update the current task state */
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = RUNNING;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = RUNNING;
 
       /* Clear the current task's ready bit */
-      osClearTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio);
+      osClearTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio);
       
       /* Call osPreTaskHook */
-      #if(OS_PRETASKHOOK)
-      osPreTaskHook();
+      #ifdef OS_PRETASKHOOK
+      (OCB_Cfg[osActiveCore]->OsPreTaskHook)();
       #endif
       
       /* Create Stack Frame for the 1st execution */
-      const uint32 NewStackFramePtr = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->pstack_top;
-      const pFunc  NewTaskPtr       = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->function;
+      const uint32 NewStackFramePtr = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->pstack_top;
+      const pFunc  NewTaskPtr       = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Function;
 
       /* Save the new stack ptr */
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->pCurrentStackPointer = NewStackFramePtr;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->pCurrentStackPointer = NewStackFramePtr;
 
       /* Start the new task */
       osStartNewTask(NewStackFramePtr, NewTaskPtr);
 
     }
-    else if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus == READY)
+    else if(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus == READY)
     {
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->TaskStatus = RUNNING;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->TaskStatus = RUNNING;
 
       /* Clear the current task's ready bit */
-      osClearTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio);
+      osClearTaskPrioReady(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio);
       
       /* Call osPreTaskHook */
-      #if(OS_PRETASKHOOK)
-      osPreTaskHook();
+      #ifdef OS_PRETASKHOOK
+      (OCB_Cfg[osActiveCore]->OsPreTaskHook)();
       #endif
     }
   }
@@ -269,7 +267,7 @@ uint32 osDispatcher(uint32 StackPtr)
        an event will be occurred */
     return(OCB_Cfg[osActiveCore]->OsCurrentSystemStackPtr);
   }
-  return(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->pCurrentStackPointer);
+  return(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->pCurrentStackPointer);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -307,10 +305,10 @@ void osStoreStackPointer(uint32 StackPtrValue)
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
 
   /* save the interrupt nesting level stack pointer */
-  OCB_Cfg[osActiveCore]->OsIntNestSavedStackPointer[OsInterruptNestingDepth - 1u] = StackPtrValue;
+  OCB_Cfg[osActiveCore]->pInt->OsIntNestSavedStackPointer[OsInterruptNestingDepth - 1u] = StackPtrValue;
 
   /* save the interrupt nesting level priority */
-  OCB_Cfg[osActiveCore]->OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u] = osGetInterruptPriorityMask();
+  OCB_Cfg[osActiveCore]->pInt->OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u] = osGetInterruptPriorityMask();
 
   /* store the preempted task context only in nested level 1,
      the other nesting interrupts will use the current stack */
@@ -319,10 +317,10 @@ void osStoreStackPointer(uint32 StackPtrValue)
     /* set the Cat2 interrupt flag */
     OCB_Cfg[osActiveCore]->OsCat2InterruptLevel = 1;
 
-    if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
+    if(OCB_Cfg[osActiveCore]->OsCurrentTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
       /* preempted from task level */
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->pCurrentStackPointer = StackPtrValue; /* current task stack will be used */
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->pCurrentStackPointer = StackPtrValue; /* current task stack will be used */
     }
     else
     {
@@ -350,9 +348,9 @@ uint32 osGetSavedStackPointer(void)
 
   if(OsInterruptNestingDepth == 1u)
   {
-    if(OCB_Cfg[osActiveCore]->CurrentTaskIdx < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
+    if(OCB_Cfg[osActiveCore]->OsCurrentTaskId < OCB_Cfg[osActiveCore]->OsNumberOfTasks)
     {
-      return(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->pCurrentStackPointer);
+      return(OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->pCurrentStackPointer);
     }
     else
     {
@@ -361,7 +359,7 @@ uint32 osGetSavedStackPointer(void)
   }
   else
   {
-    return(OCB_Cfg[osActiveCore]->OsIntNestSavedStackPointer[OsInterruptNestingDepth - 1u]);
+    return(OCB_Cfg[osActiveCore]->pInt->OsIntNestSavedStackPointer[OsInterruptNestingDepth - 1u]);
   }
 }
 
@@ -382,7 +380,7 @@ uint32 osIntCallDispatch(uint32 StackPtr)
   const uint32 OsInterruptNestingDepth = osGetIntNestingLevel();
 
   /* restore the interrupt nesting priority level */
-  osSetInterruptPriorityMask(OCB_Cfg[osActiveCore]->OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u]);
+  osSetInterruptPriorityMask(OCB_Cfg[osActiveCore]->pInt->OsIntNestSavedPrioLevel[OsInterruptNestingDepth - 1u]);
 
   if(OsInterruptNestingDepth == 1u)
   {
@@ -447,8 +445,8 @@ void OS_ShutdownOS(OsStatusType Error)
 {
   const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
 
-#if(OS_SHUTDOWNHOOK)
-  osShutdownHook(Error);
+#ifdef OS_SHUTDOWNHOOK
+  (OCB_Cfg[osActiveCore]->OsShutdownHook)(Error);
 #else
   (void)Error;
 #endif
@@ -538,8 +536,9 @@ void osErrTaskExitWithoutTerminate(void)
 void osKernelError(OsStatusType err)
 {
   DISABLE_INTERRUPTS();
-  #if(OS_ERRORHOOK)
-    osErrorHook(err);
+  #ifdef OS_ERRORHOOK
+    const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
+    (OCB_Cfg[osActiveCore]->OsErrorHook)(err);
   #else
     (void)err;
   #endif
@@ -597,7 +596,7 @@ uint8_t osGetLogicalCoreId(uint8_t PhysicalCoreId)
   {
     if(PhysicalCoreId == osLogicalToPhysicalCoreIdMapping[core_id])
     {
-      return(core_id);
+        return(core_id);
     }
   }
 
@@ -661,14 +660,9 @@ osObjectCoreAsgn_t osGetLocalTaskAssignment(uint32_t SystemTaskId)
 //-----------------------------------------------------------------------------
 osObjectCoreAsgn_t osGetLocalResourceAssignment(uint32_t SystemResourceId)
 {
-  osObjectCoreAsgn_t osLocalResourceMap;
-  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
-
   if(SystemResourceId <= OS_NUMBER_OF_RESOURCES)
   {
-    osLocalResourceMap.pinned_core = osActiveCore;
-    osLocalResourceMap.local_id    = osResourceCoreAsgnLookupTable[SystemResourceId][osActiveCore];
-    return(osLocalResourceMap);
+    return(osResourceCoreAsgnLookupTable[SystemResourceId]);
   }
   else
   {

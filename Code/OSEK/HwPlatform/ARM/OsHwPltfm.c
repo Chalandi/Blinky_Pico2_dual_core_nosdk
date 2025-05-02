@@ -121,19 +121,19 @@ void osInitInterrupts(void)
 
   uint32 IntPrioBit = OsHwGetInterruptPrioBits();
 
-  for (uint32 InterruptIndex = 0; InterruptIndex < OCB_Cfg[osActiveCore]->pInt->osNbrOfInterrupts; InterruptIndex++)
+  for (uint32 InterruptIndex = 0; InterruptIndex < OCB_Cfg[osActiveCore]->pInt->OsNbrOfInterrupts; InterruptIndex++)
   {
-    if (OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
+    if (OCB_Cfg[osActiveCore]->pInt->OsIsrLookupTablePtr[InterruptIndex].IsrFunc != pISR(Undefined))
     {
       if((InterruptIndex == 4U) || (InterruptIndex == 5U)  || (InterruptIndex == 6U) || (InterruptIndex == 11U) || (InterruptIndex == 14U) || (InterruptIndex == 15U))
       {
         /* set the system handler priority level */
-        SCB_SHPRx[InterruptIndex - 4U] = ((uint8)osRemapOsPriorityValue(OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
+        SCB_SHPRx[InterruptIndex - 4U] = ((uint8)osRemapOsPriorityValue(OCB_Cfg[osActiveCore]->pInt->OsIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
       }
       else if(InterruptIndex > 15U)
       {
         /* set the NVIC interrupt priority level */
-        NVIC_IPRx[InterruptIndex - 16U] |= ((uint8)osRemapOsPriorityValue(OCB_Cfg[osActiveCore]->pInt->osIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
+        NVIC_IPRx[InterruptIndex - 16U] |= ((uint8)osRemapOsPriorityValue(OCB_Cfg[osActiveCore]->pInt->OsIsrLookupTablePtr[InterruptIndex].Prio, IntPrioBit) << (8U - IntPrioBit));
 
         /* clear the NVIC interrupt pending */
         NVIC_ICPRx[(InterruptIndex - 16U) / 32U] |= (1UL << ((InterruptIndex - 16U) % 32U));
@@ -265,4 +265,42 @@ uint8 osGetCoreId(void)
 void osClearPendingInterrupt(uint32_t InterruptId)
 {
   NVIC->ICPR[(InterruptId / 32)] |= (1ul << (InterruptId % 32));
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//------------------------------------------------------------------------------------------------------------------
+void osGenerateCrossCoreInterrupt(OsCoreId ActiveCore, OsCoreId TargetCore)
+{
+  (void)ActiveCore;
+
+  HW_PER_SIO->DOORBELL_OUT_SET.reg |= (1ul << TargetCore);
+}
+
+//------------------------------------------------------------------------------------------------------------------
+/// \brief  
+///
+/// \descr  
+///
+/// \param  
+///
+/// \return 
+//------------------------------------------------------------------------------------------------------------------
+void osClearCrossCoreInterrupt(void)
+{
+  const uint32 osActiveCore = osGetLogicalCoreId(osGetCoreId());
+  HW_PER_SIO->DOORBELL_IN_CLR.reg |= (1ul << osActiveCore);
+}
+
+uint32_t osHwTryToAcquireSpinLock(uint32_t* lock)
+{
+  (void)lock;
+  #warning "osHwTryToAcquireSpinLock is not implemented"
+  return 0;
 }

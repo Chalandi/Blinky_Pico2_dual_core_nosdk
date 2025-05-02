@@ -39,17 +39,18 @@ OsStatusType OS_GetResource(OsResourceType ResID)
     const osObjectCoreAsgn_t osLocalResourceAssignment = osGetLocalResourceAssignment(ResID);
     const OsResourceType LocalResID = osLocalResourceAssignment.local_id;
     
-    if(((OCB_Cfg[osActiveCore]->pRes[LocalResID]->AuthorizedTask & (1ul << OCB_Cfg[osActiveCore]->CurrentTaskIdx)) != 0) &&
-       OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask == OCB_Cfg[osActiveCore]->OsNumberOfTasks)
+    if(((OCB_Cfg[osActiveCore]->pRes[LocalResID]->AuthorizedTask & (1ul << OCB_Cfg[osActiveCore]->OsCurrentTaskId)) != 0) &&
+       OCB_Cfg[osActiveCore]->pRes[LocalResID]->Occupied == 0)
     {
-      /* The resource is available */
+      /* The resource is available, mark it now as occupied */
+      OCB_Cfg[osActiveCore]->pRes[LocalResID]->Occupied = 1ul;
 
       /* reserve the resource to the current task */
-      OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask = OCB_Cfg[osActiveCore]->CurrentTaskIdx;
+      OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask = OCB_Cfg[osActiveCore]->OsCurrentTaskId;
 
       /* Set the ceilling prio of the resource to the current task */
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio = OCB_Cfg[osActiveCore]->pRes[LocalResID]->ResCeilingPrio;
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->CeilingPrio = OCB_Cfg[osActiveCore]->pRes[LocalResID]->ResCeilingPrio;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->CeilingPrio;
 
       return(E_OK);
     }
@@ -84,14 +85,15 @@ OsStatusType OS_ReleaseResource(OsResourceType ResID)
     const osObjectCoreAsgn_t osLocalResourceAssignment = osGetLocalResourceAssignment(ResID);
     const OsResourceType LocalResID = osLocalResourceAssignment.local_id;
 
-    if(OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask == OCB_Cfg[osActiveCore]->CurrentTaskIdx)
+    if((OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask == OCB_Cfg[osActiveCore]->OsCurrentTaskId) && (OCB_Cfg[osActiveCore]->pRes[LocalResID]->Occupied == 1ul))
     {
       /* Release the resource */
+      OCB_Cfg[osActiveCore]->pRes[LocalResID]->Occupied = 0;
       OCB_Cfg[osActiveCore]->pRes[LocalResID]->CurrentOccupiedTask = OCB_Cfg[osActiveCore]->OsNumberOfTasks;
       
       /* Set the default prio to the current task */
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->CeilingPrio = 0;
-      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->Prio = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->CurrentTaskIdx]->FixedPrio;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->CeilingPrio = 0;
+      OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->Prio = OCB_Cfg[osActiveCore]->pTcb[OCB_Cfg[osActiveCore]->OsCurrentTaskId]->FixedPrio;
 
       /* Call the scheduler */
       (void)osSchedule();

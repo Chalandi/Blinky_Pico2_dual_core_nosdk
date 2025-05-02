@@ -14,7 +14,7 @@ alarm_autostart   = "-"
 alarm_callback    = "-"
 AlarmsTotalNumber = 0
 AlarmsList        = []
-
+OsAlarmsList_per_core = [[], []]
 
 def OilAlarmsParser(args, Oilfile):
      
@@ -36,6 +36,10 @@ def OilAlarmsParser(args, Oilfile):
         alarm_action_pattern = re.compile(r"ACTION\s*=\s*(\w+)", re.MULTILINE)
         alarm_action_match   = alarm_action_pattern.search(alarm_body)
         alarm_action         = alarm_action_match.group(1) if alarm_action_match else None
+
+        alarm_pinned_core_pattern = re.compile(r"CORE\s*=\s*(\w+);")
+        alarm_pinned_core_match   = alarm_pinned_core_pattern.search(alarm_body)
+        alarm_pinned_core         = alarm_pinned_core_match.group(1) if alarm_pinned_core_match else "0"
 
         # Check for syntax error
         if alarm_action == None              \
@@ -95,4 +99,7 @@ def OilAlarmsParser(args, Oilfile):
                 alarm_cycletime = int(alarm_cycletime, 10)
 
         AlarmsTotalNumber += 1
-        AlarmsList.append([alarm_name, alarm_alarmtime, alarm_cycletime, alarm_event, alarm_task, alarm_action, alarm_autostart, alarm_callback])
+        AlarmsList.append([alarm_name, alarm_alarmtime, alarm_cycletime, alarm_event, alarm_task, alarm_action, alarm_autostart, alarm_callback, alarm_pinned_core])
+        OsAlarmsList_per_core[int(alarm_pinned_core)].append([alarm_name, alarm_alarmtime, alarm_cycletime, alarm_event, alarm_task, alarm_action, alarm_autostart, alarm_callback])
+    #print(f"OsAlarmsList_per_core[0] = {OsAlarmsList_per_core[0]}")
+    #print(f"OsAlarmsList_per_core[1] = {OsAlarmsList_per_core[1]}")

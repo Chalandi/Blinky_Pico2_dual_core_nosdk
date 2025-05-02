@@ -6,8 +6,9 @@ from tabulate import tabulate
 
 # Globals
 InterruptsTotalNumber   = 0
-InterruptCat1LowestPrio = 0
+InterruptCat1LowestPrio = [[], []]
 InterruptsList          = []
+InterruptsList_per_core = [[], []]
 
 def OilInterruptsParser(args, Oilfile):
     
@@ -43,7 +44,12 @@ def OilInterruptsParser(args, Oilfile):
         isr_prio = isr_prio_match.group(1) if isr_prio_match else None
         isr_prio = 0 if isr_prio == None else isr_prio
 
+        # Core
+        isr_core_pattern = re.compile(r"CORE\s*=\s*(\w+);")
+        isr_core_match = isr_core_pattern.search(isr_properties)
+        isr_core = isr_core_match.group(1) if isr_core_match else "0"
 
         # Update list infomation
         InterruptsTotalNumber += 1
-        InterruptsList.append([isr_name, isr_cat, isr_vector, isr_prio, isr_nest])
+        InterruptsList.append([isr_name, isr_cat, isr_vector, isr_prio, isr_nest, isr_core])
+        InterruptsList_per_core[int(isr_core)].append([isr_name, isr_cat, isr_vector, isr_prio, isr_nest])

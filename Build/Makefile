@@ -76,7 +76,7 @@ OPT_MODIFIED_O2 = -O2                               \
 
 NO_OPT = -O0
 
-OPT = $(NO_OPT)
+OPT = $(OPT_MODIFIED_O2)
 
 ############################################################################################
 # GCC Compiler verbose flags
@@ -248,8 +248,17 @@ INC_FILES := $(SRC_DIR)                             \
 # RTOS Files
 ############################################################################################
 ifeq ($(RTOS),osek)
+ ifeq ($(CORE_FAMILY), ARM)
+    OS_OIL_FILE = $(SRC_DIR)/Appli/osek_rp2350_arm.oil
+ else
+    OS_OIL_FILE = $(SRC_DIR)/Appli/osek_rp2350_risc-v.oil
+ endif
+ OS_TCB_GEN_FOLDER = $(SRC_DIR)/Appli/gen
  include $(SRC_DIR)/OSEK/Os.makefile
  SRC_FILES += $(SRC_DIR)/Appli/tasks.c
+ SRC_FILES += $(OS_TCB_GEN_FOLDER)/OsTcb.c
+ INC_FILES += $(OS_TCB_GEN_FOLDER)
+ DEFS      += -DOSEK
 endif
 
 ############################################################################################
@@ -266,11 +275,11 @@ ifeq ($(MAKECMDGOALS), BUILD_STAGE_2)
 -include $(subst .o,.d,$(FILES_O))
 endif
 
-REBUILD_STAGE_1 : CLEAN PRE_BUILD PIO_SRC_GEN
+REBUILD_STAGE_1 : CLEAN PRE_BUILD PIO_SRC_GEN $(CUSTOM_PRE_BUILD_TARGET)
 REBUILD_STAGE_2 : link
 REBUILD_STAGE_3 : GENERATE POST_BUILD
 
-BUILD_STAGE_1   : PRE_BUILD PIO_SRC_GEN
+BUILD_STAGE_1   : PRE_BUILD PIO_SRC_GEN $(CUSTOM_PRE_BUILD_TARGET)
 BUILD_STAGE_2   : link
 BUILD_STAGE_3   : GENERATE POST_BUILD
 
