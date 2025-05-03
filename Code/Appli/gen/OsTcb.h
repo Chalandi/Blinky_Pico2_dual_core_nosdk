@@ -12,9 +12,9 @@
 //
 // Generator       : OilGenTool
 //
-// Oil file        : ../Code/Appli/osek_rp2350_arm.oil
+// Oil file        : ../Code/Appli/osek_rp2350_risc-v.oil
 //
-// Generation Time : 02.05.2025 04:36:52
+// Generation Time : 03.05.2025 12:11:21
 //
 // Description     : Auto-generated OS Configuration file
 //
@@ -110,8 +110,8 @@ void osErrorHook_core1(OsStatusType error);
 
 #define OS_NUMBER_OF_CORES    2UL
 
-extern const OsIntIsrLtType OsIsrLookupTable_core0[66];
-extern const OsIntIsrLtType OsIsrLookupTable_core1[66];
+extern const OsIntIsrLtType OsIsrLookupTable_core0[52];
+extern const OsIntIsrLtType OsIsrLookupTable_core1[52];
 extern const osObjectCoreAsgn_t osTaskCoreAsgnLookupTable[4];
 extern const osObjectCoreAsgn_t osAlarmCoreAsgnLookupTable[4];
 extern const osObjectCoreAsgn_t osResourceCoreAsgnLookupTable[3];

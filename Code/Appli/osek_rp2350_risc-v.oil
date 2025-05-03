@@ -12,7 +12,7 @@ CPU RP2350 {
       POSTTASKHOOK = TRUE;
       WithStackCheck = TRUE;
       CpuFrequency = 16.000000;
-      MaximumVectorEntries = 50;
+      MaximumVectorEntries = 52;
       TickTime = 1000;
 
       CPU_CORE  RP2350_0

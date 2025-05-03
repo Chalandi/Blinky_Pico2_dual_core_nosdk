@@ -40,13 +40,8 @@ TASK(T1)
         OS_ClearEvent(EVT_BLINK_BLUE_LED_FAST);
         LED_CORE1_TOGGLE();
 
-
-        
-
-          /* cross-core os service: core0 is requesting the state of the task T3 running on core 1 */
-          (void)OS_GetTaskState(T4, &State);
-
-
+        /* cross-core os service: core0 is requesting the state of the task T3 running on core 1 */
+        (void)OS_GetTaskState(T4, &State);
       }
 
       if((Events & EVT_TOGGLE_BLUE_LED) == EVT_TOGGLE_BLUE_LED)
@@ -58,7 +53,8 @@ TASK(T1)
       /* read the mailbox */
       if((Events & EVT_T1_MBX) == EVT_T1_MBX)
       {
-        if(IPC_OK == OS_IpcReceiveData(OS_IPC_T1_MAILBOX, (OsIpcMbxdataType const*) &Msgdata))
+        IpcStatus status = OS_IpcReceiveData(OS_IPC_T1_MAILBOX, (OsIpcMbxdataType const*) &Msgdata);
+        if(IPC_OK == status)
         {
           if(myData == 0x55aa55aa)
           {
@@ -71,12 +67,15 @@ TASK(T1)
             LED_IPC_CROSSCORE_TOGGLE();
           }
         }
+        else if(IPC_QUEUE_IS_EMPTY == status)
+        {
+          OS_ClearEvent(EVT_T1_MBX);
+        }
         else
         {
           DISABLE_INTERRUPTS();
           for(;;);
         }
-        OS_ClearEvent(EVT_T1_MBX);
       }
     }
     else
@@ -114,8 +113,9 @@ TASK(T2)
 
           /* IPC in the same core0: T2 is sending data to T1 */
           uint32 myData = 0x55aa55aa;
-          OsIpcMbxdataType Msgdata = {0, 4, (uint8_t*)&myData}; 
-          if(IPC_NOK == OS_IpcSendData(OS_IPC_T1_MAILBOX, (OsIpcMbxdataType const*) &Msgdata))
+          OsIpcMbxdataType Msgdata = {0, 4, (uint8_t*)&myData};
+
+          if(IPC_OK != OS_IpcSendData(OS_IPC_T1_MAILBOX, (OsIpcMbxdataType const*) &Msgdata))
           {
             DISABLE_INTERRUPTS();
             for(;;);
@@ -166,7 +166,8 @@ TASK(T3)
 
         uint32 myData = 0x55bb55bb;
         OsIpcMbxdataType Msgdata = {0, 4, (uint8_t*)&myData}; 
-        if(IPC_NOK == OS_IpcSendData(OS_IPC_T1_MAILBOX, (OsIpcMbxdataType const*) &Msgdata))
+        
+        if(IPC_OK != OS_IpcSendData(OS_IPC_T1_MAILBOX, (OsIpcMbxdataType const*) &Msgdata))
         {
           DISABLE_INTERRUPTS();
           for(;;);

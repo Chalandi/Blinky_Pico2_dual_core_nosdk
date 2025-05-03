@@ -12,9 +12,9 @@
 //
 // Generator       : OilGenTool
 //
-// Oil file        : ../Code/Appli/osek_rp2350_arm.oil
+// Oil file        : ../Code/Appli/osek_rp2350_risc-v.oil
 //
-// Generation Time : 02.05.2025 04:36:52
+// Generation Time : 03.05.2025 12:11:21
 //
 // Description     : Auto-generated OS Configuration file
 //
@@ -38,7 +38,7 @@
   │        │ OsPostTaskHook     =  TRUE      │
   │        │ OsStackCheck       =  TRUE      │
   │        │ OsCpuFrequency     =  16.000000 │
-  │        │ OsMaxVectorEntries =  66        │
+  │        │ OsMaxVectorEntries =  52        │
   │        │ OsTickTime         =  1000      │
   ╘════════╧═════════════════════════════════╛
 
@@ -158,23 +158,23 @@
   ╒═══════════════════════════╤════════════╤══════════╤════════╤═══════════╕
   │ Name                      │   Category │   Vector │   Prio │ Nesting   │
   ╞═══════════════════════════╪════════════╪══════════╪════════╪═══════════╡
-  │ SysTickTimer              │          2 │       15 │      0 │ FALSE     │
+  │ SysTickTimer              │          2 │       29 │      0 │ FALSE     │
   ├───────────────────────────┼────────────┼──────────┼────────┼───────────┤
-  │ osCrossCoreReceiveRequest │          2 │       42 │      0 │ FALSE     │
+  │ osCrossCoreReceiveRequest │          2 │       26 │      0 │ FALSE     │
   ╘═══════════════════════════╧════════════╧══════════╧════════╧═══════════╛
   Total number of used interrupts: 2
-  Total number of CPU interrupts : 66
+  Total number of CPU interrupts : 52
 
   Interrupts on core1:
   ╒═══════════════════════════╤════════════╤══════════╤════════╤═══════════╕
   │ Name                      │   Category │   Vector │   Prio │ Nesting   │
   ╞═══════════════════════════╪════════════╪══════════╪════════╪═══════════╡
-  │ osCrossCoreReceiveRequest │          2 │       42 │      0 │ FALSE     │
+  │ osCrossCoreReceiveRequest │          2 │       26 │      0 │ FALSE     │
   ├───────────────────────────┼────────────┼──────────┼────────┼───────────┤
-  │ SysTickTimer              │          2 │       15 │      0 │ FALSE     │
+  │ SysTickTimer              │          2 │       29 │      0 │ FALSE     │
   ╘═══════════════════════════╧════════════╧══════════╧════════╧═══════════╛
   Total number of used interrupts: 2
-  Total number of CPU interrupts : 66
+  Total number of CPU interrupts : 52
 */
 
 /********************************************************************************************************************/
@@ -472,7 +472,7 @@ static const OsSpinlockConfigType* OsSpinlocksConfig[2] = {
 /********************************************************************************************************************/
 /* Interrupt LUT (Core0) */
 /********************************************************************************************************************/
-const OsIntIsrLtType OsIsrLookupTable_core0[66] = {
+const OsIntIsrLtType OsIsrLookupTable_core0[52] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 0 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 1 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 2 */
@@ -488,7 +488,7 @@ const OsIntIsrLtType OsIsrLookupTable_core0[66] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 12 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 13 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 14 */
-    {pISR(SysTickTimer), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2}, /* Interrupt vector 15 */
+    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 15 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 16 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 17 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 18 */
@@ -499,10 +499,10 @@ const OsIntIsrLtType OsIsrLookupTable_core0[66] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 23 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 24 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 25 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 26 */
+    {pISR(osCrossCoreReceiveRequest), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2}, /* Interrupt vector 26 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 27 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 28 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 29 */
+    {pISR(SysTickTimer), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2}, /* Interrupt vector 29 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 30 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 31 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 32 */
@@ -515,7 +515,7 @@ const OsIntIsrLtType OsIsrLookupTable_core0[66] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 39 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 40 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 41 */
-    {pISR(osCrossCoreReceiveRequest), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2}, /* Interrupt vector 42 */
+    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 42 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 43 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 44 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 45 */
@@ -525,27 +525,13 @@ const OsIntIsrLtType OsIsrLookupTable_core0[66] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 49 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 50 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 51 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 52 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 53 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 54 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 55 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 56 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 57 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 58 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 59 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 60 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 61 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 62 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 63 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 64 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 65 */
 };
 
 /********************************************************************************************************************/
 /* OsInterruptsConfig_core0 */
 /********************************************************************************************************************/
 OsInterruptConfigType OsInterruptsConfig_core0 = {
-    66, /* OsNbrOfInterrupts */
+    52, /* OsNbrOfInterrupts */
     0x1ul, /* OsIntCat1LowestPrioLevel */
     0, /* OsInterruptNestingDepth */
     0, /* OsInterruptSavedPrioLevel */
@@ -560,7 +546,7 @@ OsInterruptConfigType OsInterruptsConfig_core0 = {
 /********************************************************************************************************************/
 /* Interrupt LUT (Core1) */
 /********************************************************************************************************************/
-const OsIntIsrLtType OsIsrLookupTable_core1[66] = {
+const OsIntIsrLtType OsIsrLookupTable_core1[52] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 0 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 1 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 2 */
@@ -576,7 +562,7 @@ const OsIntIsrLtType OsIsrLookupTable_core1[66] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 12 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 13 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 14 */
-    {pISR(SysTickTimer), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2}, /* Interrupt vector 15 */
+    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 15 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 16 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 17 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 18 */
@@ -587,10 +573,10 @@ const OsIntIsrLtType OsIsrLookupTable_core1[66] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 23 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 24 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 25 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 26 */
+    {pISR(osCrossCoreReceiveRequest), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2}, /* Interrupt vector 26 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 27 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 28 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 29 */
+    {pISR(SysTickTimer), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2}, /* Interrupt vector 29 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 30 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 31 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 32 */
@@ -603,7 +589,7 @@ const OsIntIsrLtType OsIsrLookupTable_core1[66] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 39 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 40 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 41 */
-    {pISR(osCrossCoreReceiveRequest), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2}, /* Interrupt vector 42 */
+    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 42 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 43 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 44 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 45 */
@@ -613,27 +599,13 @@ const OsIntIsrLtType OsIsrLookupTable_core1[66] = {
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 49 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 50 */
     {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 51 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 52 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 53 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 54 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 55 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 56 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 57 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 58 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 59 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 60 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 61 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 62 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 63 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 64 */
-    {pISR(Undefined), (uint8)0, (OsInterruptNestingType)NOT_NESTED, 2},  /* Interrupt vector 65 */
 };
 
 /********************************************************************************************************************/
 /* OsInterruptsConfig_core1 */
 /********************************************************************************************************************/
 OsInterruptConfigType OsInterruptsConfig_core1 = {
-    66, /* OsNbrOfInterrupts */
+    52, /* OsNbrOfInterrupts */
     0x1ul, /* OsIntCat1LowestPrioLevel */
     0, /* OsInterruptNestingDepth */
     0, /* OsInterruptSavedPrioLevel */
@@ -721,8 +693,8 @@ volatile Ocb_t* OCB_Cfg[2] = {
 /* logical to physical core id mapping*/
 /********************************************************************************************************************/
 const uint8 osLogicalToPhysicalCoreIdMapping[2] = {
-    0, /* RP2350_0 : ARM - CORTEX_M33 */
-    1, /* RP2350_1 : ARM - CORTEX_M33 */
+    0, /* RP2350_0 : RISC_V - Hazard3 */
+    1, /* RP2350_1 : RISC_V - Hazard3 */
 };
 
 /********************************************************************************************************************/

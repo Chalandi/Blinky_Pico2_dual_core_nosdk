@@ -100,7 +100,7 @@ _VectoredInterruptVectorTable:
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
                                j Isr_UndefinedHandler
-                               j osCat2IsrWrapper               /* MachineExternalInterrupt (MEI) --> The highest priority interrupt level */
+                               j osCat2IsrWrapper             /* MachineExternalInterrupt (MEI) --> The highest priority interrupt level */
 
 
 .size _VectoredInterruptVectorTable, .-_VectoredInterruptVectorTable

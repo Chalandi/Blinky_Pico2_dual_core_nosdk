@@ -12,9 +12,9 @@
 //
 // Generator       : OilGenTool
 //
-// Oil file        : ../Code/Appli/osek_rp2350_arm.oil
+// Oil file        : ../Code/Appli/osek_rp2350_risc-v.oil
 //
-// Generation Time : 02.05.2025 04:36:52
+// Generation Time : 03.05.2025 12:11:21
 //
 // Description     : Auto-generated OS Configuration file
 //
