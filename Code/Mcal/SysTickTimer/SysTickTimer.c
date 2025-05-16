@@ -34,6 +34,7 @@ void SysTickTimer_Init(void)
 {
   pSTK_CTRL->u32Register     = 0;
   pSTK_VAL->u32Register      = 0;
+  pSTK_LOAD->u32Register     = 0;
   pSTK_CTRL->bits.u1CLOCKSRC = SYS_TICK_CLKSRC_PROCESSOR_CLOCK;
   pSTK_CTRL->bits.u1TICKINT  = SYS_TICK_ENABLE_INT;
 }
@@ -50,6 +51,7 @@ void SysTickTimer_Init(void)
 void SysTickTimer_Start(uint32 timeout)
 {
   pSTK_LOAD->u32Register   = timeout;
+  pSTK_VAL->u32Register    = 0;
   pSTK_CTRL->bits.u1ENABLE = SYS_TICK_ENABLE_TIMER;
 }
 
@@ -64,6 +66,7 @@ void SysTickTimer_Start(uint32 timeout)
 //-----------------------------------------------------------------------------
 void SysTickTimer_Reload(uint32 timeout)
 {
+  pSTK_VAL->u32Register    = 0;
   pSTK_LOAD->u32Register   = timeout;
 }
 
